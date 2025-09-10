@@ -4,15 +4,31 @@ import { useOpsStore, OperationType, State } from "../store/operations";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import AutocompleteInput from "./AutocompleteInput";
+import MultiAutocompleteChips from "./MultiAutocompleteChips";
+import { buildPathIndex, suggestPathTokens, suggestTopLevelKeys, suggestAnyKeys, suggestIndexKeys } from "../utils/pathSuggest";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
   const update = useOpsStore((s: State) => s.updateOperation);
   const remove = useOpsStore((s: State) => s.deleteOperation);
+  const sourceText = useOpsStore((s: State) => s.sourceText);
+  const opIndexes = useOpsStore((s: State) => s.opIndexes);
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
   const err = useOpsStore((s: State) => s.pipelineError);
   const hasErr = err && err.opId === op?.id ? err.message : undefined;
+
+  // Prefer precomputed index prior to this op; fallback to current source
+  const sourceObj = useMemo(() => {
+    try {
+      return JSON.parse(sourceText);
+    } catch {
+      return null;
+    }
+  }, [sourceText]);
+  const fallbackIndex = useMemo(() => buildPathIndex(sourceObj), [sourceObj]);
+  const pathIndex = opIndexes[index] ?? fallbackIndex;
 
   if (!op) return null;
   return (
@@ -39,21 +55,23 @@ function OperationCard({ id, index }: { id: string; index: number }) {
               <option value="keep">keep</option>
               <option value="remove">remove</option>
             </select>
-            <input
-              className="border rounded px-2 py-1 w-full"
-              placeholder="keys (comma separated)"
-              value={(op.config.keys ?? []).join(",")}
-              onChange={(e) => update(op.id, { config: { ...op.config, keys: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) } })}
+            <MultiAutocompleteChips
+              className="w-full"
+              placeholder="keys"
+              values={op.config.keys ?? []}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(vals) => update(op.id, { config: { ...op.config, keys: vals } })}
             />
           </div>
         )}
         {op.type === "RenameKey" && (
           <div className="flex gap-2">
-            <input
-              className="border rounded px-2 py-1 w-1/2"
+            <AutocompleteInput
+              className="w-1/2"
               placeholder="from"
               value={op.config.from ?? ""}
-              onChange={(e) => update(op.id, { config: { ...op.config, from: e.target.value } })}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, from: v } })}
             />
             <input
               className="border rounded px-2 py-1 w-1/2"
@@ -65,11 +83,12 @@ function OperationCard({ id, index }: { id: string; index: number }) {
         )}
         {op.type === "MapArray" && (
           <div className="flex gap-2">
-            <input
-              className="border rounded px-2 py-1 w-2/3"
+            <AutocompleteInput
+              className="w-2/3"
               placeholder="path e.g. items"
               value={op.config.path ?? ""}
-              onChange={(e) => update(op.id, { config: { ...op.config, path: e.target.value } })}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
             />
             <select
               className="border rounded px-2 py-1 w-1/3"
@@ -85,11 +104,12 @@ function OperationCard({ id, index }: { id: string; index: number }) {
         )}
         {op.type === "ExtractPath" && (
           <div className="flex gap-2">
-            <input
-              className="border rounded px-2 py-1 w-full"
+            <AutocompleteInput
+              className="w-full"
               placeholder="path e.g. user.name"
               value={op.config.path ?? ""}
-              onChange={(e) => update(op.id, { config: { ...op.config, path: e.target.value } })}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
             />
           </div>
         )}

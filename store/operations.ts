@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 import { getOperationModule, Operation, OperationType, ValidationError } from "../operations";
+import { buildPathIndex, type PathIndex } from "../utils/pathSuggest";
 
 export type State = {
   sourceText: string;
@@ -8,6 +9,7 @@ export type State = {
   operations: Operation[];
   resultText: string;
   pipelineError?: ValidationError | undefined;
+  opIndexes: PathIndex[]; // index of JSON state before each operation
   // history (operations only)
   past: Operation[][];
   future: Operation[][];
@@ -45,18 +47,21 @@ function validateOp(op: Operation, input: any): string | undefined {
   return mod?.validate(op.config as any, input);
 }
 
-function runAll(input: any, ops: Operation[]): { output?: any; error?: ValidationError } {
+function runAll(input: any, ops: Operation[]): { output?: any; error?: ValidationError; indexes: PathIndex[] } {
   try {
     let cur = input;
+    const indexes: PathIndex[] = [];
     for (const op of ops) {
+      // Index the state BEFORE applying this op
+      indexes.push(buildPathIndex(cur));
       const err = validateOp(op, cur);
-      if (err) return { error: { opId: op.id, message: err } };
+      if (err) return { error: { opId: op.id, message: err }, indexes };
       const mod = getOperationModule(op.type);
       cur = mod.apply(cur, op.config as any);
     }
-    return { output: cur };
+    return { output: cur, indexes };
   } catch (e: any) {
-    return { error: { message: e?.message ?? "Pipeline failed" } };
+    return { error: { message: e?.message ?? "Pipeline failed" }, indexes: [] };
   }
 }
 
@@ -64,6 +69,7 @@ export const useOpsStore = create<State>()((set, get) => ({
   sourceText: "{\n  \"items\": [1, 2, 3],\n  \"user\": { \"id\": 1, \"name\": \"Alice\" }\n}",
   operations: [],
   resultText: "",
+  opIndexes: [],
   past: [],
   future: [],
   setSourceText: (text: string) => {
@@ -117,10 +123,10 @@ export const useOpsStore = create<State>()((set, get) => ({
   runPipeline: () => {
     const { sourceText, operations } = get();
     const parsed = parseJSON(sourceText);
-    if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error } });
-    const res = runAll(parsed.value, operations);
-    if (res.error) return set({ resultText: "", pipelineError: res.error });
-    set({ resultText: safeStringify(res.output), pipelineError: undefined });
+  if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [] });
+  const res = runAll(parsed.value, operations);
+  if (res.error) return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes });
+  set({ resultText: safeStringify(res.output), pipelineError: undefined, opIndexes: res.indexes });
   },
   clearAll: () =>
     set({
