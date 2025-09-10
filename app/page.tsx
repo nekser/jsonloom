@@ -1,103 +1,64 @@
-import Image from "next/image";
+"use client";
+import { ResizableColumns } from "../components/ResizableColumns";
+import { SourceEditor, ResultEditor } from "../components/JsonEditors";
+import { OperationsPanel } from "../components/OperationsPanel";
+import { useOpsStore, State } from "../store/operations";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const undo = useOpsStore((s: State) => s.undo);
+  const redo = useOpsStore((s: State) => s.redo);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  const download = () => {
+    const text = useOpsStore.getState().resultText;
+    const blob = new Blob([text], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `result-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  const copy = async () => {
+    await navigator.clipboard.writeText(useOpsStore.getState().resultText);
+  };
+  const upload = () => {
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = ".json,application/json";
+    inp.onchange = async () => {
+      const file = inp.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      useOpsStore.getState().setSourceText(text);
+    };
+    inp.click();
+  };
+  const paste = async () => {
+    const text = await navigator.clipboard.readText();
+    useOpsStore.getState().setSourceText(text);
+  };
+
+  return (
+    <div className="min-h-screen h-screen flex flex-col">
+      <header className="p-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
+        <div className="font-semibold mr-auto">JSON Transformations</div>
+        <button className="text-sm px-3 py-1.5 rounded border" onClick={paste}>Paste JSON</button>
+        <button className="text-sm px-3 py-1.5 rounded border" onClick={upload}>Upload</button>
+        <div className="w-px h-6 bg-neutral-300 mx-1" />
+        <button className="text-sm px-3 py-1.5 rounded border" onClick={undo}>Undo</button>
+        <button className="text-sm px-3 py-1.5 rounded border" onClick={redo}>Redo</button>
+        <div className="w-px h-6 bg-neutral-300 mx-1" />
+        <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
+        <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Download</button>
+      </header>
+  <main className="flex-1 min-h-0">
+        <ResizableColumns
+          cols={[
+            { id: "src", initial: 34, content: <SourceEditor /> },
+            { id: "ops", initial: 32, content: <OperationsPanel /> },
+            { id: "res", initial: 34, content: <ResultEditor /> },
+          ]}
+        />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
