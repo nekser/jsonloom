@@ -1,4 +1,4 @@
-import { getByPath, setByPath } from "./utils";
+import { getByPath, setByPath } from "./utils"; // get/set support '*' wildcards
 
 export function isNumeric(x: any): boolean {
   return typeof x === "number" && Number.isFinite(x);

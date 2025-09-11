@@ -89,7 +89,10 @@ export function OperationsPanel() {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between p-2 border-b border-neutral-200 dark:border-neutral-800">
-        <div className="font-medium">Operations</div>
+        <div className="font-medium flex items-center gap-2">
+          Operations
+          <span title="Paths support '*' wildcards. Example: users.*.age applies to each user's age." className="text-xs text-neutral-500 cursor-help">?</span>
+        </div>
         <div className="flex gap-2">
           <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} />
         </div>

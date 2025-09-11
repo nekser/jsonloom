@@ -45,6 +45,11 @@ export function normalizeKeyCase(input: any, mode: KeyCase): any {
 // ----- delete path -----
 export function deleteByPath(obj: any, path: string): any {
   if (!path) return obj;
+  if (path.includes("*")) {
+    // implement via setByPath: replace matched leaves with undefined and then prune
+    const replaced = setByPath(obj, path, undefined);
+    return pruneUndefined(replaced);
+  }
   const parts = path.split(".");
   const root = Array.isArray(obj) ? [...obj] : obj && typeof obj === "object" ? { ...obj } : {};
   let cur: any = root;
@@ -67,6 +72,23 @@ export function deleteByPath(obj: any, path: string): any {
     }
   }
   return root;
+}
+
+function pruneUndefined(node: any): any {
+  if (Array.isArray(node)) {
+    // remove explicit undefineds in arrays
+    const arr = node.map((v) => pruneUndefined(v)).filter((v) => v !== undefined);
+    return arr;
+  }
+  if (node && typeof node === "object") {
+    const out: any = {};
+    for (const [k, v] of Object.entries(node)) {
+      const nv = pruneUndefined(v);
+      if (nv !== undefined) out[k] = nv;
+    }
+    return out;
+  }
+  return node;
 }
 
 // ----- merge utils -----
