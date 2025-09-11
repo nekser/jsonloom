@@ -15,8 +15,7 @@ export type OperationType =
   | "CountArray"
   | "JoinArray";
 
-// Extra operations
-export type ExtendedOperationType = OperationType | "MapFields";
+// OperationType is the single source of truth for operation identifiers.
 
 export interface Operation<T = any> {
   id: string;

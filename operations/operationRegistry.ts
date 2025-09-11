@@ -1,0 +1,59 @@
+import type { OperationType } from "./types";
+
+export type OperationCategory = "Object" | "Array" | "String" | "Other";
+
+export interface OperationMeta {
+  type: OperationType;
+  category: OperationCategory;
+  label: string;
+  description: string;
+  // Optional: form component for rendering this operation's config UI
+  // Lazy-load later to optimize bundle size
+  component?: React.ComponentType<any>;
+}
+
+export const operationCatalog: OperationMeta[] = [
+  // Object
+  {
+    type: "FilterByKey",
+    category: "Object",
+    label: "Filter By Key",
+    description: "Keep or remove object keys by name",
+  },
+  {
+    type: "RenameKey",
+    category: "Object",
+    label: "Rename Key",
+    description: "Rename a key recursively",
+  },
+  {
+    type: "ExtractPath",
+    category: "Object",
+    label: "Extract Path",
+    description: "Extract a nested value by path",
+  },
+
+  // Array
+  {
+    type: "MapArray",
+    category: "Array",
+    label: "Map Array",
+    description: "Map an array at a JSON path (type cast)",
+  },
+  { type: "FilterArray", category: "Array", label: "Filter Array", description: "Filter items in an array by a condition" },
+  { type: "SortArray", category: "Array", label: "Sort Array", description: "Sort an array by value or key" },
+  { type: "UniqueArray", category: "Array", label: "Unique Array", description: "Remove duplicates from an array" },
+  { type: "FlattenArray", category: "Array", label: "Flatten Array", description: "Flatten nested arrays to a given depth" },
+  { type: "SliceArray", category: "Array", label: "Slice Array", description: "Slice an array by start/end/step" },
+  { type: "GroupBy", category: "Array", label: "Group By", description: "Group objects in an array by a key" },
+  { type: "ReduceArray", category: "Array", label: "Reduce Array", description: "Reduce an array (sum/avg/min/max/concat)" },
+  { type: "CountArray", category: "Array", label: "Count Array", description: "Replace an array with its length" },
+  { type: "JoinArray", category: "Array", label: "Join Array", description: "Join array items into a string" },
+
+  // String
+  { type: "StringReplace", category: "String", label: "String Replace", description: "Replace text within string values" },
+];
+
+export const operationMetaByType: Record<OperationType, OperationMeta> = Object.fromEntries(
+  operationCatalog.map((m) => [m.type, m])
+) as Record<OperationType, OperationMeta>;

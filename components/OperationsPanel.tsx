@@ -7,6 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import AutocompleteInput from "./AutocompleteInput";
 import MultiAutocompleteChips from "./MultiAutocompleteChips";
 import { buildPathIndex, suggestPathTokens, suggestTopLevelKeys, suggestAnyKeys, suggestIndexKeys } from "../utils/pathSuggest";
+import { operationCatalog, type OperationMeta } from "../operations/operationRegistry";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -376,6 +377,24 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             />
           </div>
         )}
+        {!(
+          op.type === "FilterByKey" ||
+          op.type === "RenameKey" ||
+          op.type === "MapArray" ||
+          op.type === "ExtractPath" ||
+          op.type === "StringReplace" ||
+          op.type === "FilterArray" ||
+          op.type === "SortArray" ||
+          op.type === "UniqueArray" ||
+          op.type === "FlattenArray" ||
+          op.type === "SliceArray" ||
+          op.type === "GroupBy" ||
+          op.type === "ReduceArray" ||
+          op.type === "CountArray" ||
+          op.type === "JoinArray"
+        ) && (
+          <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>
+        )}
       </div>
       {hasErr && (
         <div className="mt-2 text-xs text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded p-2">
@@ -423,25 +442,7 @@ export function OperationsPanel() {
 
 function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const add = useOpsStore((s: State) => s.addOperation);
-  const list: { type: OperationType; desc: string }[] = useMemo(
-    () => [
-      { type: "FilterByKey", desc: "Keep or remove object keys by name" },
-      { type: "RenameKey", desc: "Rename a key recursively" },
-  { type: "MapArray", desc: "Map an array at a JSON path (type cast)" },
-      { type: "ExtractPath", desc: "Extract a nested value by path" },
-      { type: "StringReplace", desc: "Replace text within string values" },
-  { type: "FilterArray", desc: "Filter items in an array by a condition" },
-  { type: "SortArray", desc: "Sort an array by value or key" },
-  { type: "UniqueArray", desc: "Remove duplicates from an array" },
-  { type: "FlattenArray", desc: "Flatten nested arrays to a given depth" },
-  { type: "SliceArray", desc: "Slice an array by start/end/step" },
-  { type: "GroupBy", desc: "Group objects in an array by a key" },
-  { type: "ReduceArray", desc: "Reduce an array (sum/avg/min/max/concat)" },
-  { type: "CountArray", desc: "Replace an array with its length" },
-  { type: "JoinArray", desc: "Join array items into a string" },
-    ],
-    []
-  );
+  const catalog = operationCatalog;
 
   // Search state with debounce
   const [search, setSearch] = useState("");
@@ -453,13 +454,13 @@ function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: 
   }, [search]);
 
   const normalize = (s: string) => s.toLowerCase();
-  const match = (item: { type: string; desc: string }, q: string) =>
-    normalize(item.type).includes(normalize(q)) || normalize(item.desc).includes(normalize(q));
+  const match = (item: OperationMeta, q: string) =>
+    normalize(item.label).includes(normalize(q)) || normalize(item.description).includes(normalize(q)) || normalize(item.type).includes(normalize(q));
 
   const filtered = useMemo(() => {
-    if (!debounced.trim()) return list;
-    return list.filter((it) => match(it, debounced));
-  }, [list, debounced]);
+    if (!debounced.trim()) return catalog;
+    return catalog.filter((it) => match(it, debounced));
+  }, [catalog, debounced]);
 
   const highlight = (text: string, q: string) => {
     if (!q) return text;
@@ -477,7 +478,7 @@ function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: 
     );
   };
 
-  const commitSelection = (item: { type: OperationType; desc: string }) => {
+  const commitSelection = (item: OperationMeta) => {
     add(item.type);
     onOpenChange(false);
     setSearch("");
@@ -504,26 +505,79 @@ function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: 
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
-              <div className="space-y-2 max-h-[60vh] overflow-auto">
-                {filtered.length === 0 ? (
-                  <div className="text-center text-sm text-neutral-500 py-8">No operations match your search.</div>
-                ) : (
-                  filtered.map((item) => (
-                    <button
-                      key={item.type}
-                      className="w-full text-left border rounded p-3 hover:bg-neutral-50 dark:hover:bg-neutral-800"
-                      onClick={() => commitSelection(item)}
-                    >
-                      <div className="font-medium">{highlight(item.type, debounced)}</div>
-                      <div className="text-xs text-neutral-500">{highlight(item.desc, debounced)}</div>
-                    </button>
-                  ))
-                )}
-              </div>
+              <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
             </div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function CatalogList({ items, query, onSelect }: { items: OperationMeta[]; query: string; onSelect: (m: OperationMeta) => void }) {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const it of items) initial[it.category] = true;
+    return initial;
+  });
+  const grouped = useMemo(() => {
+    const m = new Map<string, OperationMeta[]>();
+    for (const it of items) {
+      const key = it.category;
+      if (!m.has(key)) m.set(key, []);
+      m.get(key)!.push(it);
+    }
+    return Array.from(m.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [items]);
+
+  const highlight = (text: string, q: string) => {
+    if (!q) return text;
+    const i = text.toLowerCase().indexOf(q.toLowerCase());
+    if (i === -1) return text;
+    const before = text.slice(0, i);
+    const mid = text.slice(i, i + q.length);
+    const after = text.slice(i + q.length);
+    return (
+      <>
+        {before}
+        <span className="font-semibold">{mid}</span>
+        {after}
+      </>
+    );
+  };
+
+  if (items.length === 0) return <div className="text-center text-sm text-neutral-500 py-8">No operations match your search.</div>;
+
+  return (
+    <div className="space-y-2 max-h-[60vh] overflow-auto">
+      {grouped.map(([cat, ops]) => {
+        const isCollapsed = !!collapsed[cat];
+        return (
+          <div key={cat} className="border rounded">
+            <button
+              className="w-full flex items-center justify-between px-3 py-2 text-left bg-neutral-50 dark:bg-neutral-800"
+              onClick={() => setCollapsed((s) => ({ ...s, [cat]: !s[cat] }))}
+            >
+              <span className="font-medium">{cat} Operations</span>
+              <span className="text-xs text-neutral-500">{isCollapsed ? "Expand" : "Collapse"}</span>
+            </button>
+            {!isCollapsed && (
+              <div className="p-2 space-y-2">
+                {ops.map((item) => (
+                  <button
+                    key={item.type}
+                    className="w-full text-left border rounded p-3 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                    onClick={() => onSelect(item)}
+                  >
+                    <div className="font-medium">{highlight(item.label, query)}</div>
+                    <div className="text-xs text-neutral-500">{highlight(item.description, query)}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

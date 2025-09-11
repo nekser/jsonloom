@@ -54,10 +54,11 @@ function runAll(input: any, ops: Operation[]): { output?: any; error?: Validatio
     for (const op of ops) {
       // Index the state BEFORE applying this op
       indexes.push(buildPathIndex(cur));
-      const err = validateOp(op, cur);
-      if (err) return { error: { opId: op.id, message: err }, indexes };
-      const mod = getOperationModule(op.type);
-      cur = mod.apply(cur, op.config as any);
+  const mod = getOperationModule(op.type);
+  if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes };
+  const err = mod.validate(op.config as any, cur);
+  if (err) return { error: { opId: op.id, message: err }, indexes };
+  cur = mod.apply(cur, op.config as any);
     }
     return { output: cur, indexes };
   } catch (e: any) {
