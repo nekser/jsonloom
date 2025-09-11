@@ -124,6 +124,7 @@ export function OperationsPanel() {
   const ops = useOpsStore((s: State) => s.operations);
   const reorder = useOpsStore((s: State) => s.reorderOperations);
   const setOperations = useOpsStore((s: State) => s.setOperations);
+  const setSourceText = useOpsStore((s: State) => s.setSourceText);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
