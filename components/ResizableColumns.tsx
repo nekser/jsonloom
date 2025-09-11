@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import clsx from "clsx";
+import { useIsMobile } from "./hooks/useMediaQuery";
 
 type Col = {
   id: string;
@@ -13,6 +14,8 @@ type Col = {
 export function ResizableColumns({ cols }: { cols: Col[] }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [sizes, setSizes] = useState<number[]>(cols.map((c) => c.initial));
+  const isMobile = useIsMobile();
+  const [activeIdx, setActiveIdx] = useState(1); // default middle column on mobile
 
   const startDrag = (idx: number, e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,6 +40,44 @@ export function ResizableColumns({ cols }: { cols: Col[] }) {
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
   };
+
+  if (isMobile) {
+    return (
+      <div ref={containerRef} className="flex w-full h-full min-h-0 overflow-hidden flex-col">
+        <div className="flex items-center gap-1 p-2 border-b border-neutral-200 dark:border-neutral-800">
+          {cols.map((c, i) => (
+            <button
+              key={c.id}
+              className={clsx(
+                "text-xs px-2 py-1 rounded border",
+                i === activeIdx ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent"
+              )}
+              onClick={() => setActiveIdx(i)}
+            >
+              {c.id}
+            </button>
+          ))}
+          <div className="ml-auto">
+            <button
+              className="text-xs px-2 py-1 rounded border"
+              onClick={() => {
+                try {
+                  window.dispatchEvent(new CustomEvent("open-catalog"));
+                } catch {}
+              }}
+            >
+              Catalog
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 min-h-0 overflow-auto">
+          {cols.map((col, i) => (
+            <div key={col.id} className={clsx("h-full min-h-0 flex flex-col", i === activeIdx ? "block" : "hidden")}>{col.content}</div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="flex w-full h-full min-h-0 overflow-hidden">

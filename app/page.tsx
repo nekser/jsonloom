@@ -4,6 +4,7 @@ import { SourceEditor, ResultEditor } from "../components/JsonEditors";
 import { OperationsPanel } from "../components/OperationsPanel";
 import { useOpsStore, State } from "../store/operations";
 import { useState } from "react";
+import { useIsMobile } from "../components/hooks/useMediaQuery";
 
 export default function Home() {
   const undo = useOpsStore((s: State) => s.undo);
@@ -13,6 +14,7 @@ export default function Home() {
   const [demoOpen, setDemoOpen] = useState(false);
   const [demoError, setDemoError] = useState<string | undefined>(undefined);
   const [demoLoading, setDemoLoading] = useState(false);
+  const isMobile = useIsMobile();
 
   const download = () => {
     const text = useOpsStore.getState().resultText;
@@ -47,25 +49,43 @@ export default function Home() {
     <div className="min-h-screen h-screen flex flex-col">
       <header className="p-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
         <div className="font-semibold mr-auto">JSON Transformations</div>
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={paste}>Paste JSON</button>
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={upload}>Upload</button>
-        <div className="w-px h-6 bg-neutral-300 mx-1" />
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={undo}>Undo</button>
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={redo}>Redo</button>
-        <div className="w-px h-6 bg-neutral-300 mx-1" />
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Download</button>
-        <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
+        {!isMobile ? (
+          <>
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={paste}>Paste JSON</button>
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={upload}>Upload</button>
+            <div className="w-px h-6 bg-neutral-300 mx-1" />
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={undo}>Undo</button>
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={redo}>Redo</button>
+            <div className="w-px h-6 bg-neutral-300 mx-1" />
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Download</button>
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
+          </>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
+            <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
+          </div>
+        )}
       </header>
-  <main className="flex-1 min-h-0">
+      <main className="flex-1 min-h-0">
         <ResizableColumns
           cols={[
-            { id: "src", initial: 34, content: <SourceEditor /> },
-            { id: "ops", initial: 32, content: <OperationsPanel /> },
-            { id: "res", initial: 34, content: <ResultEditor /> },
+            { id: "Source", initial: 34, content: <SourceEditor /> },
+            { id: "Pipeline", initial: 32, content: <OperationsPanel /> },
+            { id: "Preview", initial: 34, content: <ResultEditor /> },
           ]}
         />
       </main>
+      {isMobile && (
+        <nav className="border-t border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-around">
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={paste}>Paste</button>
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={upload}>Upload</button>
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={undo}>Undo</button>
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={redo}>Redo</button>
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Save</button>
+        </nav>
+      )}
       {demoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setDemoOpen(false)}>
           <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[640px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>

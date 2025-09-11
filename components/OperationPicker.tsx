@@ -2,10 +2,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useOpsStore, type State, type OperationType } from "../store/operations";
 import { operationCatalog, type OperationMeta } from "../operations/operationRegistry";
+import { useIsMobile } from "./hooks/useMediaQuery";
 
 export default function OperationPicker({ open, onOpenChange, onSelect }: { open: boolean; onOpenChange: (v: boolean) => void; onSelect?: (type: OperationType) => void }) {
   const add = useOpsStore((s: State) => s.addOperation);
   const catalog = operationCatalog;
+  const isMobile = useIsMobile();
 
   // Search state with debounce
   const [search, setSearch] = useState("");
@@ -38,24 +40,48 @@ export default function OperationPicker({ open, onOpenChange, onSelect }: { open
         Add Operation
       </button>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => onOpenChange(false)}>
-          <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[620px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">Add Operation</div>
-              <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  placeholder="Search operations…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => onOpenChange(false)}>
+          {isMobile ? (
+            <div className="absolute inset-x-0 bottom-0 h-[85vh] bg-white dark:bg-neutral-900 rounded-t-md shadow-lg p-4 flex flex-col" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-semibold">Add Operation</div>
+                <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
               </div>
-              <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
+              <div className="space-y-3 flex-1 min-h-0">
+                <div>
+                  <input
+                    className="w-full border rounded px-3 py-2"
+                    placeholder="Search operations…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1 min-h-0 overflow-auto">
+                  <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center w-full h-full" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[620px] max-w-[95vw] p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="font-semibold">Add Operation</div>
+                  <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <input
+                      className="w-full border rounded px-3 py-2"
+                      placeholder="Search operations…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

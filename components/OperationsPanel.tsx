@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import clsx from "clsx";
 import { useOpsStore, OperationType, State } from "../store/operations";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
@@ -14,6 +15,7 @@ import { getByPath } from "../operations/utils";
 import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../utils/sharing/PipelineValidator";
+import { useIsMobile } from "./hooks/useMediaQuery";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -23,12 +25,14 @@ function OperationCard({ id, index }: { id: string; index: number }) {
   const opIndexes = useOpsStore((s: State) => s.opIndexes);
   const interText = useOpsStore((s: State) => s.intermediate?.[op?.id ?? ""]);
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
+  const style = { transform: CSS.Transform.toString(transform), transition } as React.CSSProperties;
   const err = useOpsStore((s: State) => s.pipelineError);
   const hasErr = err && err.opId === op?.id ? err.message : undefined;
   const isEnabled = op?.enabled !== false;
+  const isMobile = useIsMobile();
+  const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
+  const [mobileResultOpen, setMobileResultOpen] = useState(false);
 
-  // Prefer precomputed index prior to this op; fallback to current source
   const sourceObj = useMemo(() => {
     try {
       return JSON.parse(sourceText);
@@ -41,69 +45,47 @@ function OperationCard({ id, index }: { id: string; index: number }) {
 
   if (!op) return null;
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`border rounded-md p-3 bg-white/50 dark:bg-neutral-900/50 ${!isEnabled ? "opacity-60" : ""}`}
-    >
+    <div ref={setNodeRef} style={style} className={`border rounded-md p-3 bg-white/50 dark:bg-neutral-900/50 ${!isEnabled ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="font-medium flex items-center gap-2">
           <span className={`text-xs px-1.5 py-0.5 rounded border ${!isEnabled ? "line-through" : ""}`}>#{index + 1}</span>
           <span>{op.type}</span>
           {!isEnabled && <span className="text-xs text-neutral-500">(disabled)</span>}
         </div>
-        <div className="flex gap-2">
-          <label className="flex items-center gap-1 text-xs">
-            <input
-              type="checkbox"
-              checked={isEnabled}
-              onChange={(e) => update(op.id, { enabled: e.target.checked })}
-            />
-            Enable
-          </label>
-          <button
-            className="text-xs px-2 py-1 rounded border"
-            onClick={() => update(op.id, { debugOpen: !op.debugOpen })}
-          >
-            {op.debugOpen ? "Hide Result" : "View Result"}
-          </button>
-          <button className="text-xs px-2 py-1 rounded border" {...attributes} {...listeners}>
-            Drag
-          </button>
-          <button className="text-xs px-2 py-1 rounded border" onClick={() => remove(op.id)}>
-            Delete
-          </button>
-        </div>
+        {!isMobile ? (
+          <div className="flex gap-2">
+            <label className="flex items-center gap-1 text-xs">
+              <input type="checkbox" checked={isEnabled} onChange={(e) => update(op.id, { enabled: e.target.checked })} />
+              Enable
+            </label>
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
+              {op.debugOpen ? "Hide Result" : "View Result"}
+            </button>
+            <button className="text-xs px-2 py-1 rounded border" {...attributes} {...listeners}>Drag</button>
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => remove(op.id)}>Delete</button>
+          </div>
+        ) : (
+          <button className="text-xs px-2 py-1 rounded border" onClick={() => setMobileActionsOpen(true)}>Actions</button>
+        )}
       </div>
       <div className="mt-2">
         {op.type === "MapArray" ? (
-          <MapArrayEditor op={op as any} pathIndex={pathIndex} onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })} />
+          <MapArrayEditor op={op as any} pathIndex={pathIndex} onUpdate={(cfg: any) => update(op.id, { config: { ...op.config, ...cfg } })} />
         ) : op.type === "If" ? (
-          <IfEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })} />
+          <IfEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg: any) => update(op.id, { config: { ...op.config, ...cfg } })} />
         ) : op.type === "Switch" ? (
-          <SwitchEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })} />
+          <SwitchEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg: any) => update(op.id, { config: { ...op.config, ...cfg } })} />
         ) : (() => {
           const t = op.type as keyof typeof editors;
           const Editor = editors[t];
-          if (!Editor)
-            return <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>;
-          return (
-            <Editor
-              config={op.config}
-              onChange={(patch: any) => update(op.id, { config: { ...op.config, ...patch } })}
-              pathIndex={pathIndex}
-            />
-          );
+          if (!Editor) return <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>;
+          return <Editor config={op.config} onChange={(patch: any) => update(op.id, { config: { ...op.config, ...patch } })} pathIndex={pathIndex} />;
         })()}
-        
       </div>
-      {/* Intermediate result viewer */}
-      {op.debugOpen && (
+      {!isMobile && op.debugOpen && (
         <div className="mt-2 border rounded p-2 bg-neutral-50 dark:bg-neutral-900/40">
           {hasErr ? (
-            <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">
-              {hasErr}
-            </div>
+            <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">{hasErr}</div>
           ) : (
             <div className="text-xs">
               <pre className="overflow-auto max-h-64 whitespace-pre-wrap">{interText ?? ""}</pre>
@@ -111,9 +93,43 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           )}
         </div>
       )}
-      {hasErr && (
-        <div className="mt-2 text-xs text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded p-2">
-          {hasErr}
+      {isMobile && mobileActionsOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileActionsOpen(false)}>
+          <div className="absolute inset-x-0 bottom-0 bg-white dark:bg-neutral-900 rounded-t-md p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Actions</div>
+              <button className="text-xs" onClick={() => setMobileActionsOpen(false)}>Close</button>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={isEnabled} onChange={(e) => update(op.id, { enabled: e.target.checked })} />
+              Enable
+            </label>
+            <div className="flex gap-2">
+              <button className="text-sm px-3 py-1.5 rounded border" onClick={() => { setMobileActionsOpen(false); setMobileResultOpen(true); }}>View Result</button>
+              <button className="text-sm px-3 py-1.5 rounded border" {...attributes} {...listeners}>Drag</button>
+              <button className="text-sm px-3 py-1.5 rounded border" onClick={() => { remove(op.id); setMobileActionsOpen(false); }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isMobile && mobileResultOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileResultOpen(false)}>
+          <div className="absolute inset-4 bg-white dark:bg-neutral-900 rounded-md p-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-medium">Intermediate Result</div>
+              <button className="text-xs" onClick={() => setMobileResultOpen(false)}>Close</button>
+            </div>
+            {hasErr ? (
+              <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">{hasErr}</div>
+            ) : (
+              <div className="text-xs">
+                <pre className="overflow-auto max-h-[70vh] whitespace-pre-wrap">{interText ?? ""}</pre>
+              </div>
+            )}
+            <div className="mt-2 flex gap-2">
+              <button className="text-xs px-2 py-1 rounded border" onClick={async () => { await navigator.clipboard.writeText(String(interText ?? "")); }}>Copy</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -121,25 +137,25 @@ function OperationCard({ id, index }: { id: string; index: number }) {
 }
 
 export function OperationsPanel() {
+  const isMobile = useIsMobile();
   const ops = useOpsStore((s: State) => s.operations);
   const reorder = useOpsStore((s: State) => s.reorderOperations);
   const setOperations = useOpsStore((s: State) => s.setOperations);
-  const setSourceText = useOpsStore((s: State) => s.setSourceText);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
   const [importError, setImportError] = useState<string | undefined>(undefined);
+
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-  const oldIndex = ops.findIndex((o: { id: string }) => o.id === active.id);
-  const newIndex = ops.findIndex((o: { id: string }) => o.id === over.id);
+    const oldIndex = ops.findIndex((o: { id: string }) => o.id === active.id);
+    const newIndex = ops.findIndex((o: { id: string }) => o.id === over.id);
     if (oldIndex !== -1 && newIndex !== -1) reorder(oldIndex, newIndex);
   };
 
-  // Parse pipeline from URL on mount
   useEffect(() => {
     const url = new URL(window.location.href);
     const encoded = url.searchParams.get("pipeline");
@@ -150,8 +166,15 @@ export function OperationsPanel() {
     const v = PipelineValidator.validate(ops as any);
     if (!v.ok) return;
     setOperations(ops as any);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    const handler = () => setPickerOpen(true);
+    window.addEventListener("open-catalog" as any, handler);
+    return () => window.removeEventListener("open-catalog" as any, handler);
+  }, []);
+
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between p-2 border-b border-neutral-200 dark:border-neutral-800">
@@ -160,19 +183,24 @@ export function OperationsPanel() {
           <span title="Paths support '*' wildcards. Example: users.*.age applies to each user's age." className="text-xs text-neutral-500 cursor-help">?</span>
         </div>
         <div className="flex gap-2">
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={() => {
-            const ser = PipelineSerializer.serialize(ops as any);
-            const enc = PipelineEncoder.encode(ser);
-            const url = new URL(window.location.href);
-            url.searchParams.set("pipeline", enc);
-            setShareUrl(url.toString());
-            setShareOpen(true);
-          }}>Share</button>
+          <button
+            className="text-sm px-3 py-1.5 rounded border"
+            onClick={() => {
+              const ser = PipelineSerializer.serialize(ops as any);
+              const enc = PipelineEncoder.encode(ser);
+              const url = new URL(window.location.href);
+              url.searchParams.set("pipeline", enc);
+              setShareUrl(url.toString());
+              setShareOpen(true);
+            }}
+          >
+            Share
+          </button>
           <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setImportOpen(true)}>Import</button>
           <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} />
         </div>
       </div>
-  <div className="flex-1 min-h-0 overflow-auto p-3 space-y-3">
+      <div className={clsx("flex-1 min-h-0 overflow-auto p-3", isMobile ? "space-y-2" : "space-y-3")}>
         <DndContext onDragEnd={onDragEnd}>
           <SortableContext items={ops.map((o: { id: string }) => o.id)} strategy={verticalListSortingStrategy}>
             {ops.map((op: { id: string }, idx: number) => (
@@ -180,79 +208,65 @@ export function OperationsPanel() {
             ))}
           </SortableContext>
         </DndContext>
-        {ops.length === 0 && (
-          <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>
-        )}
+        {ops.length === 0 && <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>}
       </div>
 
-      {/* Share Modal */}
       {shareOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShareOpen(false)}>
-          <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[720px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">Share Pipeline</div>
-              <button className="text-sm" onClick={() => setShareOpen(false)}>Close</button>
-            </div>
-            <div className="space-y-3">
-              <input className="w-full border rounded px-3 py-2" value={shareUrl} readOnly />
-              <div className="flex gap-2">
-                <button
-                  className="text-sm px-3 py-1.5 rounded border"
-                  onClick={async () => {
-                    await navigator.clipboard.writeText(shareUrl);
-                  }}
-                >Copy link</button>
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShareOpen(false)}>
+          <div className="absolute inset-x-0 bottom-0 sm:static sm:m-auto sm:flex sm:items-center sm:justify-center">
+            <div className="bg-white dark:bg-neutral-900 rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-semibold">Share Pipeline</div>
+                <button className="text-sm" onClick={() => setShareOpen(false)}>Close</button>
+              </div>
+              <div className="space-y-3">
+                <input className="w-full border rounded px-3 py-2" value={shareUrl} readOnly />
+                <div className="flex gap-2">
+                  <button className="text-sm px-3 py-1.5 rounded border" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>Copy link</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Import Modal */}
       {importOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setImportOpen(false)}>
-          <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[720px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">Import Pipeline</div>
-              <button className="text-sm" onClick={() => setImportOpen(false)}>Close</button>
-            </div>
-            <div className="space-y-3">
-              <textarea
-                className="w-full border rounded px-3 py-2 h-36"
-                placeholder="Paste the 'pipeline' query string value or full URL"
-                value={importText}
-                onChange={(e) => setImportText(e.target.value)}
-              />
-              {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
-              <div className="flex gap-2">
-                <button
-                  className="text-sm px-3 py-1.5 rounded border"
-                  onClick={() => {
-                    try {
-                      setImportError(undefined);
-                      let encoded = importText.trim();
+        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setImportOpen(false)}>
+          <div className="absolute inset-x-0 bottom-0 sm:static sm:m-auto sm:flex sm:items-center sm:justify-center">
+            <div className="bg-white dark:bg-neutral-900 rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="font-semibold">Import Pipeline</div>
+                <button className="text-sm" onClick={() => setImportOpen(false)}>Close</button>
+              </div>
+              <div className="space-y-3">
+                <textarea className="w-full border rounded px-3 py-2 h-36" placeholder="Paste the 'pipeline' query string value or full URL" value={importText} onChange={(e) => setImportText(e.target.value)} />
+                {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
+                <div className="flex gap-2">
+                  <button
+                    className="text-sm px-3 py-1.5 rounded border"
+                    onClick={() => {
                       try {
-                        const maybeUrl = new URL(encoded);
-                        encoded = maybeUrl.searchParams.get("pipeline") || encoded;
-                      } catch {}
-                      const decoded = PipelineEncoder.decode(encoded);
-                      const ops = PipelineSerializer.deserialize(decoded);
-                      if (!ops) {
-                        setImportError("Invalid pipeline payload");
-                        return;
+                        setImportError(undefined);
+                        let encoded = importText.trim();
+                        try {
+                          const maybeUrl = new URL(encoded);
+                          encoded = maybeUrl.searchParams.get("pipeline") || encoded;
+                        } catch {}
+                        const decoded = PipelineEncoder.decode(encoded);
+                        const ops = PipelineSerializer.deserialize(decoded);
+                        if (!ops) { setImportError("Invalid pipeline payload"); return; }
+                        const v = PipelineValidator.validate(ops as any);
+                        if (!v.ok) { setImportError(v.error); return; }
+                        setOperations(ops as any);
+                        setImportOpen(false);
+                      } catch (e: any) {
+                        setImportError(e?.message || "Failed to import pipeline");
                       }
-                      const v = PipelineValidator.validate(ops as any);
-                      if (!v.ok) {
-                        setImportError(v.error);
-                        return;
-                      }
-                      setOperations(ops as any);
-                      setImportOpen(false);
-                    } catch (e: any) {
-                      setImportError(e?.message || "Failed to import pipeline");
-                    }
-                  }}
-                >Import</button>
+                    }}
+                  >
+                    Import
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -564,7 +578,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
       {cases.map((c, i) => (
         <div key={i} className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
           <div className="flex items-center justify-between mb-2">
-            <div className="font-medium text-sm">Case: <input className="border rounded px-2 py-1 w-40 ml-1" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
+            <div className="font-medium text-sm">Case: <input className="border rounded px-2 py-1 w-full sm:w-40 ml-1" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
             <div className="flex gap-2">
               <button className="text-xs px-2 py-1 rounded border" onClick={() => setPickerIndex(i)}>Add operation</button>
             </div>
@@ -638,8 +652,25 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: op.id });
   const style: any = { transform: CSS.Transform.toString(transform), transition };
   const [collapsed, setCollapsed] = useState(initialCollapsed ?? false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [swiped, setSwiped] = useState(false);
   return (
-    <div ref={setNodeRef} style={style} className="border rounded p-2 bg-white/60 dark:bg-neutral-900/50">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="border rounded p-2 bg-white/60 dark:bg-neutral-900/50"
+      onTouchStart={(e) => setTouchStartX(e.changedTouches[0]?.clientX ?? null)}
+      onTouchEnd={(e) => {
+        if (touchStartX == null) return;
+        const dx = (e.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+        if (dx < -60) { // swipe left
+          setSwiped(true);
+        } else {
+          setSwiped(false);
+        }
+        setTouchStartX(null);
+      }}
+    >
       <div className="flex items-center justify-between">
         <button className="text-sm font-medium text-left" onClick={() => setCollapsed((v) => !v)}>
           {collapsed ? "▶" : "▽"} {op.type}
@@ -653,6 +684,13 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
           </button>
         </div>
       </div>
+      {swiped && (
+        <div className="mt-2">
+          <button className="text-xs px-2 py-1 rounded border border-red-500 text-red-600" onClick={() => onDelete(op.id)}>
+            Confirm delete
+          </button>
+        </div>
+      )}
       {!collapsed && (
         <div className="mt-2">
           {/* MapArray recursive */}
