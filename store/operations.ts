@@ -16,6 +16,7 @@ export type State = {
   // actions
   setSourceText: (text: string) => void;
   addOperation: (type: OperationType, config?: any) => void;
+  setOperations: (ops: Operation[]) => void;
   updateOperation: (id: string, patch: Partial<Operation>) => void;
   deleteOperation: (id: string) => void;
   reorderOperations: (from: number, to: number) => void;
@@ -92,6 +93,10 @@ export const useOpsStore = create<State>()((set, get) => ({
       future: [],
       operations: [...s.operations, { id: nanoid(), type, config: initial }],
     }));
+    get().runPipeline();
+  },
+  setOperations: (ops: Operation[]) => {
+    set((s) => ({ past: [...s.past, s.operations], future: [], operations: ops }));
     get().runPipeline();
   },
   updateOperation: (id: string, patch: Partial<Operation>) => {

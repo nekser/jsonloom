@@ -11,6 +11,9 @@ import { editors } from "./opEditors/registry";
 import { getOperationModule, type Operation } from "../operations";
 import { nanoid } from "nanoid";
 import { getByPath } from "../operations/utils";
+import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
+import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
+import { PipelineValidator } from "../utils/sharing/PipelineValidator";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -82,7 +85,13 @@ function OperationCard({ id, index }: { id: string; index: number }) {
 export function OperationsPanel() {
   const ops = useOpsStore((s: State) => s.operations);
   const reorder = useOpsStore((s: State) => s.reorderOperations);
+  const setOperations = useOpsStore((s: State) => s.setOperations);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importError, setImportError] = useState<string | undefined>(undefined);
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
@@ -90,6 +99,20 @@ export function OperationsPanel() {
   const newIndex = ops.findIndex((o: { id: string }) => o.id === over.id);
     if (oldIndex !== -1 && newIndex !== -1) reorder(oldIndex, newIndex);
   };
+
+  // Parse pipeline from URL on mount
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const encoded = url.searchParams.get("pipeline");
+    if (!encoded) return;
+    const decoded = PipelineEncoder.decode(encoded);
+    const ops = PipelineSerializer.deserialize(decoded);
+    if (!ops) return;
+    const v = PipelineValidator.validate(ops as any);
+    if (!v.ok) return;
+    setOperations(ops as any);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between p-2 border-b border-neutral-200 dark:border-neutral-800">
@@ -98,6 +121,15 @@ export function OperationsPanel() {
           <span title="Paths support '*' wildcards. Example: users.*.age applies to each user's age." className="text-xs text-neutral-500 cursor-help">?</span>
         </div>
         <div className="flex gap-2">
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={() => {
+            const ser = PipelineSerializer.serialize(ops as any);
+            const enc = PipelineEncoder.encode(ser);
+            const url = new URL(window.location.href);
+            url.searchParams.set("pipeline", enc);
+            setShareUrl(url.toString());
+            setShareOpen(true);
+          }}>Share</button>
+          <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setImportOpen(true)}>Import</button>
           <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} />
         </div>
       </div>
@@ -113,6 +145,80 @@ export function OperationsPanel() {
           <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>
         )}
       </div>
+
+      {/* Share Modal */}
+      {shareOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShareOpen(false)}>
+          <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[720px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">Share Pipeline</div>
+              <button className="text-sm" onClick={() => setShareOpen(false)}>Close</button>
+            </div>
+            <div className="space-y-3">
+              <input className="w-full border rounded px-3 py-2" value={shareUrl} readOnly />
+              <div className="flex gap-2">
+                <button
+                  className="text-sm px-3 py-1.5 rounded border"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(shareUrl);
+                  }}
+                >Copy link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {importOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setImportOpen(false)}>
+          <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[720px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold">Import Pipeline</div>
+              <button className="text-sm" onClick={() => setImportOpen(false)}>Close</button>
+            </div>
+            <div className="space-y-3">
+              <textarea
+                className="w-full border rounded px-3 py-2 h-36"
+                placeholder="Paste the 'pipeline' query string value or full URL"
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+              />
+              {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
+              <div className="flex gap-2">
+                <button
+                  className="text-sm px-3 py-1.5 rounded border"
+                  onClick={() => {
+                    try {
+                      setImportError(undefined);
+                      let encoded = importText.trim();
+                      try {
+                        const maybeUrl = new URL(encoded);
+                        encoded = maybeUrl.searchParams.get("pipeline") || encoded;
+                      } catch {}
+                      const decoded = PipelineEncoder.decode(encoded);
+                      const ops = PipelineSerializer.deserialize(decoded);
+                      if (!ops) {
+                        setImportError("Invalid pipeline payload");
+                        return;
+                      }
+                      const v = PipelineValidator.validate(ops as any);
+                      if (!v.ok) {
+                        setImportError(v.error);
+                        return;
+                      }
+                      setOperations(ops as any);
+                      setImportOpen(false);
+                    } catch (e: any) {
+                      setImportError(e?.message || "Failed to import pipeline");
+                    }
+                  }}
+                >Import</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
