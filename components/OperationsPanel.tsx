@@ -8,6 +8,9 @@ import AutocompleteInput from "./AutocompleteInput";
 import MultiAutocompleteChips from "./MultiAutocompleteChips";
 import { buildPathIndex, suggestPathTokens, suggestTopLevelKeys, suggestAnyKeys, suggestIndexKeys } from "../utils/pathSuggest";
 import { operationCatalog, type OperationMeta } from "../operations/operationRegistry";
+import { getOperationModule, type Operation } from "../operations";
+import { nanoid } from "nanoid";
+import { getByPath } from "../operations/utils";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -83,25 +86,11 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           </div>
         )}
         {op.type === "MapArray" && (
-          <div className="flex gap-2">
-            <AutocompleteInput
-              className="w-2/3"
-              placeholder="path e.g. items"
-              value={op.config.path ?? ""}
-              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
-              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
-            />
-            <select
-              className="border rounded px-2 py-1 w-1/3"
-              value={op.config.map ?? "identity"}
-              onChange={(e) => update(op.id, { config: { ...op.config, map: e.target.value } })}
-            >
-              <option value="identity">identity</option>
-              <option value="stringify">stringify</option>
-              <option value="number">number</option>
-              <option value="boolean">boolean</option>
-            </select>
-          </div>
+          <MapArrayEditor
+            op={op as any}
+            pathIndex={pathIndex}
+            onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })}
+          />
         )}
         {op.type === "FilterArray" && (
           <div className="flex flex-wrap gap-2">
@@ -763,7 +752,443 @@ export function OperationsPanel() {
   );
 }
 
-function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+// Nested editor for MapArray
+function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
+  const [open, setOpen] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const sourceText = useOpsStore((s: State) => s.sourceText);
+  const sourceObj = useMemo(() => {
+    try {
+      return JSON.parse(sourceText);
+    } catch {
+      return null;
+    }
+  }, [sourceText]);
+  const sampleIndex = useMemo(() => {
+    if (!sourceObj) return pathIndex;
+    try {
+      const arr = getByPath(sourceObj, (op as any).config.path ?? "");
+      if (Array.isArray(arr) && arr.length > 0) return buildPathIndex(arr[0]);
+    } catch {}
+    return pathIndex;
+  }, [sourceObj, (op as any).config.path, pathIndex]);
+
+  const nestedOps: Operation[] = (op as any).config.operations ?? [];
+
+  const onAddNested = (type: OperationType) => {
+    const mod = getOperationModule(type);
+    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    onUpdate({ operations: [...nestedOps, newOp] });
+    setPickerOpen(false);
+  };
+
+  const onUpdateNested = (id: string, patch: Partial<Operation>) => {
+    const next = nestedOps.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
+    onUpdate({ operations: next });
+  };
+
+  const onDeleteNested = (id: string) => {
+    onUpdate({ operations: nestedOps.filter((n) => n.id !== id) });
+  };
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const ids = nestedOps.map((n) => n.id);
+    const from = ids.indexOf(String(active.id));
+    const to = ids.indexOf(String(over.id));
+    if (from === -1 || to === -1) return;
+    const arr = [...nestedOps];
+    const [moved] = arr.splice(from, 1);
+    arr.splice(to, 0, moved);
+    onUpdate({ operations: arr });
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+    <div className="flex gap-2">
+        <AutocompleteInput
+      className="w-full"
+          placeholder="path e.g. items"
+          value={(op as any).config.path ?? ""}
+          getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+          onChange={(v) => onUpdate({ path: v })}
+        />
+      </div>
+      <div className="flex items-center gap-2 text-sm">
+        <button className="text-xs px-2 py-1 rounded border" onClick={() => setOpen((v) => !v)}>
+          {open ? "Hide" : "Show"} operations
+        </button>
+        <label className="flex items-center gap-1 text-xs">
+          <span>onError</span>
+          <select
+            className="border rounded px-2 py-1"
+            value={(op as any).config.onError ?? "propagate"}
+            onChange={(e) => onUpdate({ onError: (e.target as HTMLSelectElement).value })}
+          >
+            <option value="propagate">propagate</option>
+            <option value="skip">skip element</option>
+          </select>
+        </label>
+      </div>
+      {open && (
+        <div className="mt-1 border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+          <div className="flex items-center justify-between mb-2">
+            <div className="font-medium text-sm">Operations</div>
+            <div className="flex gap-2">
+              <button className="text-xs px-2 py-1 rounded border" onClick={() => setPickerOpen(true)}>
+                Add operation
+              </button>
+            </div>
+          </div>
+          <DndContext onDragEnd={onDragEnd}>
+            <SortableContext items={nestedOps.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-2">
+                {nestedOps.map((n) => (
+                  <NestedOperationCard key={n.id} op={n} sampleIndex={sampleIndex} onUpdate={onUpdateNested} onDelete={onDeleteNested} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+          <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(t) => onAddNested(t)} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete }: { op: Operation; sampleIndex: any; onUpdate: (id: string, patch: Partial<Operation>) => void; onDelete: (id: string) => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: op.id });
+  const style: any = { transform: CSS.Transform.toString(transform), transition };
+  const [collapsed, setCollapsed] = useState(true);
+  return (
+    <div ref={setNodeRef} style={style} className="border rounded p-2 bg-white/60 dark:bg-neutral-900/50">
+      <div className="flex items-center justify-between">
+        <button className="text-sm font-medium text-left" onClick={() => setCollapsed((v) => !v)}>
+          {collapsed ? "▶" : "▽"} {op.type}
+        </button>
+        <div className="flex gap-2">
+          <button className="text-xs px-2 py-1 rounded border" {...attributes} {...listeners}>
+            Drag
+          </button>
+          <button className="text-xs px-2 py-1 rounded border" onClick={() => onDelete(op.id)}>
+            Delete
+          </button>
+        </div>
+      </div>
+      {!collapsed && (
+        <div className="mt-2">
+          {/* MapArray recursive */}
+          {op.type === "MapArray" && (
+            <MapArrayEditor
+              op={op as any}
+              pathIndex={sampleIndex}
+              onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
+            />
+          )}
+          {/* FilterByKey */}
+          {op.type === "FilterByKey" && (
+            <div className="flex gap-2">
+              <select
+                className="border rounded px-2 py-1"
+                value={(op as any).config.mode ?? "keep"}
+                onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, mode: (e.target as HTMLSelectElement).value } })}
+              >
+                <option value="keep">keep</option>
+                <option value="remove">remove</option>
+              </select>
+              <MultiAutocompleteChips
+                className="w-full"
+                placeholder="keys"
+                values={(op as any).config.keys ?? []}
+                getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)}
+                onChange={(vals) => onUpdate(op.id, { config: { ...(op as any).config, keys: vals } })}
+              />
+            </div>
+          )}
+          {/* RenameKey */}
+          {op.type === "RenameKey" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="w-1/2" placeholder="from" value={(op as any).config.from ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, from: v } })} />
+              <input className="border rounded px-2 py-1 w-1/2" placeholder="to" value={(op as any).config.to ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, to: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {/* Array ops */}
+          {op.type === "FilterArray" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <AutocompleteInput className="w-40" placeholder="key (optional)" value={(op as any).config.key ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, key: v } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.operator ?? "eq"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, operator: (e.target as HTMLSelectElement).value } })}>
+                <option value="eq">eq</option>
+                <option value="neq">neq</option>
+                <option value="gt">gt</option>
+                <option value="lt">lt</option>
+                <option value="in">in</option>
+                <option value="contains">contains</option>
+              </select>
+              <input className="border rounded px-2 py-1 flex-1 min-w-[20%]" placeholder="value" value={(op as any).config.value ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, value: (e.target as HTMLInputElement).value } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.mode ?? "keep"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, mode: (e.target as HTMLSelectElement).value } })}>
+                <option value="keep">keep</option>
+                <option value="remove">remove</option>
+              </select>
+            </div>
+          )}
+          {op.type === "SortArray" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <AutocompleteInput className="w-40" placeholder="by (optional)" value={(op as any).config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, by: v } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.order ?? "asc"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, order: (e.target as HTMLSelectElement).value } })}>
+                <option value="asc">asc</option>
+                <option value="desc">desc</option>
+              </select>
+              <label className="flex items-center gap-1 text-xs">
+                <input type="checkbox" checked={!!(op as any).config.caseInsensitive} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, caseInsensitive: (e.target as HTMLInputElement).checked } })} />
+                case-insensitive
+              </label>
+              <select className="border rounded px-2 py-1" value={(op as any).config.nulls ?? "last"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, nulls: (e.target as HTMLSelectElement).value } })}>
+                <option value="first">nulls first</option>
+                <option value="last">nulls last</option>
+              </select>
+            </div>
+          )}
+          {op.type === "UniqueArray" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <AutocompleteInput className="w-56" placeholder="by (optional)" value={(op as any).config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, by: v } })} />
+            </div>
+          )}
+          {op.type === "FlattenArray" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-32" placeholder="depth" value={(op as any).config.depth ?? 1} onChange={(e) => {
+                const raw = (e.target as HTMLInputElement).value; const depth: any = raw === "infinity" ? "infinity" : Number(raw); onUpdate(op.id, { config: { ...(op as any).config, depth } });
+              }} />
+            </div>
+          )}
+          {op.type === "SliceArray" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-24" placeholder="start" value={(op as any).config.start ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, start: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+              <input className="border rounded px-2 py-1 w-24" placeholder="end" value={(op as any).config.end ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, end: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+              <input className="border rounded px-2 py-1 w-24" placeholder="step" value={(op as any).config.step ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, step: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+            </div>
+          )}
+          {op.type === "GroupBy" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <AutocompleteInput className="w-40" placeholder="group by" value={(op as any).config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, by: v } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.collect ?? "array"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, collect: (e.target as HTMLSelectElement).value } })}>
+                <option value="array">array</option>
+                <option value="count">count</option>
+                <option value="sum">sum</option>
+              </select>
+              {(op as any).config.collect === "sum" && (
+                <AutocompleteInput className="w-44" placeholder="sum path" value={(op as any).config.sumPath ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, sumPath: v } })} />
+              )}
+            </div>
+          )}
+          {op.type === "ReduceArray" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <AutocompleteInput className="w-40" placeholder="by (optional)" value={(op as any).config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, by: v } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.op ?? "sum"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, op: (e.target as HTMLSelectElement).value } })}>
+                <option value="sum">sum</option>
+                <option value="avg">avg</option>
+                <option value="min">min</option>
+                <option value="max">max</option>
+                <option value="concat">concat</option>
+              </select>
+            </div>
+          )}
+          {op.type === "CountArray" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="w-full" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+            </div>
+          )}
+          {op.type === "JoinArray" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-40" placeholder="," value={(op as any).config.delimiter ?? ","} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, delimiter: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {/* Object ops */}
+          {op.type === "RenameKeysByPattern" && (
+            <div className="flex flex-wrap gap-2">
+              <input className="border rounded px-2 py-1 flex-1 min-w-[40%]" placeholder="pattern (regex)" value={(op as any).config.pattern ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, pattern: (e.target as HTMLInputElement).value } })} />
+              <input className="border rounded px-2 py-1 w-44" placeholder="flags (e.g. gi)" value={(op as any).config.flags ?? "g"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, flags: (e.target as HTMLInputElement).value } })} />
+              <input className="border rounded px-2 py-1 w-full" placeholder="replace" value={(op as any).config.replace ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, replace: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {op.type === "NormalizeKeyCase" && (
+            <div className="flex gap-2">
+              <select className="border rounded px-2 py-1 w-48" value={(op as any).config.mode ?? "camel"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, mode: (e.target as HTMLSelectElement).value } })}>
+                <option value="camel">camel</option>
+                <option value="snake">snake</option>
+                <option value="kebab">kebab</option>
+                <option value="pascal">pascal</option>
+              </select>
+            </div>
+          )}
+          {op.type === "PickPaths" && (
+            <div className="flex flex-col gap-2">
+              <textarea className="border rounded px-2 py-1 w-full h-28" placeholder="paths (one per line)" value={((op as any).config.paths ?? []).join("\n")} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, paths: (e.target as HTMLTextAreaElement).value.split(/\r?\n/).filter(Boolean) } })} />
+            </div>
+          )}
+          {op.type === "OmitPaths" && (
+            <div className="flex flex-col gap-2">
+              <textarea className="border rounded px-2 py-1 w-full h-28" placeholder="paths (one per line)" value={((op as any).config.paths ?? []).join("\n")} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, paths: (e.target as HTMLTextAreaElement).value.split(/\r?\n/).filter(Boolean) } })} />
+            </div>
+          )}
+          {op.type === "SetPath" && (
+            <div className="flex flex-col gap-2">
+              <AutocompleteInput className="w-full" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-full" placeholder='value (JSON literal, e.g. 123, "text", true)' value={typeof (op as any).config.value === "string" ? (op as any).config.value : JSON.stringify((op as any).config.value)} onChange={(e) => {
+                const raw = (e.target as HTMLInputElement).value; try { onUpdate(op.id, { config: { ...(op as any).config, value: JSON.parse(raw) } }); } catch { onUpdate(op.id, { config: { ...(op as any).config, value: raw } }); }
+              }} />
+            </div>
+          )}
+          {op.type === "DeletePath" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="w-full" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+            </div>
+          )}
+          {op.type === "MergeAtPath" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="target path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.source ?? "root"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, source: (e.target as HTMLSelectElement).value } })}>
+                <option value="root">root</option>
+                <option value="path">path</option>
+              </select>
+              {(op as any).config.source === "path" && (
+                <AutocompleteInput className="w-64" placeholder="source path" value={(op as any).config.sourcePath ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, sourcePath: v } })} />
+              )}
+              <select className="border rounded px-2 py-1" value={(op as any).config.strategy ?? "shallow"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, strategy: (e.target as HTMLSelectElement).value } })}>
+                <option value="shallow">shallow</option>
+                <option value="deep">deep</option>
+                <option value="overwrite">overwrite</option>
+              </select>
+            </div>
+          )}
+          {op.type === "FlattenObject" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-28" placeholder="delimiter" value={(op as any).config.delimiter ?? "."} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, delimiter: (e.target as HTMLInputElement).value } })} />
+              <input className="border rounded px-2 py-1 w-28" placeholder="maxDepth" value={(op as any).config.maxDepth ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, maxDepth: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+            </div>
+          )}
+          {op.type === "UnflattenObject" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-28" placeholder="delimiter" value={(op as any).config.delimiter ?? "."} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, delimiter: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {/* String ops */}
+          {op.type === "StringReplace" && (
+            <div className="flex gap-2">
+              <input className="border rounded px-2 py-1 w-1/2" placeholder="search" value={(op as any).config.search ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, search: (e.target as HTMLInputElement).value } })} />
+              <input className="border rounded px-2 py-1 w-1/2" placeholder="replace" value={(op as any).config.replace ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, replace: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {op.type === "RegexReplace" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="path (optional)" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 flex-1 min-w-[40%]" placeholder="pattern (regex)" value={(op as any).config.pattern ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, pattern: (e.target as HTMLInputElement).value } })} />
+              <input className="border rounded px-2 py-1 w-40" placeholder="flags (e.g. gi)" value={(op as any).config.flags ?? "g"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, flags: (e.target as HTMLInputElement).value } })} />
+              <input className="border rounded px-2 py-1 w-full" placeholder="replace" value={(op as any).config.replace ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, replace: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {op.type === "TrimStrings" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="w-full" placeholder="path (optional)" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+            </div>
+          )}
+          {op.type === "CoerceType" && (
+            <div className="flex flex-wrap gap-2">
+              <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <select className="border rounded px-2 py-1" value={(op as any).config.to ?? "string"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, to: (e.target as HTMLSelectElement).value } })}>
+                <option value="string">string</option>
+                <option value="number">number</option>
+                <option value="boolean">boolean</option>
+                <option value="object">object</option>
+                <option value="array">array</option>
+              </select>
+              <input className="border rounded px-2 py-1 flex-1 min-w-[40%]" placeholder="fallback (optional)" value={(op as any).config.fallback ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, fallback: (e.target as HTMLInputElement).value } })} />
+            </div>
+          )}
+          {op.type === "TemplateInterpolate" && (
+            <div className="flex flex-col gap-2">
+              <AutocompleteInput className="w-full" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <textarea className="border rounded px-2 py-1 w-full h-24" placeholder="template" value={(op as any).config.template ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, template: (e.target as HTMLTextAreaElement).value } })} />
+              <select className="border rounded px-2 py-1 w-48" value={(op as any).config.onMissing ?? "literal"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, onMissing: (e.target as HTMLSelectElement).value } })}>
+                <option value="literal">leave literal</option>
+                <option value="ignore">ignore</option>
+                <option value="error">throw error</option>
+              </select>
+            </div>
+          )}
+          {op.type === "Base64" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <select className="border rounded px-2 py-1 w-40" value={(op as any).config.mode ?? "encode"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, mode: (e.target as HTMLSelectElement).value } })}>
+                <option value="encode">encode</option>
+                <option value="decode">decode</option>
+              </select>
+            </div>
+          )}
+          {op.type === "StringCase" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <select className="border rounded px-2 py-1 w-40" value={(op as any).config.mode ?? "lowercase"} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, mode: (e.target as HTMLSelectElement).value } })}>
+                <option value="lowercase">lowercase</option>
+                <option value="uppercase">uppercase</option>
+              </select>
+              <label className="flex items-center gap-1 text-xs">
+                <input type="checkbox" checked={!!(op as any).config.coerceNonString} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, coerceNonString: (e.target as HTMLInputElement).checked } })} />
+                coerce non-string
+              </label>
+            </div>
+          )}
+          {/* Fallback */}
+          {! (
+            op.type === "FilterByKey" ||
+            op.type === "RenameKey" ||
+            op.type === "MapArray" ||
+            op.type === "ExtractPath" ||
+            op.type === "StringReplace" ||
+            op.type === "FilterArray" ||
+            op.type === "SortArray" ||
+            op.type === "UniqueArray" ||
+            op.type === "FlattenArray" ||
+            op.type === "SliceArray" ||
+            op.type === "GroupBy" ||
+            op.type === "ReduceArray" ||
+            op.type === "CountArray" ||
+            op.type === "JoinArray" ||
+            op.type === "RegexReplace" ||
+            op.type === "TrimStrings" ||
+            op.type === "CoerceType" ||
+            op.type === "TemplateInterpolate" ||
+            op.type === "Base64" ||
+            op.type === "StringCase" ||
+            op.type === "RenameKeysByPattern" ||
+            op.type === "NormalizeKeyCase" ||
+            op.type === "PickPaths" ||
+            op.type === "OmitPaths" ||
+            op.type === "SetPath" ||
+            op.type === "DeletePath" ||
+            op.type === "MergeAtPath" ||
+            op.type === "FlattenObject" ||
+            op.type === "UnflattenObject"
+          ) && (
+            <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OperationPicker({ open, onOpenChange, onSelect }: { open: boolean; onOpenChange: (v: boolean) => void; onSelect?: (type: OperationType) => void }) {
   const add = useOpsStore((s: State) => s.addOperation);
   const catalog = operationCatalog;
 
@@ -802,7 +1227,8 @@ function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: 
   };
 
   const commitSelection = (item: OperationMeta) => {
-    add(item.type);
+    if (onSelect) onSelect(item.type);
+    else add(item.type);
     onOpenChange(false);
     setSearch("");
   };

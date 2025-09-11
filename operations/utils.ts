@@ -1,10 +1,10 @@
 export function getByPath(obj: any, path: string): any {
-  if (!path) return obj;
+  if (!path || path === ".") return obj;
   return path.split(".").reduce((acc, seg) => (acc == null ? acc : (acc as any)[seg]), obj);
 }
 
 export function setByPath(obj: any, path: string, val: any): any {
-  if (!path) return val;
+  if (!path || path === ".") return val;
   const parts = path.split(".");
   const root = Array.isArray(obj) ? [...obj] : obj && typeof obj === "object" ? { ...obj } : {};
   let cur: any = root;
