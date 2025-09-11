@@ -189,4 +189,13 @@ export type {
   TemplateInterpolateConfig,
   Base64Config,
   StringCaseConfig,
+  RenameKeysByPatternConfig,
+  NormalizeKeyCaseConfig,
+  PickPathsConfig,
+  OmitPathsConfig,
+  SetPathConfig,
+  DeletePathConfig,
+  MergeAtPathConfig,
+  FlattenObjectConfig,
+  UnflattenObjectConfig,
 } from "../operations";

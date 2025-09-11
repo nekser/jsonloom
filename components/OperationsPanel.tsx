@@ -361,6 +361,174 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             />
           </div>
         )}
+        {op.type === "RenameKeysByPattern" && (
+          <div className="flex flex-wrap gap-2">
+            <input
+              className="border rounded px-2 py-1 flex-1 min-w-[40%]"
+              placeholder="pattern (regex)"
+              value={op.config.pattern ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, pattern: e.target.value } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-44"
+              placeholder="flags (e.g. gi)"
+              value={op.config.flags ?? "g"}
+              onChange={(e) => update(op.id, { config: { ...op.config, flags: e.target.value } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-full"
+              placeholder="replace"
+              value={op.config.replace ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, replace: e.target.value } })}
+            />
+          </div>
+        )}
+        {op.type === "NormalizeKeyCase" && (
+          <div className="flex gap-2">
+            <select
+              className="border rounded px-2 py-1 w-48"
+              value={op.config.mode ?? "camel"}
+              onChange={(e) => update(op.id, { config: { ...op.config, mode: e.target.value } })}
+            >
+              <option value="camel">camel</option>
+              <option value="snake">snake</option>
+              <option value="kebab">kebab</option>
+              <option value="pascal">pascal</option>
+            </select>
+          </div>
+        )}
+        {op.type === "PickPaths" && (
+          <div className="flex flex-col gap-2">
+            <textarea
+              className="border rounded px-2 py-1 w-full h-28"
+              placeholder="paths (one per line)"
+              value={(op.config.paths ?? []).join("\n")}
+              onChange={(e) => update(op.id, { config: { ...op.config, paths: e.target.value.split(/\r?\n/).filter(Boolean) } })}
+            />
+          </div>
+        )}
+        {op.type === "OmitPaths" && (
+          <div className="flex flex-col gap-2">
+            <textarea
+              className="border rounded px-2 py-1 w-full h-28"
+              placeholder="paths (one per line)"
+              value={(op.config.paths ?? []).join("\n")}
+              onChange={(e) => update(op.id, { config: { ...op.config, paths: e.target.value.split(/\r?\n/).filter(Boolean) } })}
+            />
+          </div>
+        )}
+        {op.type === "SetPath" && (
+          <div className="flex flex-col gap-2">
+            <AutocompleteInput
+              className="w-full"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-full"
+              placeholder='value (JSON literal, e.g. 123, "text", true)'
+              value={typeof op.config.value === "string" ? op.config.value : JSON.stringify(op.config.value)}
+              onChange={(e) => {
+                const raw = e.target.value;
+                try {
+                  update(op.id, { config: { ...op.config, value: JSON.parse(raw) } });
+                } catch {
+                  update(op.id, { config: { ...op.config, value: raw } });
+                }
+              }}
+            />
+          </div>
+        )}
+        {op.type === "DeletePath" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="w-full"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+          </div>
+        )}
+        {op.type === "MergeAtPath" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="target path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.source ?? "root"}
+              onChange={(e) => update(op.id, { config: { ...op.config, source: e.target.value } })}
+            >
+              <option value="root">root</option>
+              <option value="path">path</option>
+            </select>
+            {op.config.source === "path" && (
+              <AutocompleteInput
+                className="w-64"
+                placeholder="source path"
+                value={op.config.sourcePath ?? ""}
+                getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+                onChange={(v) => update(op.id, { config: { ...op.config, sourcePath: v } })}
+              />
+            )}
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.strategy ?? "shallow"}
+              onChange={(e) => update(op.id, { config: { ...op.config, strategy: e.target.value } })}
+            >
+              <option value="shallow">shallow</option>
+              <option value="deep">deep</option>
+              <option value="overwrite">overwrite</option>
+            </select>
+          </div>
+        )}
+        {op.type === "FlattenObject" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-28"
+              placeholder="delimiter"
+              value={op.config.delimiter ?? "."}
+              onChange={(e) => update(op.id, { config: { ...op.config, delimiter: e.target.value } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-28"
+              placeholder="maxDepth"
+              value={op.config.maxDepth ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, maxDepth: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+          </div>
+        )}
+        {op.type === "UnflattenObject" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-28"
+              placeholder="delimiter"
+              value={op.config.delimiter ?? "."}
+              onChange={(e) => update(op.id, { config: { ...op.config, delimiter: e.target.value } })}
+            />
+          </div>
+        )}
         {op.type === "StringReplace" && (
           <div className="flex gap-2">
             <input
@@ -537,7 +705,16 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           op.type === "CoerceType" ||
           op.type === "TemplateInterpolate" ||
           op.type === "Base64" ||
-          op.type === "StringCase"
+          op.type === "StringCase" ||
+          op.type === "RenameKeysByPattern" ||
+          op.type === "NormalizeKeyCase" ||
+          op.type === "PickPaths" ||
+          op.type === "OmitPaths" ||
+          op.type === "SetPath" ||
+          op.type === "DeletePath" ||
+          op.type === "MergeAtPath" ||
+          op.type === "FlattenObject" ||
+          op.type === "UnflattenObject"
         ) && (
           <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>
         )}

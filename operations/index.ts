@@ -4,6 +4,15 @@ import RenameKey from "./RenameKey";
 import MapArray from "./MapArray";
 import ExtractPath from "./ExtractPath";
 import StringReplace from "./StringReplace";
+import RenameKeysByPattern from "./RenameKeysByPattern";
+import NormalizeKeyCase from "./NormalizeKeyCase";
+import PickPaths from "./PickPaths";
+import OmitPaths from "./OmitPaths";
+import SetPath from "./SetPath";
+import DeletePath from "./DeletePath";
+import MergeAtPath from "./MergeAtPath";
+import FlattenObject from "./FlattenObject";
+import UnflattenObject from "./UnflattenObject";
 import FilterArray from "./FilterArray";
 import SortArray from "./SortArray";
 import UniqueArray from "./UniqueArray";
@@ -26,6 +35,15 @@ const registry: Record<OperationType, OperationModule<any>> = {
   MapArray,
   ExtractPath,
   StringReplace,
+  RenameKeysByPattern,
+  NormalizeKeyCase,
+  PickPaths,
+  OmitPaths,
+  SetPath,
+  DeletePath,
+  MergeAtPath,
+  FlattenObject,
+  UnflattenObject,
   FilterArray,
   SortArray,
   UniqueArray,
@@ -53,6 +71,15 @@ export type { RenameKeyConfig } from "./RenameKey";
 export type { MapArrayConfig } from "./MapArray";
 export type { ExtractPathConfig } from "./ExtractPath";
 export type { StringReplaceConfig } from "./StringReplace";
+export type { RenameKeysByPatternConfig } from "./RenameKeysByPattern";
+export type { NormalizeKeyCaseConfig } from "./NormalizeKeyCase";
+export type { PickPathsConfig } from "./PickPaths";
+export type { OmitPathsConfig } from "./OmitPaths";
+export type { SetPathConfig } from "./SetPath";
+export type { DeletePathConfig } from "./DeletePath";
+export type { MergeAtPathConfig } from "./MergeAtPath";
+export type { FlattenObjectConfig } from "./FlattenObject";
+export type { UnflattenObjectConfig } from "./UnflattenObject";
 export type { FilterArrayConfig } from "./FilterArray";
 export type { SortArrayConfig } from "./SortArray";
 export type { UniqueArrayConfig } from "./UniqueArray";

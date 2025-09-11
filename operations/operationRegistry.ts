@@ -32,6 +32,15 @@ export const operationCatalog: OperationMeta[] = [
     label: "Extract Path",
     description: "Extract a nested value by path",
   },
+  { type: "RenameKeysByPattern", category: "Object", label: "Rename Keys by Pattern", description: "Regex-based key renaming recursively" },
+  { type: "NormalizeKeyCase", category: "Object", label: "Normalize Key Case", description: "Convert all keys to camel/snake/kebab/pascal" },
+  { type: "PickPaths", category: "Object", label: "Pick Paths", description: "Return new object with only specified paths" },
+  { type: "OmitPaths", category: "Object", label: "Omit Paths", description: "Remove properties at specified paths" },
+  { type: "SetPath", category: "Object", label: "Set Path", description: "Set or overwrite value at a path" },
+  { type: "DeletePath", category: "Object", label: "Delete Path", description: "Delete property at path" },
+  { type: "MergeAtPath", category: "Object", label: "Merge At Path", description: "Merge target object with source (shallow/deep/overwrite)" },
+  { type: "FlattenObject", category: "Object", label: "Flatten Object", description: "Flatten nested object into dotted keys" },
+  { type: "UnflattenObject", category: "Object", label: "Unflatten Object", description: "Expand dotted keys into nested object" },
 
   // Array
   {

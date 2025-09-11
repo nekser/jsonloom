@@ -4,6 +4,16 @@ export type OperationType =
   | "MapArray"
   | "ExtractPath"
   | "StringReplace"
+  // Object operations (new)
+  | "RenameKeysByPattern"
+  | "NormalizeKeyCase"
+  | "PickPaths"
+  | "OmitPaths"
+  | "SetPath"
+  | "DeletePath"
+  | "MergeAtPath"
+  | "FlattenObject"
+  | "UnflattenObject"
   // Array operations
   | "FilterArray"
   | "SortArray"
