@@ -13,6 +13,12 @@ import GroupBy from "./GroupBy";
 import ReduceArray from "./ReduceArray";
 import CountArray from "./CountArray";
 import JoinArray from "./JoinArray";
+import RegexReplace from "./RegexReplace";
+import TrimStrings from "./TrimStrings";
+import CoerceType from "./CoerceType";
+import TemplateInterpolate from "./TemplateInterpolate";
+import Base64 from "./Base64";
+import StringCase from "./StringCase";
 
 const registry: Record<OperationType, OperationModule<any>> = {
   FilterByKey,
@@ -29,6 +35,12 @@ const registry: Record<OperationType, OperationModule<any>> = {
   ReduceArray,
   CountArray,
   JoinArray,
+  RegexReplace,
+  TrimStrings,
+  CoerceType,
+  TemplateInterpolate,
+  Base64,
+  StringCase,
 };
 
 export function getOperationModule(type: OperationType): OperationModule<any> {
@@ -50,3 +62,9 @@ export type { GroupByConfig } from "./GroupBy";
 export type { ReduceArrayConfig } from "./ReduceArray";
 export type { CountArrayConfig } from "./CountArray";
 export type { JoinArrayConfig } from "./JoinArray";
+export type { RegexReplaceConfig } from "./RegexReplace";
+export type { TrimStringsConfig } from "./TrimStrings";
+export type { CoerceTypeConfig } from "./CoerceType";
+export type { TemplateInterpolateConfig } from "./TemplateInterpolate";
+export type { Base64Config } from "./Base64";
+export type { StringCaseConfig } from "./StringCase";

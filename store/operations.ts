@@ -183,4 +183,10 @@ export type {
   ReduceArrayConfig,
   CountArrayConfig,
   JoinArrayConfig,
+  RegexReplaceConfig,
+  TrimStringsConfig,
+  CoerceTypeConfig,
+  TemplateInterpolateConfig,
+  Base64Config,
+  StringCaseConfig,
 } from "../operations";

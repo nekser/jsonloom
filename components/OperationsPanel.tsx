@@ -377,6 +377,146 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             />
           </div>
         )}
+        {op.type === "RegexReplace" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="path (optional: apply globally if empty)"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 flex-1 min-w-[40%]"
+              placeholder="pattern (regex)"
+              value={op.config.pattern ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, pattern: e.target.value } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-40"
+              placeholder="flags (e.g. gi)"
+              value={op.config.flags ?? "g"}
+              onChange={(e) => update(op.id, { config: { ...op.config, flags: e.target.value } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-full"
+              placeholder="replace"
+              value={op.config.replace ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, replace: e.target.value } })}
+            />
+          </div>
+        )}
+        {op.type === "TrimStrings" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="w-full"
+              placeholder="path (optional: trim all if empty)"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+          </div>
+        )}
+        {op.type === "CoerceType" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.to ?? "string"}
+              onChange={(e) => update(op.id, { config: { ...op.config, to: e.target.value } })}
+            >
+              <option value="string">string</option>
+              <option value="number">number</option>
+              <option value="boolean">boolean</option>
+              <option value="object">object</option>
+              <option value="array">array</option>
+            </select>
+            <input
+              className="border rounded px-2 py-1 flex-1 min-w-[40%]"
+              placeholder="fallback (optional)"
+              value={op.config.fallback ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, fallback: e.target.value } })}
+            />
+          </div>
+        )}
+        {op.type === "TemplateInterpolate" && (
+          <div className="flex flex-col gap-2">
+            <AutocompleteInput
+              className="w-full"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <textarea
+              className="border rounded px-2 py-1 w-full h-24"
+              placeholder="template (e.g., Hello ${user.name})"
+              value={op.config.template ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, template: e.target.value } })}
+            />
+            <select
+              className="border rounded px-2 py-1 w-48"
+              value={op.config.onMissing ?? "literal"}
+              onChange={(e) => update(op.id, { config: { ...op.config, onMissing: e.target.value } })}
+            >
+              <option value="literal">leave literal</option>
+              <option value="ignore">ignore</option>
+              <option value="error">throw error</option>
+            </select>
+          </div>
+        )}
+        {op.type === "Base64" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1 w-40"
+              value={op.config.mode ?? "encode"}
+              onChange={(e) => update(op.id, { config: { ...op.config, mode: e.target.value } })}
+            >
+              <option value="encode">encode</option>
+              <option value="decode">decode</option>
+            </select>
+          </div>
+        )}
+        {op.type === "StringCase" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1 w-40"
+              value={op.config.mode ?? "lowercase"}
+              onChange={(e) => update(op.id, { config: { ...op.config, mode: e.target.value } })}
+            >
+              <option value="lowercase">lowercase</option>
+              <option value="uppercase">uppercase</option>
+            </select>
+            <label className="flex items-center gap-1 text-xs">
+              <input
+                type="checkbox"
+                checked={!!op.config.coerceNonString}
+                onChange={(e) => update(op.id, { config: { ...op.config, coerceNonString: e.target.checked } })}
+              />
+              coerce non-string
+            </label>
+          </div>
+        )}
         {!(
           op.type === "FilterByKey" ||
           op.type === "RenameKey" ||
@@ -391,7 +531,13 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           op.type === "GroupBy" ||
           op.type === "ReduceArray" ||
           op.type === "CountArray" ||
-          op.type === "JoinArray"
+          op.type === "JoinArray" ||
+          op.type === "RegexReplace" ||
+          op.type === "TrimStrings" ||
+          op.type === "CoerceType" ||
+          op.type === "TemplateInterpolate" ||
+          op.type === "Base64" ||
+          op.type === "StringCase"
         ) && (
           <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>
         )}

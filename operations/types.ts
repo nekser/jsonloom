@@ -13,7 +13,14 @@ export type OperationType =
   | "GroupBy"
   | "ReduceArray"
   | "CountArray"
-  | "JoinArray";
+  | "JoinArray"
+  // String operations (new)
+  | "RegexReplace"
+  | "TrimStrings"
+  | "CoerceType"
+  | "TemplateInterpolate"
+  | "Base64"
+  | "StringCase";
 
 // OperationType is the single source of truth for operation identifiers.
 

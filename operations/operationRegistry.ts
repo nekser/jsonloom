@@ -52,6 +52,12 @@ export const operationCatalog: OperationMeta[] = [
 
   // String
   { type: "StringReplace", category: "String", label: "String Replace", description: "Replace text within string values" },
+  { type: "RegexReplace", category: "String", label: "Regex Replace", description: "Regex-based string replace with flags" },
+  { type: "TrimStrings", category: "String", label: "Trim Strings", description: "Trim whitespace (global or at path)" },
+  { type: "CoerceType", category: "String", label: "Coerce Type", description: "Convert value to string/number/boolean/object/array" },
+  { type: "TemplateInterpolate", category: "String", label: "Template Interpolate", description: "Interpolate ${...} placeholders from root" },
+  { type: "Base64", category: "String", label: "Base64", description: "Encode or decode Base64" },
+  { type: "StringCase", category: "String", label: "String Case", description: "Convert to lower/upper case" },
 ];
 
 export const operationMetaByType: Record<OperationType, OperationMeta> = Object.fromEntries(
