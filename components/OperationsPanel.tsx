@@ -45,7 +45,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
 
   if (!op) return null;
   return (
-    <div ref={setNodeRef} style={style} className={`border rounded-md p-3 bg-white/50 dark:bg-neutral-900/50 ${!isEnabled ? "opacity-60" : ""}`}>
+  <div ref={setNodeRef} style={style} className={`border rounded-md p-3 op-surface ${!isEnabled ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
         <div className="font-medium flex items-center gap-2">
           <span className={`text-xs px-1.5 py-0.5 rounded border ${!isEnabled ? "line-through" : ""}`}>#{index + 1}</span>
@@ -83,7 +83,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
         })()}
       </div>
       {!isMobile && op.debugOpen && (
-        <div className="mt-2 border rounded p-2 bg-neutral-50 dark:bg-neutral-900/40">
+  <div className="mt-2 border rounded p-2 op-surface">
           {hasErr ? (
             <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">{hasErr}</div>
           ) : (
@@ -93,9 +93,9 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           )}
         </div>
       )}
-      {isMobile && mobileActionsOpen && (
+    {isMobile && mobileActionsOpen && (
         <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileActionsOpen(false)}>
-          <div className="absolute inset-x-0 bottom-0 bg-white dark:bg-neutral-900 rounded-t-md p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+  <div className="absolute inset-x-0 bottom-0 op-surface rounded-t-md p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div className="font-medium">Actions</div>
               <button className="text-xs" onClick={() => setMobileActionsOpen(false)}>Close</button>
@@ -112,9 +112,9 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           </div>
         </div>
       )}
-      {isMobile && mobileResultOpen && (
+    {isMobile && mobileResultOpen && (
         <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileResultOpen(false)}>
-          <div className="absolute inset-4 bg-white dark:bg-neutral-900 rounded-md p-3" onClick={(e) => e.stopPropagation()}>
+  <div className="absolute inset-4 op-surface rounded-md p-3" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-2">
               <div className="font-medium">Intermediate Result</div>
               <button className="text-xs" onClick={() => setMobileResultOpen(false)}>Close</button>
@@ -214,7 +214,7 @@ export function OperationsPanel() {
       {shareOpen && (
         <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShareOpen(false)}>
           <div className="absolute inset-x-0 bottom-0 sm:static sm:m-auto sm:flex sm:items-center sm:justify-center">
-            <div className="bg-white dark:bg-neutral-900 rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="op-surface rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-3">
                 <div className="font-semibold">Share Pipeline</div>
                 <button className="text-sm" onClick={() => setShareOpen(false)}>Close</button>
@@ -233,7 +233,7 @@ export function OperationsPanel() {
       {importOpen && (
         <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setImportOpen(false)}>
           <div className="absolute inset-x-0 bottom-0 sm:static sm:m-auto sm:flex sm:items-center sm:justify-center">
-            <div className="bg-white dark:bg-neutral-900 rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="op-surface rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-3">
                 <div className="font-semibold">Import Pipeline</div>
                 <button className="text-sm" onClick={() => setImportOpen(false)}>Close</button>
@@ -358,7 +358,7 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
         </label>
       </div>
       {open && (
-        <div className="mt-1 border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+  <div className="mt-1 border rounded-md p-2 op-surface">
           <div className="flex items-center justify-between mb-2">
             <div className="font-medium text-sm">Operations</div>
             <div className="flex gap-2">
@@ -438,7 +438,7 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
           <Editor config={(op as any).config} onChange={(patch: any) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
-      <div className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+  <div className="border rounded-md p-2 op-surface">
         <div className="flex items-center justify-between mb-2">
           <div className="font-medium text-sm">Then</div>
           <div className="flex items-center gap-2">
@@ -473,7 +473,7 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
         )}
         <OperationPicker open={thenPickerOpen} onOpenChange={setThenPickerOpen} onSelect={(t) => addNested("then", t)} />
       </div>
-      <div className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+  <div className="border rounded-md p-2 op-surface">
         <div className="flex items-center justify-between mb-2">
           <div className="font-medium text-sm">Else</div>
           <div className="flex items-center gap-2">
@@ -576,7 +576,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
         <button className="text-xs px-2 py-1 rounded border" onClick={addCase}>Add case</button>
       </div>
       {cases.map((c, i) => (
-        <div key={i} className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+  <div key={i} className="border rounded-md p-2 op-surface">
           <div className="flex items-center justify-between mb-2">
             <div className="font-medium text-sm">Case: <input className="border rounded px-2 py-1 w-full sm:w-40 ml-1" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
             <div className="flex gap-2">
@@ -611,7 +611,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
           <OperationPicker open={pickerIndex === i} onOpenChange={(o) => setPickerIndex(o ? i : null)} onSelect={(t) => addOpToCase(i, t)} />
         </div>
       ))}
-      <div className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+  <div className="border rounded-md p-2 op-surface">
         <div className="flex items-center justify-between mb-2">
           <div className="font-medium text-sm">Default</div>
           <div className="flex gap-2">
@@ -658,7 +658,7 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
     <div
       ref={setNodeRef}
       style={style}
-      className="border rounded p-2 bg-white/60 dark:bg-neutral-900/50"
+  className="border rounded p-2 op-surface"
       onTouchStart={(e) => setTouchStartX(e.changedTouches[0]?.clientX ?? null)}
       onTouchEnd={(e) => {
         if (touchStartX == null) return;

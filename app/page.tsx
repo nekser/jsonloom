@@ -5,6 +5,7 @@ import { OperationsPanel } from "../components/OperationsPanel";
 import { useOpsStore, State } from "../store/operations";
 import { useState } from "react";
 import { useIsMobile } from "../components/hooks/useMediaQuery";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Home() {
   const undo = useOpsStore((s: State) => s.undo);
@@ -60,11 +61,13 @@ export default function Home() {
             <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
             <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Download</button>
             <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
+            <ThemeToggle />
           </>
         ) : (
           <div className="flex items-center gap-2">
             <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
             <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
+            <ThemeToggle />
           </div>
         )}
       </header>
