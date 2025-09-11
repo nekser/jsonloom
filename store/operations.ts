@@ -10,6 +10,7 @@ export type State = {
   resultText: string;
   pipelineError?: ValidationError | undefined;
   opIndexes: PathIndex[]; // index of JSON state before each operation
+  intermediate?: Record<string, string>; // opId -> JSON string after this op
   // history (operations only)
   past: Operation[][];
   future: Operation[][];
@@ -48,22 +49,29 @@ function validateOp(op: Operation, input: any): string | undefined {
   return mod?.validate(op.config as any, input);
 }
 
-function runAll(input: any, ops: Operation[]): { output?: any; error?: ValidationError; indexes: PathIndex[] } {
+function runAll(input: any, ops: Operation[]): { output?: any; error?: ValidationError; indexes: PathIndex[]; inter: Record<string, any> } {
   try {
     let cur = input;
     const indexes: PathIndex[] = [];
+    const inter: Record<string, any> = {};
     for (const op of ops) {
       // Index the state BEFORE applying this op
       indexes.push(buildPathIndex(cur));
+  // Skip disabled operations but still record intermediate state (unchanged)
+  if (op.enabled === false) {
+    inter[op.id] = cur;
+    continue;
+  }
   const mod = getOperationModule(op.type);
-  if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes };
+  if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes, inter };
   const err = mod.validate(op.config as any, cur);
-  if (err) return { error: { opId: op.id, message: err }, indexes };
+  if (err) return { error: { opId: op.id, message: err }, indexes, inter };
   cur = mod.apply(cur, op.config as any);
+      inter[op.id] = cur;
     }
-    return { output: cur, indexes };
+    return { output: cur, indexes, inter };
   } catch (e: any) {
-    return { error: { message: e?.message ?? "Pipeline failed" }, indexes: [] };
+    return { error: { message: e?.message ?? "Pipeline failed" }, indexes: [], inter: {} };
   }
 }
 
@@ -129,10 +137,12 @@ export const useOpsStore = create<State>()((set, get) => ({
   runPipeline: () => {
     const { sourceText, operations } = get();
     const parsed = parseJSON(sourceText);
-  if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [] });
+  if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [], intermediate: {} });
   const res = runAll(parsed.value, operations);
-  if (res.error) return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes });
-  set({ resultText: safeStringify(res.output), pipelineError: undefined, opIndexes: res.indexes });
+  if (res.error) return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes, intermediate: res.inter });
+  const interText: Record<string, string> = {};
+  for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v);
+  set({ resultText: safeStringify(res.output), pipelineError: undefined, opIndexes: res.indexes, intermediate: interText });
   },
   clearAll: () =>
     set({

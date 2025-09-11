@@ -21,10 +21,12 @@ function OperationCard({ id, index }: { id: string; index: number }) {
   const remove = useOpsStore((s: State) => s.deleteOperation);
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const opIndexes = useOpsStore((s: State) => s.opIndexes);
+  const interText = useOpsStore((s: State) => s.intermediate?.[op?.id ?? ""]);
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = { transform: CSS.Transform.toString(transform), transition };
   const err = useOpsStore((s: State) => s.pipelineError);
   const hasErr = err && err.opId === op?.id ? err.message : undefined;
+  const isEnabled = op?.enabled !== false;
 
   // Prefer precomputed index prior to this op; fallback to current source
   const sourceObj = useMemo(() => {
@@ -39,10 +41,32 @@ function OperationCard({ id, index }: { id: string; index: number }) {
 
   if (!op) return null;
   return (
-    <div ref={setNodeRef} style={style} className="border rounded-md p-3 bg-white/50 dark:bg-neutral-900/50">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`border rounded-md p-3 bg-white/50 dark:bg-neutral-900/50 ${!isEnabled ? "opacity-60" : ""}`}
+    >
       <div className="flex items-center justify-between">
-        <div className="font-medium">{op.type}</div>
+        <div className="font-medium flex items-center gap-2">
+          <span className={`text-xs px-1.5 py-0.5 rounded border ${!isEnabled ? "line-through" : ""}`}>#{index + 1}</span>
+          <span>{op.type}</span>
+          {!isEnabled && <span className="text-xs text-neutral-500">(disabled)</span>}
+        </div>
         <div className="flex gap-2">
+          <label className="flex items-center gap-1 text-xs">
+            <input
+              type="checkbox"
+              checked={isEnabled}
+              onChange={(e) => update(op.id, { enabled: e.target.checked })}
+            />
+            Enable
+          </label>
+          <button
+            className="text-xs px-2 py-1 rounded border"
+            onClick={() => update(op.id, { debugOpen: !op.debugOpen })}
+          >
+            {op.debugOpen ? "Hide Result" : "View Result"}
+          </button>
           <button className="text-xs px-2 py-1 rounded border" {...attributes} {...listeners}>
             Drag
           </button>
@@ -73,6 +97,20 @@ function OperationCard({ id, index }: { id: string; index: number }) {
         })()}
         
       </div>
+      {/* Intermediate result viewer */}
+      {op.debugOpen && (
+        <div className="mt-2 border rounded p-2 bg-neutral-50 dark:bg-neutral-900/40">
+          {hasErr ? (
+            <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">
+              {hasErr}
+            </div>
+          ) : (
+            <div className="text-xs">
+              <pre className="overflow-auto max-h-64 whitespace-pre-wrap">{interText ?? ""}</pre>
+            </div>
+          )}
+        </div>
+      )}
       {hasErr && (
         <div className="mt-2 text-xs text-amber-700 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded p-2">
           {hasErr}

@@ -54,6 +54,8 @@ export interface Operation<T = any> {
   id: string;
   type: OperationType;
   config: T;
+  enabled?: boolean; // default true
+  debugOpen?: boolean; // persisted UI state for intermediate viewer
 }
 
 export interface OperationModule<TConfig = any> {
