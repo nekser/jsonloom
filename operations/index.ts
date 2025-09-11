@@ -28,6 +28,18 @@ import CoerceType from "./CoerceType";
 import TemplateInterpolate from "./TemplateInterpolate";
 import Base64 from "./Base64";
 import StringCase from "./StringCase";
+import Add from "./Add";
+import Subtract from "./Subtract";
+import Multiply from "./Multiply";
+import Divide from "./Divide";
+import Modulo from "./Modulo";
+import Power from "./Power";
+import Round from "./Round";
+import Clamp from "./Clamp";
+import Sum from "./Sum";
+import Count from "./Count";
+import Min from "./Min";
+import Max from "./Max";
 
 const registry: Record<OperationType, OperationModule<any>> = {
   FilterByKey,
@@ -59,6 +71,18 @@ const registry: Record<OperationType, OperationModule<any>> = {
   TemplateInterpolate,
   Base64,
   StringCase,
+  Add,
+  Subtract,
+  Multiply,
+  Divide,
+  Modulo,
+  Power,
+  Round,
+  Clamp,
+  Sum,
+  Count,
+  Min,
+  Max,
 };
 
 export function getOperationModule(type: OperationType): OperationModule<any> {
@@ -95,3 +119,15 @@ export type { CoerceTypeConfig } from "./CoerceType";
 export type { TemplateInterpolateConfig } from "./TemplateInterpolate";
 export type { Base64Config } from "./Base64";
 export type { StringCaseConfig } from "./StringCase";
+export type { AddConfig } from "./Add";
+export type { SubtractConfig } from "./Subtract";
+export type { MultiplyConfig } from "./Multiply";
+export type { DivideConfig } from "./Divide";
+export type { ModuloConfig } from "./Modulo";
+export type { PowerConfig } from "./Power";
+export type { RoundConfig } from "./Round";
+export type { ClampConfig } from "./Clamp";
+export type { SumConfig } from "./Sum";
+export type { CountConfig } from "./Count";
+export type { MinConfig } from "./Min";
+export type { MaxConfig } from "./Max";

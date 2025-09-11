@@ -350,6 +350,76 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             />
           </div>
         )}
+        {/* Math ops - element-wise */}
+        {(op.type === "Add" || op.type === "Subtract" || op.type === "Multiply" || op.type === "Divide" || op.type === "Modulo" || op.type === "Power") && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path (value or array)"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-32"
+              placeholder="value"
+              value={op.config.value ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, value: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+          </div>
+        )}
+        {op.type === "Round" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path (value or array)"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-28"
+              placeholder="precision"
+              value={op.config.precision ?? 0}
+              onChange={(e) => update(op.id, { config: { ...op.config, precision: e.target.value === "" ? 0 : Number(e.target.value) } })}
+            />
+          </div>
+        )}
+        {op.type === "Clamp" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="path (value or array)"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-28"
+              placeholder="min"
+              value={op.config.min ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, min: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-28"
+              placeholder="max"
+              value={op.config.max ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, max: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+          </div>
+        )}
+        {/* Math ops - aggregations */}
+        {(op.type === "Sum" || op.type === "Count" || op.type === "Min" || op.type === "Max") && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="w-full"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+          </div>
+        )}
         {op.type === "RenameKeysByPattern" && (
           <div className="flex flex-wrap gap-2">
             <input
@@ -756,6 +826,7 @@ export function OperationsPanel() {
 function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
   const [open, setOpen] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const sourceObj = useMemo(() => {
     try {
@@ -780,6 +851,7 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
     const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
     onUpdate({ operations: [...nestedOps, newOp] });
     setPickerOpen(false);
+  setLastAddedId(newOp.id);
   };
 
   const onUpdateNested = (id: string, patch: Partial<Operation>) => {
@@ -845,7 +917,14 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
             <SortableContext items={nestedOps.map((n) => n.id)} strategy={verticalListSortingStrategy}>
               <div className="flex flex-col gap-2">
                 {nestedOps.map((n) => (
-                  <NestedOperationCard key={n.id} op={n} sampleIndex={sampleIndex} onUpdate={onUpdateNested} onDelete={onDeleteNested} />
+                  <NestedOperationCard
+                    key={n.id}
+                    op={n}
+                    sampleIndex={sampleIndex}
+                    onUpdate={onUpdateNested}
+                    onDelete={onDeleteNested}
+                    initialCollapsed={n.id !== lastAddedId}
+                  />
                 ))}
               </div>
             </SortableContext>
@@ -857,10 +936,10 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
   );
 }
 
-function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete }: { op: Operation; sampleIndex: any; onUpdate: (id: string, patch: Partial<Operation>) => void; onDelete: (id: string) => void }) {
+function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialCollapsed }: { op: Operation; sampleIndex: any; onUpdate: (id: string, patch: Partial<Operation>) => void; onDelete: (id: string) => void; initialCollapsed?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: op.id });
   const style: any = { transform: CSS.Transform.toString(transform), transition };
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(initialCollapsed ?? true);
   return (
     <div ref={setNodeRef} style={style} className="border rounded p-2 bg-white/60 dark:bg-neutral-900/50">
       <div className="flex items-center justify-between">
@@ -1148,6 +1227,32 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete }: { op: Oper
               </label>
             </div>
           )}
+          {/* Math ops - element-wise */}
+          {(op.type === "Add" || op.type === "Subtract" || op.type === "Multiply" || op.type === "Divide" || op.type === "Modulo" || op.type === "Power") && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path (value or array)" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-32" placeholder="value" value={(op as any).config.value ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, value: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+            </div>
+          )}
+          {op.type === "Round" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path (value or array)" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-28" placeholder="precision" value={(op as any).config.precision ?? 0} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, precision: (e.target as HTMLInputElement).value === "" ? 0 : Number((e.target as HTMLInputElement).value) } })} />
+            </div>
+          )}
+          {op.type === "Clamp" && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="flex-1" placeholder="path (value or array)" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+              <input className="border rounded px-2 py-1 w-28" placeholder="min" value={(op as any).config.min ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, min: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+              <input className="border rounded px-2 py-1 w-28" placeholder="max" value={(op as any).config.max ?? ""} onChange={(e) => onUpdate(op.id, { config: { ...(op as any).config, max: (e.target as HTMLInputElement).value === "" ? undefined : Number((e.target as HTMLInputElement).value) } })} />
+            </div>
+          )}
+          {/* Math ops - aggregations */}
+          {(op.type === "Sum" || op.type === "Count" || op.type === "Min" || op.type === "Max") && (
+            <div className="flex gap-2">
+              <AutocompleteInput className="w-full" placeholder="array path" value={(op as any).config.path ?? ""} getSuggestions={(q) => suggestPathTokens(sampleIndex, q)} onChange={(v) => onUpdate(op.id, { config: { ...(op as any).config, path: v } })} />
+            </div>
+          )}
           {/* Fallback */}
           {! (
             op.type === "FilterByKey" ||
@@ -1178,7 +1283,20 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete }: { op: Oper
             op.type === "DeletePath" ||
             op.type === "MergeAtPath" ||
             op.type === "FlattenObject" ||
-            op.type === "UnflattenObject"
+            op.type === "UnflattenObject" ||
+            // Math
+            op.type === "Add" ||
+            op.type === "Subtract" ||
+            op.type === "Multiply" ||
+            op.type === "Divide" ||
+            op.type === "Modulo" ||
+            op.type === "Power" ||
+            op.type === "Round" ||
+            op.type === "Clamp" ||
+            op.type === "Sum" ||
+            op.type === "Count" ||
+            op.type === "Min" ||
+            op.type === "Max"
           ) && (
             <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>
           )}

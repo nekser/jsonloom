@@ -1,6 +1,6 @@
 import type { OperationType } from "./types";
 
-export type OperationCategory = "Object" | "Array" | "String" | "Other";
+export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Other";
 
 export interface OperationMeta {
   type: OperationType;
@@ -67,6 +67,20 @@ export const operationCatalog: OperationMeta[] = [
   { type: "TemplateInterpolate", category: "String", label: "Template Interpolate", description: "Interpolate ${...} placeholders from root" },
   { type: "Base64", category: "String", label: "Base64", description: "Encode or decode Base64" },
   { type: "StringCase", category: "String", label: "String Case", description: "Convert to lower/upper case" },
+  
+  // Math
+  { type: "Add", category: "Math", label: "Add", description: "Add a number to a value or to each array element" },
+  { type: "Subtract", category: "Math", label: "Subtract", description: "Subtract a number from a value or each array element" },
+  { type: "Multiply", category: "Math", label: "Multiply", description: "Multiply a value or each array element" },
+  { type: "Divide", category: "Math", label: "Divide", description: "Divide a value or each array element" },
+  { type: "Modulo", category: "Math", label: "Modulo", description: "Modulo of a value or each array element" },
+  { type: "Power", category: "Math", label: "Power", description: "Raise a value or each array element to a power" },
+  { type: "Round", category: "Math", label: "Round", description: "Round value(s) to a given precision" },
+  { type: "Clamp", category: "Math", label: "Clamp", description: "Clamp value(s) between min and max" },
+  { type: "Sum", category: "Math", label: "Sum", description: "Replace an array with the sum of its numeric values" },
+  { type: "Count", category: "Math", label: "Count", description: "Replace an array with its count (length)" },
+  { type: "Min", category: "Math", label: "Min", description: "Replace an array with its minimum numeric value" },
+  { type: "Max", category: "Math", label: "Max", description: "Replace an array with its maximum numeric value" },
 ];
 
 export const operationMetaByType: Record<OperationType, OperationMeta> = Object.fromEntries(

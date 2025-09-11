@@ -30,7 +30,20 @@ export type OperationType =
   | "CoerceType"
   | "TemplateInterpolate"
   | "Base64"
-  | "StringCase";
+  | "StringCase"
+  // Math operations
+  | "Add"
+  | "Subtract"
+  | "Multiply"
+  | "Divide"
+  | "Modulo"
+  | "Power"
+  | "Round"
+  | "Clamp"
+  | "Sum"
+  | "Count"
+  | "Min"
+  | "Max";
 
 // OperationType is the single source of truth for operation identifiers.
 
