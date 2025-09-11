@@ -102,6 +102,253 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             </select>
           </div>
         )}
+        {op.type === "FilterArray" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="array path e.g. items"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <AutocompleteInput
+              className="w-40"
+              placeholder="key (optional)"
+              value={op.config.key ?? ""}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, key: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.operator ?? "eq"}
+              onChange={(e) => update(op.id, { config: { ...op.config, operator: e.target.value } })}
+            >
+              <option value="eq">eq</option>
+              <option value="neq">neq</option>
+              <option value="gt">gt</option>
+              <option value="lt">lt</option>
+              <option value="in">in</option>
+              <option value="contains">contains</option>
+            </select>
+            <input
+              className="border rounded px-2 py-1 flex-1 min-w-[20%]"
+              placeholder="value"
+              value={op.config.value ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, value: e.target.value } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.mode ?? "keep"}
+              onChange={(e) => update(op.id, { config: { ...op.config, mode: e.target.value } })}
+            >
+              <option value="keep">keep</option>
+              <option value="remove">remove</option>
+            </select>
+          </div>
+        )}
+        {op.type === "SortArray" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <AutocompleteInput
+              className="w-40"
+              placeholder="by (optional)"
+              value={op.config.by ?? ""}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, by: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.order ?? "asc"}
+              onChange={(e) => update(op.id, { config: { ...op.config, order: e.target.value } })}
+            >
+              <option value="asc">asc</option>
+              <option value="desc">desc</option>
+            </select>
+            <label className="flex items-center gap-1 text-xs">
+              <input
+                type="checkbox"
+                checked={!!op.config.caseInsensitive}
+                onChange={(e) => update(op.id, { config: { ...op.config, caseInsensitive: e.target.checked } })}
+              />
+              case-insensitive
+            </label>
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.nulls ?? "last"}
+              onChange={(e) => update(op.id, { config: { ...op.config, nulls: e.target.value } })}
+            >
+              <option value="first">nulls first</option>
+              <option value="last">nulls last</option>
+            </select>
+          </div>
+        )}
+        {op.type === "UniqueArray" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <AutocompleteInput
+              className="w-56"
+              placeholder="by (optional)"
+              value={op.config.by ?? ""}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, by: v } })}
+            />
+          </div>
+        )}
+        {op.type === "FlattenArray" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-32"
+              placeholder="depth (number or 'infinity')"
+              value={op.config.depth ?? 1}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const depth = raw === "infinity" ? "infinity" : Number(raw);
+                update(op.id, { config: { ...op.config, depth } });
+              }}
+            />
+          </div>
+        )}
+        {op.type === "SliceArray" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-24"
+              placeholder="start"
+              value={op.config.start ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, start: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-24"
+              placeholder="end"
+              value={op.config.end ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, end: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-24"
+              placeholder="step"
+              value={op.config.step ?? ""}
+              onChange={(e) => update(op.id, { config: { ...op.config, step: e.target.value === "" ? undefined : Number(e.target.value) } })}
+            />
+          </div>
+        )}
+        {op.type === "GroupBy" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <AutocompleteInput
+              className="w-40"
+              placeholder="group by"
+              value={op.config.by ?? ""}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, by: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.collect ?? "array"}
+              onChange={(e) => update(op.id, { config: { ...op.config, collect: e.target.value } })}
+            >
+              <option value="array">array</option>
+              <option value="count">count</option>
+              <option value="sum">sum</option>
+            </select>
+            {op.config.collect === "sum" && (
+              <AutocompleteInput
+                className="w-44"
+                placeholder="sum path"
+                value={op.config.sumPath ?? ""}
+                getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+                onChange={(v) => update(op.id, { config: { ...op.config, sumPath: v } })}
+              />
+            )}
+          </div>
+        )}
+        {op.type === "ReduceArray" && (
+          <div className="flex flex-wrap gap-2">
+            <AutocompleteInput
+              className="flex-1 min-w-[40%]"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <AutocompleteInput
+              className="w-40"
+              placeholder="by (optional)"
+              value={op.config.by ?? ""}
+              getSuggestions={(q) => suggestIndexKeys(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, by: v } })}
+            />
+            <select
+              className="border rounded px-2 py-1"
+              value={op.config.op ?? "sum"}
+              onChange={(e) => update(op.id, { config: { ...op.config, op: e.target.value } })}
+            >
+              <option value="sum">sum</option>
+              <option value="avg">avg</option>
+              <option value="min">min</option>
+              <option value="max">max</option>
+              <option value="concat">concat</option>
+            </select>
+          </div>
+        )}
+        {op.type === "CountArray" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="w-full"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+          </div>
+        )}
+        {op.type === "JoinArray" && (
+          <div className="flex gap-2">
+            <AutocompleteInput
+              className="flex-1"
+              placeholder="array path"
+              value={op.config.path ?? ""}
+              getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+              onChange={(v) => update(op.id, { config: { ...op.config, path: v } })}
+            />
+            <input
+              className="border rounded px-2 py-1 w-40"
+              placeholder="," 
+              value={op.config.delimiter ?? ","}
+              onChange={(e) => update(op.id, { config: { ...op.config, delimiter: e.target.value } })}
+            />
+          </div>
+        )}
         {op.type === "ExtractPath" && (
           <div className="flex gap-2">
             <AutocompleteInput
@@ -180,9 +427,18 @@ function OperationPicker({ open, onOpenChange }: { open: boolean; onOpenChange: 
     () => [
       { type: "FilterByKey", desc: "Keep or remove object keys by name" },
       { type: "RenameKey", desc: "Rename a key recursively" },
-      { type: "MapArray", desc: "Map an array at a JSON path" },
+  { type: "MapArray", desc: "Map an array at a JSON path (type cast)" },
       { type: "ExtractPath", desc: "Extract a nested value by path" },
       { type: "StringReplace", desc: "Replace text within string values" },
+  { type: "FilterArray", desc: "Filter items in an array by a condition" },
+  { type: "SortArray", desc: "Sort an array by value or key" },
+  { type: "UniqueArray", desc: "Remove duplicates from an array" },
+  { type: "FlattenArray", desc: "Flatten nested arrays to a given depth" },
+  { type: "SliceArray", desc: "Slice an array by start/end/step" },
+  { type: "GroupBy", desc: "Group objects in an array by a key" },
+  { type: "ReduceArray", desc: "Reduce an array (sum/avg/min/max/concat)" },
+  { type: "CountArray", desc: "Replace an array with its length" },
+  { type: "JoinArray", desc: "Join array items into a string" },
     ],
     []
   );

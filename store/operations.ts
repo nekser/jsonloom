@@ -167,4 +167,19 @@ export const useOpsStore = create<State>()((set, get) => ({
 }));
 
 export type { OperationType };
-export type { FilterByKeyConfig, RenameKeyConfig, MapArrayConfig, ExtractPathConfig, StringReplaceConfig } from "../operations";
+export type {
+  FilterByKeyConfig,
+  RenameKeyConfig,
+  MapArrayConfig,
+  ExtractPathConfig,
+  StringReplaceConfig,
+  FilterArrayConfig,
+  SortArrayConfig,
+  UniqueArrayConfig,
+  FlattenArrayConfig,
+  SliceArrayConfig,
+  GroupByConfig,
+  ReduceArrayConfig,
+  CountArrayConfig,
+  JoinArrayConfig,
+} from "../operations";

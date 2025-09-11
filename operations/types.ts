@@ -3,7 +3,20 @@ export type OperationType =
   | "RenameKey"
   | "MapArray"
   | "ExtractPath"
-  | "StringReplace";
+  | "StringReplace"
+  // Array operations
+  | "FilterArray"
+  | "SortArray"
+  | "UniqueArray"
+  | "FlattenArray"
+  | "SliceArray"
+  | "GroupBy"
+  | "ReduceArray"
+  | "CountArray"
+  | "JoinArray";
+
+// Extra operations
+export type ExtendedOperationType = OperationType | "MapFields";
 
 export interface Operation<T = any> {
   id: string;
