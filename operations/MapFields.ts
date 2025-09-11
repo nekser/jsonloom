@@ -22,7 +22,9 @@ const validateSchema = ajv.compile({
 function apply(input: any, cfg: MapFieldsConfig): any {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
-  const out = arr.map((it) => applyFieldMap(it, cfg.mapping));
+  // Convert Record<string, string> to FieldMap[]
+  const fieldMaps = Object.entries(cfg.mapping).map(([to, from]) => ({ from, to }));
+  const out = arr.map((it) => applyFieldMap(it, fieldMaps));
   return setByPath(input, cfg.path, out);
 }
 
