@@ -1,6 +1,6 @@
 import type { OperationType } from "./types";
 
-export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Control" | "Other";
+export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Control" | "Validation" | "Other";
 
 export interface OperationMeta {
   type: OperationType;
@@ -85,6 +85,9 @@ export const operationCatalog: OperationMeta[] = [
   // Control Flow
   { type: "If", category: "Control", label: "If", description: "Conditionally run one of two pipelines" },
   { type: "Switch", category: "Control", label: "Switch", description: "Multi-branch pipeline based on a value" },
+
+  // Validation
+  { type: "ValidateJSON", category: "Validation", label: "Validate JSON", description: "Validate data against a JSON Schema (AJV)" },
 ];
 
 export const operationMetaByType: Record<OperationType, OperationMeta> = Object.fromEntries(

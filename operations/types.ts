@@ -46,7 +46,9 @@ export type OperationType =
   | "Max"
   // Control Flow
   | "If"
-  | "Switch";
+  | "Switch"
+  // Validation
+  | "ValidateJSON";
 
 // OperationType is the single source of truth for operation identifiers.
 

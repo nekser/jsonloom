@@ -42,6 +42,7 @@ import Sum from "./Sum";
 import Count from "./Count";
 import Min from "./Min";
 import Max from "./Max";
+import ValidateJSON from "./ValidateJSON";
 
 const registry: Record<OperationType, OperationModule<any>> = {
   FilterByKey,
@@ -87,6 +88,7 @@ const registry: Record<OperationType, OperationModule<any>> = {
   Count,
   Min,
   Max,
+  ValidateJSON,
 };
 
 export function getOperationModule(type: OperationType): OperationModule<any> {
@@ -135,5 +137,6 @@ export type { SumConfig } from "./Sum";
 export type { CountConfig } from "./Count";
 export type { MinConfig } from "./Min";
 export type { MaxConfig } from "./Max";
+export type { ValidateJSONConfig } from "./ValidateJSON";
 export type { IfConfig } from "./If";
 export type { SwitchConfig } from "./Switch";
