@@ -43,7 +43,10 @@ export type OperationType =
   | "Sum"
   | "Count"
   | "Min"
-  | "Max";
+  | "Max"
+  // Control Flow
+  | "If"
+  | "Switch";
 
 // OperationType is the single source of truth for operation identifiers.
 

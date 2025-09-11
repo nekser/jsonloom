@@ -28,6 +28,8 @@ import CoerceType from "./CoerceType";
 import TemplateInterpolate from "./TemplateInterpolate";
 import Base64 from "./Base64";
 import StringCase from "./StringCase";
+import If from "./If";
+import Switch from "./Switch";
 import Add from "./Add";
 import Subtract from "./Subtract";
 import Multiply from "./Multiply";
@@ -71,6 +73,8 @@ const registry: Record<OperationType, OperationModule<any>> = {
   TemplateInterpolate,
   Base64,
   StringCase,
+  If,
+  Switch,
   Add,
   Subtract,
   Multiply,
@@ -131,3 +135,5 @@ export type { SumConfig } from "./Sum";
 export type { CountConfig } from "./Count";
 export type { MinConfig } from "./Min";
 export type { MaxConfig } from "./Max";
+export type { IfConfig } from "./If";
+export type { SwitchConfig } from "./Switch";

@@ -12,6 +12,7 @@ import Base64Editor from "./Base64Editor";
 import StringCaseEditor from "./StringCaseEditor";
 import { FilterArrayEditor, SortArrayEditor, UniqueArrayEditor, FlattenArrayEditor, SliceArrayEditor, GroupByEditor, ReduceArrayEditor, CountArrayEditor, JoinArrayEditor } from "./ArrayEditors";
 import { AggregationEditor, ClampEditor, RoundEditor, ScalarMathEditor } from "./MathEditors";
+import { IfEditor, SwitchEditor } from "./ControlEditors";
 import { NormalizeKeyCaseEditor, OmitPathsEditor, PickPathsEditor, RenameKeysByPatternEditor, SetPathEditor, DeletePathEditor, MergeAtPathEditor, FlattenObjectEditor, UnflattenObjectEditor } from "./ObjectEditors";
 
 export const editors: OperationEditors = {
@@ -62,4 +63,7 @@ export const editors: OperationEditors = {
   Count: AggregationEditor,
   Min: AggregationEditor,
   Max: AggregationEditor,
+  // Control
+  If: IfEditor,
+  Switch: SwitchEditor,
 };

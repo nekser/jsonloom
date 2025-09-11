@@ -51,6 +51,10 @@ function OperationCard({ id, index }: { id: string; index: number }) {
       <div className="mt-2">
         {op.type === "MapArray" ? (
           <MapArrayEditor op={op as any} pathIndex={pathIndex} onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })} />
+        ) : op.type === "If" ? (
+          <IfEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })} />
+        ) : op.type === "Switch" ? (
+          <SwitchEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg) => update(op.id, { config: { ...op.config, ...cfg } })} />
         ) : (() => {
           const t = op.type as keyof typeof editors;
           const Editor = editors[t];
@@ -223,6 +227,222 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
           <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(t) => onAddNested(t)} />
         </div>
       )}
+    </div>
+  );
+}
+
+// If editor with nested Then/Else pipelines
+function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
+  const [thenOpen, setThenOpen] = useState(true);
+  const [elseOpen, setElseOpen] = useState(false);
+  const nestedThen: Operation[] = (op as any).config.then ?? [];
+  const nestedElse: Operation[] = (op as any).config.else ?? [];
+  const [thenPickerOpen, setThenPickerOpen] = useState(false);
+  const [elsePickerOpen, setElsePickerOpen] = useState(false);
+
+  const addNested = (block: "then" | "else", type: OperationType) => {
+    const mod = getOperationModule(type);
+    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    const key = block === "then" ? "then" : "else";
+    const arr = (op as any).config[key] ?? [];
+    onUpdate({ [key]: [...arr, newOp] });
+    if (block === "then") setThenPickerOpen(false); else setElsePickerOpen(false);
+  };
+
+  const updateNested = (block: "then" | "else", id: string, patch: Partial<Operation>) => {
+    const arr: Operation[] = (op as any).config[block] ?? [];
+    const next = arr.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
+    onUpdate({ [block]: next });
+  };
+
+  const deleteNested = (block: "then" | "else", id: string) => {
+    const arr: Operation[] = (op as any).config[block] ?? [];
+    onUpdate({ [block]: arr.filter((n) => n.id !== id) });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {(() => {
+        const t = (op as any).type as keyof typeof editors;
+        const Editor = editors[t];
+        return Editor ? (
+          <Editor config={(op as any).config} onChange={(patch: any) => onUpdate(patch)} pathIndex={pathIndex} />
+        ) : null;
+      })()}
+      <div className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium text-sm">Then</div>
+          <div className="flex items-center gap-2">
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => setThenOpen((v) => !v)}>{thenOpen ? "Hide" : "Show"}</button>
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => setThenPickerOpen(true)}>Add operation</button>
+          </div>
+        </div>
+        {thenOpen && (
+          <DndContext onDragEnd={({ active, over }) => {
+            if (!over || active.id === over.id) return;
+            const ids = nestedThen.map((n) => n.id);
+            const from = ids.indexOf(String(active.id));
+            const to = ids.indexOf(String(over.id));
+            if (from === -1 || to === -1) return;
+            const arr = [...nestedThen]; const [m] = arr.splice(from, 1); arr.splice(to, 0, m); onUpdate({ then: arr });
+          }}>
+            <SortableContext items={nestedThen.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-2">
+                {nestedThen.map((n) => (
+                  <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateNested("then", id, patch)} onDelete={(id) => deleteNested("then", id)} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+        <OperationPicker open={thenPickerOpen} onOpenChange={setThenPickerOpen} onSelect={(t) => addNested("then", t)} />
+      </div>
+      <div className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium text-sm">Else</div>
+          <div className="flex items-center gap-2">
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => setElseOpen((v) => !v)}>{elseOpen ? "Hide" : "Show"}</button>
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => setElsePickerOpen(true)}>Add operation</button>
+          </div>
+        </div>
+        {elseOpen && (
+          <DndContext onDragEnd={({ active, over }) => {
+            if (!over || active.id === over.id) return;
+            const ids = nestedElse.map((n) => n.id);
+            const from = ids.indexOf(String(active.id));
+            const to = ids.indexOf(String(over.id));
+            if (from === -1 || to === -1) return;
+            const arr = [...nestedElse]; const [m] = arr.splice(from, 1); arr.splice(to, 0, m); onUpdate({ else: arr });
+          }}>
+            <SortableContext items={nestedElse.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-2">
+                {nestedElse.map((n) => (
+                  <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateNested("else", id, patch)} onDelete={(id) => deleteNested("else", id)} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
+        <OperationPicker open={elsePickerOpen} onOpenChange={setElsePickerOpen} onSelect={(t) => addNested("else", t)} />
+      </div>
+    </div>
+  );
+}
+
+// Switch editor with cases
+function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
+  const config = (op as any).config || {};
+  const cases: Array<{ value: string; ops: Operation[] }> = config.cases ?? [];
+  const defOps: Operation[] | undefined = config.default ?? [];
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null);
+  const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
+
+  const addCase = () => {
+    const next = [...cases, { value: "", ops: [] }];
+    onUpdate({ cases: next });
+  };
+  const updateCaseValue = (i: number, value: string) => {
+    const next = cases.map((c, idx) => (idx === i ? { ...c, value } : c));
+    onUpdate({ cases: next });
+  };
+  const addOpToCase = (i: number, type: OperationType) => {
+    const mod = getOperationModule(type);
+    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    const next = cases.map((c, idx) => (idx === i ? { ...c, ops: [...c.ops, newOp] } : c));
+    onUpdate({ cases: next });
+    setPickerIndex(null);
+  };
+  const updateNested = (i: number, id: string, patch: Partial<Operation>) => {
+    const next = cases.map((c, idx) => (idx === i ? { ...c, ops: c.ops.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n)) } : c));
+    onUpdate({ cases: next });
+  };
+  const deleteNested = (i: number, id: string) => {
+    const next = cases.map((c, idx) => (idx === i ? { ...c, ops: c.ops.filter((n) => n.id !== id) } : c));
+    onUpdate({ cases: next });
+  };
+
+  const addDefaultOp = (type: OperationType) => {
+    const mod = getOperationModule(type);
+    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    const next = [...(defOps ?? []), newOp];
+    onUpdate({ default: next });
+    setDefaultPickerOpen(false);
+  };
+  const updateDefaultNested = (id: string, patch: Partial<Operation>) => {
+    const next = (defOps ?? []).map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
+    onUpdate({ default: next });
+  };
+  const deleteDefaultNested = (id: string) => {
+    onUpdate({ default: (defOps ?? []).filter((n) => n.id !== id) });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      {(() => {
+        const t = (op as any).type as keyof typeof editors;
+        const Editor = editors[t];
+        return Editor ? (
+          <Editor config={config} onChange={(patch: any) => onUpdate(patch)} pathIndex={pathIndex} />
+        ) : null;
+      })()}
+      <div className="flex items-center gap-2">
+        <button className="text-xs px-2 py-1 rounded border" onClick={addCase}>Add case</button>
+      </div>
+      {cases.map((c, i) => (
+        <div key={i} className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+          <div className="flex items-center justify-between mb-2">
+            <div className="font-medium text-sm">Case: <input className="border rounded px-2 py-1 w-40 ml-1" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
+            <div className="flex gap-2">
+              <button className="text-xs px-2 py-1 rounded border" onClick={() => setPickerIndex(i)}>Add operation</button>
+            </div>
+          </div>
+          <DndContext onDragEnd={({ active, over }) => {
+            if (!over || active.id === over.id) return;
+            const ids = c.ops.map((n) => n.id);
+            const from = ids.indexOf(String(active.id));
+            const to = ids.indexOf(String(over.id));
+            if (from === -1 || to === -1) return;
+            const arr = [...c.ops]; const [m] = arr.splice(from, 1); arr.splice(to, 0, m);
+            const next = cases.map((cc, idx) => (idx === i ? { ...cc, ops: arr } : cc));
+            onUpdate({ cases: next });
+          }}>
+            <SortableContext items={c.ops.map((n) => n.id)} strategy={verticalListSortingStrategy}>
+              <div className="flex flex-col gap-2">
+                {c.ops.map((n) => (
+                  <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateNested(i, id, patch)} onDelete={(id) => deleteNested(i, id)} />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+          <OperationPicker open={pickerIndex === i} onOpenChange={(o) => setPickerIndex(o ? i : null)} onSelect={(t) => addOpToCase(i, t)} />
+        </div>
+      ))}
+      <div className="border rounded-md p-2 bg-white/60 dark:bg-neutral-900/40">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium text-sm">Default</div>
+          <div className="flex gap-2">
+            <button className="text-xs px-2 py-1 rounded border" onClick={() => setDefaultPickerOpen(true)}>Add operation</button>
+          </div>
+        </div>
+        <DndContext onDragEnd={({ active, over }) => {
+          if (!over || active.id === over.id) return;
+          const ids = (defOps ?? []).map((n) => n.id);
+          const from = ids.indexOf(String(active.id));
+          const to = ids.indexOf(String(over.id));
+          if (from === -1 || to === -1) return;
+          const arr = [...(defOps ?? [])]; const [m] = arr.splice(from, 1); arr.splice(to, 0, m);
+          onUpdate({ default: arr });
+        }}>
+          <SortableContext items={(defOps ?? []).map((n) => n.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col gap-2">
+              {(defOps ?? []).map((n) => (
+                <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateDefaultNested(id, patch)} onDelete={(id) => deleteDefaultNested(id)} />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+        <OperationPicker open={defaultPickerOpen} onOpenChange={setDefaultPickerOpen} onSelect={(t) => addDefaultOp(t)} />
+      </div>
     </div>
   );
 }

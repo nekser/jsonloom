@@ -1,6 +1,6 @@
 import type { OperationType } from "./types";
 
-export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Other";
+export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Control" | "Other";
 
 export interface OperationMeta {
   type: OperationType;
@@ -81,6 +81,10 @@ export const operationCatalog: OperationMeta[] = [
   { type: "Count", category: "Math", label: "Count", description: "Replace an array with its count (length)" },
   { type: "Min", category: "Math", label: "Min", description: "Replace an array with its minimum numeric value" },
   { type: "Max", category: "Math", label: "Max", description: "Replace an array with its maximum numeric value" },
+
+  // Control Flow
+  { type: "If", category: "Control", label: "If", description: "Conditionally run one of two pipelines" },
+  { type: "Switch", category: "Control", label: "Switch", description: "Multi-branch pipeline based on a value" },
 ];
 
 export const operationMetaByType: Record<OperationType, OperationMeta> = Object.fromEntries(
