@@ -234,11 +234,13 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
 // If editor with nested Then/Else pipelines
 function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
   const [thenOpen, setThenOpen] = useState(true);
-  const [elseOpen, setElseOpen] = useState(false);
+  const [elseOpen, setElseOpen] = useState(true);
   const nestedThen: Operation[] = (op as any).config.then ?? [];
   const nestedElse: Operation[] = (op as any).config.else ?? [];
   const [thenPickerOpen, setThenPickerOpen] = useState(false);
   const [elsePickerOpen, setElsePickerOpen] = useState(false);
+  const [lastAddedThenId, setLastAddedThenId] = useState<string | null>(null);
+  const [lastAddedElseId, setLastAddedElseId] = useState<string | null>(null);
 
   const addNested = (block: "then" | "else", type: OperationType) => {
     const mod = getOperationModule(type);
@@ -246,7 +248,15 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
     const key = block === "then" ? "then" : "else";
     const arr = (op as any).config[key] ?? [];
     onUpdate({ [key]: [...arr, newOp] });
-    if (block === "then") setThenPickerOpen(false); else setElsePickerOpen(false);
+    if (block === "then") {
+      setThenOpen(true);
+      setThenPickerOpen(false);
+  setLastAddedThenId(newOp.id);
+    } else {
+      setElseOpen(true);
+      setElsePickerOpen(false);
+  setLastAddedElseId(newOp.id);
+    }
   };
 
   const updateNested = (block: "then" | "else", id: string, patch: Partial<Operation>) => {
@@ -289,7 +299,14 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
             <SortableContext items={nestedThen.map((n) => n.id)} strategy={verticalListSortingStrategy}>
               <div className="flex flex-col gap-2">
                 {nestedThen.map((n) => (
-                  <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateNested("then", id, patch)} onDelete={(id) => deleteNested("then", id)} />
+                  <NestedOperationCard
+                    key={n.id}
+                    op={n}
+                    sampleIndex={pathIndex}
+                    onUpdate={(id, patch) => updateNested("then", id, patch)}
+                    onDelete={(id) => deleteNested("then", id)}
+                    initialCollapsed={n.id !== lastAddedThenId}
+                  />
                 ))}
               </div>
             </SortableContext>
@@ -317,7 +334,14 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
             <SortableContext items={nestedElse.map((n) => n.id)} strategy={verticalListSortingStrategy}>
               <div className="flex flex-col gap-2">
                 {nestedElse.map((n) => (
-                  <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateNested("else", id, patch)} onDelete={(id) => deleteNested("else", id)} />
+                  <NestedOperationCard
+                    key={n.id}
+                    op={n}
+                    sampleIndex={pathIndex}
+                    onUpdate={(id, patch) => updateNested("else", id, patch)}
+                    onDelete={(id) => deleteNested("else", id)}
+                    initialCollapsed={n.id !== lastAddedElseId}
+                  />
                 ))}
               </div>
             </SortableContext>
@@ -336,6 +360,8 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
   const defOps: Operation[] | undefined = config.default ?? [];
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
+  const [lastAddedCaseOpId, setLastAddedCaseOpId] = useState<Record<number, string | null>>({});
+  const [lastAddedDefaultOpId, setLastAddedDefaultOpId] = useState<string | null>(null);
 
   const addCase = () => {
     const next = [...cases, { value: "", ops: [] }];
@@ -351,6 +377,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
     const next = cases.map((c, idx) => (idx === i ? { ...c, ops: [...c.ops, newOp] } : c));
     onUpdate({ cases: next });
     setPickerIndex(null);
+  setLastAddedCaseOpId((prev) => ({ ...prev, [i]: newOp.id }));
   };
   const updateNested = (i: number, id: string, patch: Partial<Operation>) => {
     const next = cases.map((c, idx) => (idx === i ? { ...c, ops: c.ops.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n)) } : c));
@@ -367,6 +394,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
     const next = [...(defOps ?? []), newOp];
     onUpdate({ default: next });
     setDefaultPickerOpen(false);
+  setLastAddedDefaultOpId(newOp.id);
   };
   const updateDefaultNested = (id: string, patch: Partial<Operation>) => {
     const next = (defOps ?? []).map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
@@ -409,7 +437,14 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
             <SortableContext items={c.ops.map((n) => n.id)} strategy={verticalListSortingStrategy}>
               <div className="flex flex-col gap-2">
                 {c.ops.map((n) => (
-                  <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateNested(i, id, patch)} onDelete={(id) => deleteNested(i, id)} />
+                  <NestedOperationCard
+                    key={n.id}
+                    op={n}
+                    sampleIndex={pathIndex}
+                    onUpdate={(id, patch) => updateNested(i, id, patch)}
+                    onDelete={(id) => deleteNested(i, id)}
+                    initialCollapsed={n.id !== (lastAddedCaseOpId[i] ?? null)}
+                  />
                 ))}
               </div>
             </SortableContext>
@@ -436,7 +471,14 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
           <SortableContext items={(defOps ?? []).map((n) => n.id)} strategy={verticalListSortingStrategy}>
             <div className="flex flex-col gap-2">
               {(defOps ?? []).map((n) => (
-                <NestedOperationCard key={n.id} op={n} sampleIndex={pathIndex} onUpdate={(id, patch) => updateDefaultNested(id, patch)} onDelete={(id) => deleteDefaultNested(id)} />
+                <NestedOperationCard
+                  key={n.id}
+                  op={n}
+                  sampleIndex={pathIndex}
+                  onUpdate={(id, patch) => updateDefaultNested(id, patch)}
+                  onDelete={(id) => deleteDefaultNested(id)}
+                  initialCollapsed={n.id !== lastAddedDefaultOpId}
+                />
               ))}
             </div>
           </SortableContext>
@@ -450,7 +492,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
 function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialCollapsed }: { op: Operation; sampleIndex: any; onUpdate: (id: string, patch: Partial<Operation>) => void; onDelete: (id: string) => void; initialCollapsed?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: op.id });
   const style: any = { transform: CSS.Transform.toString(transform), transition };
-  const [collapsed, setCollapsed] = useState(initialCollapsed ?? true);
+  const [collapsed, setCollapsed] = useState(initialCollapsed ?? false);
   return (
     <div ref={setNodeRef} style={style} className="border rounded p-2 bg-white/60 dark:bg-neutral-900/50">
       <div className="flex items-center justify-between">
@@ -476,11 +518,28 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
               onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
             />
           )}
+          {/* If / Switch nested editors with full Then/Else & Cases/Default UI */}
+          {op.type === "If" && (
+            <IfEditorCard
+              op={op as any}
+              pathIndex={sampleIndex}
+              onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
+            />
+          )}
+          {op.type === "Switch" && (
+            <SwitchEditorCard
+              op={op as any}
+              pathIndex={sampleIndex}
+              onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
+            />
+          )}
           {/* Generic editors via registry */}
           {(() => {
             const t = (op as any).type as keyof typeof editors;
             const Editor = editors[t];
             if (!Editor) return null;
+            // Avoid double-rendering when specific nested editors above handled the type
+            if (op.type === "MapArray" || op.type === "If" || op.type === "Switch") return null;
             return (
               <Editor
                 config={(op as any).config}

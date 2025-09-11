@@ -3,8 +3,6 @@ import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
 
 export function IfEditor({ config, onChange, pathIndex }: EditorProps<any>) {
-  const [thenOpen, setThenOpen] = useState(true);
-  const [elseOpen, setElseOpen] = useState(true);
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-2">
@@ -20,12 +18,6 @@ export function IfEditor({ config, onChange, pathIndex }: EditorProps<any>) {
         </select>
         <input className="border rounded px-2 py-1 flex-1 min-w-[30%]" placeholder="value (optional)" value={config.when?.value ?? ""} onChange={(e) => onChange({ when: { ...(config.when ?? {}), value: e.target.value } })} />
       </div>
-      <div className="flex items-center gap-2">
-        <button className="text-xs px-2 py-1 rounded border" onClick={() => setThenOpen((v) => !v)}>{thenOpen ? "Hide" : "Show"} Then</button>
-        <button className="text-xs px-2 py-1 rounded border" onClick={() => setElseOpen((v) => !v)}>{elseOpen ? "Hide" : "Show"} Else</button>
-      </div>
-      {thenOpen && <div className="text-xs text-neutral-500">Then: configure nested ops below in main panel.</div>}
-      {elseOpen && <div className="text-xs text-neutral-500">Else: configure nested ops below in main panel.</div>}
     </div>
   );
 }
