@@ -1,50 +1,42 @@
 {
   "v": 1,
   "ops": [
-    {
-      "id": "op-extract-users",
-      "type": "ExtractPath",
-      "config": { "path": "users" }
-    },
+    { "id": "op-parse-meta-generatedAt", "type": "ParseDate", "config": { "path": "meta.generatedAt", "format": "yyyy-LL-dd'T'HH:mm:ss'Z'", "timezone": "utc" } },
+    { "id": "op-add7d-generatedAt", "type": "DateAdd", "config": { "path": "meta.generatedAt", "amount": 7, "unit": "days" } },
+    { "id": "op-days-since-generated", "type": "DateDiff", "config": { "startPath": "meta.generatedAt", "endPath": "meta.generatedAt", "unit": "days" } },
+
+    { "id": "op-extract-users", "type": "ExtractPath", "config": { "path": "users" } },
     {
       "id": "op-map-users",
       "type": "MapArray",
       "config": {
         "path": ".",
         "operations": [
+          { "id": "op-user-name-upper", "type": "StringCase", "config": { "path": "name", "mode": "uppercase", "coerceNonString": false } },
+          { "id": "op-user-label", "type": "TemplateInterpolate", "config": { "path": "label", "template": "${name} <${email}>", "onMissing": "literal" } },
           {
-            "id": "op-user-name-upper",
-            "type": "StringCase",
-            "config": { "path": "name", "mode": "uppercase", "coerceNonString": false }
+            "id": "op-map-orders",
+            "type": "MapArray",
+            "config": {
+              "path": "orders",
+              "operations": [
+                { "id": "op-parse-createdAt", "type": "ParseDate", "config": { "path": "createdAt", "format": "yyyy-LL-dd'T'HH:mm:ss'Z'", "timezone": "utc" } },
+                { "id": "op-parse-shippedAt", "type": "ParseDate", "config": { "path": "shippedAt", "format": "yyyy-LL-dd'T'HH:mm:ss'Z'", "timezone": "utc" } },
+                { "id": "op-diff-days-ship", "type": "DateDiff", "config": { "startPath": "createdAt", "endPath": "shippedAt", "unit": "days" } },
+                { "id": "op-flag-after-threshold", "type": "IsDateCompare", "config": { "path": "shippedAt", "compareTo": "2023-01-01T00:00:00Z", "op": "after", "resultPath": "_afterThreshold" } }
+              ]
+            }
           },
-          {
-            "id": "op-user-label",
-            "type": "TemplateInterpolate",
-            "config": { "path": "label", "template": "${name} <${email}>", "onMissing": "literal" }
-          },
-          {
-            "id": "op-orders-count",
-            "type": "CountArray",
-            "config": { "path": "orders" }
-          }
+          { "id": "op-filter-orders-after", "type": "FilterArray", "config": { "path": "orders", "key": "_afterThreshold", "operator": "eq", "value": true, "mode": "keep" } },
+          { "id": "op-orders-count", "type": "CountArray", "config": { "path": "orders" } }
         ],
         "onError": "propagate"
       }
     },
-    {
-      "id": "op-filter-has-orders",
-      "type": "FilterArray",
-      "config": { "path": ".", "key": "orders", "operator": "gt", "value": 0, "mode": "keep" }
-    },
-    {
-      "id": "op-rename-orders",
-      "type": "RenameKey",
-      "config": { "from": "orders", "to": "orderCount" }
-    },
-    {
-      "id": "op-sort-by-name",
-      "type": "SortArray",
-      "config": { "path": ".", "by": "name", "order": "asc", "caseInsensitive": true, "nulls": "last" }
-    }
+
+    { "id": "op-filter-has-orders", "type": "FilterArray", "config": { "path": ".", "key": "orders", "operator": "gt", "value": 0, "mode": "keep" } },
+
+    { "id": "op-rename-orders", "type": "RenameKey", "config": { "from": "orders", "to": "orderCount" } },
+    { "id": "op-sort-by-name", "type": "SortArray", "config": { "path": ".", "by": "name", "order": "asc", "caseInsensitive": true, "nulls": "last" } }
   ]
 }

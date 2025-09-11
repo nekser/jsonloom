@@ -8,6 +8,8 @@
         {
           "orderId": "A001",
           "total": 250.5,
+          "createdAt": "2023-12-01T09:00:00Z",
+          "shippedAt": "2023-12-05T15:30:00Z",
           "items": [
             { "product": "Laptop", "price": 200, "qty": 1 },
             { "product": "Mouse", "price": 25.25, "qty": 2 }
@@ -19,7 +21,26 @@
       "id": 2,
       "name": "Bob Smith",
       "email": "bob@example.com",
-      "orders": []
+      "orders": [
+        {
+          "orderId": "B001",
+          "total": 90.0,
+          "createdAt": "2023-11-20T14:00:00Z",
+          "shippedAt": "2023-11-22T10:00:00Z",
+          "items": [
+            { "product": "Keyboard", "price": 45.0, "qty": 2 }
+          ]
+        },
+        {
+          "orderId": "B002",
+          "total": 350.0,
+          "createdAt": "2023-12-10T08:00:00Z",
+          "shippedAt": "2023-12-15T12:00:00Z",
+          "items": [
+            { "product": "Monitor", "price": 350.0, "qty": 1 }
+          ]
+        }
+      ]
     }
   ],
   "meta": {

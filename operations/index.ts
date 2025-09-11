@@ -43,6 +43,10 @@ import Count from "./Count";
 import Min from "./Min";
 import Max from "./Max";
 import ValidateJSON from "./ValidateJSON";
+import ParseDate from "./ParseDate";
+import IsDateCompare from "./IsDateCompare";
+import DateAdd from "./DateAdd";
+import DateDiff from "./DateDiff";
 
 const registry: Record<OperationType, OperationModule<any>> = {
   FilterByKey,
@@ -89,6 +93,10 @@ const registry: Record<OperationType, OperationModule<any>> = {
   Min,
   Max,
   ValidateJSON,
+  ParseDate,
+  IsDateCompare,
+  DateAdd,
+  DateDiff,
 };
 
 export function getOperationModule(type: OperationType): OperationModule<any> {
@@ -140,3 +148,7 @@ export type { MaxConfig } from "./Max";
 export type { ValidateJSONConfig } from "./ValidateJSON";
 export type { IfConfig } from "./If";
 export type { SwitchConfig } from "./Switch";
+export type { ParseDateConfig } from "./ParseDate";
+export type { IsDateCompareConfig } from "./IsDateCompare";
+export type { DateAddConfig } from "./DateAdd";
+export type { DateDiffConfig } from "./DateDiff";

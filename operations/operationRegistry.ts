@@ -1,6 +1,6 @@
 import type { OperationType } from "./types";
 
-export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Control" | "Validation" | "Other";
+export type OperationCategory = "Object" | "Array" | "String" | "Math" | "Control" | "Validation" | "Date" | "Other";
 
 export interface OperationMeta {
   type: OperationType;
@@ -88,6 +88,12 @@ export const operationCatalog: OperationMeta[] = [
 
   // Validation
   { type: "ValidateJSON", category: "Validation", label: "Validate JSON", description: "Validate data against a JSON Schema (AJV)" },
+  
+  // Date operations
+  { type: "ParseDate", category: "Date", label: "Parse Date", description: "Parse a date string to ISO at a path" },
+  { type: "IsDateCompare", category: "Date", label: "Is After/Before", description: "Compare two date values and return boolean" },
+  { type: "DateAdd", category: "Date", label: "Date Add", description: "Add/subtract time units to a date" },
+  { type: "DateDiff", category: "Date", label: "Date Diff", description: "Difference between two dates in a unit" },
 ];
 
 export const operationMetaByType: Record<OperationType, OperationMeta> = Object.fromEntries(

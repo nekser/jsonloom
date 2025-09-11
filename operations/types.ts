@@ -48,7 +48,12 @@ export type OperationType =
   | "If"
   | "Switch"
   // Validation
-  | "ValidateJSON";
+  | "ValidateJSON"
+  // Date operations
+  | "ParseDate"
+  | "IsDateCompare"
+  | "DateAdd"
+  | "DateDiff";
 
 // OperationType is the single source of truth for operation identifiers.
 
