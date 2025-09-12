@@ -38,11 +38,14 @@ import {
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Eye, EyeOff, GripVertical, Menu, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
   const update = useOpsStore((s: State) => s.updateOperation);
   const remove = useOpsStore((s: State) => s.deleteOperation);
+  const reorder = useOpsStore((s: State) => s.reorderOperations);
+  const opsAll = useOpsStore((s: State) => s.operations);
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const opIndexes = useOpsStore((s: State) => s.opIndexes);
   const interText = useOpsStore((s: State) => s.intermediate?.[op?.id ?? ""]);
@@ -77,17 +80,22 @@ function OperationCard({ id, index }: { id: string; index: number }) {
         {!isMobile ? (
           <div className="flex gap-2">
             <div className="flex items-center gap-2 text-xs">
-              <Label htmlFor={`op-enable-${op.id}`} className="text-xs">Enable</Label>
               <Switch id={`op-enable-${op.id}`} checked={isEnabled} onCheckedChange={(v) => update(op.id, { enabled: v })} />
             </div>
-            <Button variant="outline" size="sm" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
-              {op.debugOpen ? "Hide Result" : "View Result"}
+            <Button variant="outline" size="icon" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
+              {op.debugOpen ? <EyeOff /> : <Eye />}
             </Button>
-            <Button variant="outline" size="sm" {...attributes} {...listeners}>Drag</Button>
-            <Button variant="outline" size="sm" onClick={() => remove(op.id)}>Delete</Button>
+            <Button variant="outline" size="icon" aria-label="Drag operation" {...attributes} {...listeners}>
+              <GripVertical />
+            </Button>
+            <Button variant="outline" size="icon" aria-label="Delete operation" onClick={() => remove(op.id)}>
+              <Trash2 />
+            </Button>
           </div>
         ) : (
-          <Button variant="outline" size="sm" onClick={() => setMobileActionsOpen(true)}>Actions</Button>
+          <Button variant="outline" size="icon" onClick={() => setMobileActionsOpen(true)}>
+            <Menu />
+          </Button>
         )}
       </div>
       <div className="mt-2">
@@ -120,21 +128,75 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           <SheetHeader>
             <SheetTitle>Actions</SheetTitle>
           </SheetHeader>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Label htmlFor={`op-enable-mobile-${op.id}`}>Enable</Label>
-              <Switch id={`op-enable-mobile-${op.id}`} checked={isEnabled} onCheckedChange={(v) => update(op.id, { enabled: v })} />
+          <div className="space-y-3 px-2 pb-2">
+            {/* Enable/Disable row */}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Label htmlFor={`op-enable-mobile-${op.id}`}>{isEnabled ? "Disable" : "Enable"}</Label>
+              </div>
+              <Switch
+                id={`op-enable-mobile-${op.id}`}
+                checked={isEnabled}
+                onCheckedChange={(v) => update(op.id, { enabled: v })}
+              />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => { setMobileActionsOpen(false); setMobileResultOpen(true); }}>View Result</Button>
-              <Button variant="outline" {...attributes} {...listeners}>Drag</Button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={() => { remove(op.id); setMobileActionsOpen(false); }}>Delete</Button>
-                </TooltipTrigger>
-                <TooltipContent>Delete operation</TooltipContent>
-              </Tooltip>
+
+            {/* View Result */}
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => {
+                setMobileActionsOpen(false);
+                setMobileResultOpen(true);
+              }}
+            >
+              <Eye />
+              View Result
+            </Button>
+
+            {/* Reorder: Move Up / Move Down */}
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                disabled={index <= 0}
+                onClick={() => {
+                  if (index > 0) reorder(index, index - 1);
+                }}
+              >
+                <ArrowUp />
+                Move Up
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                disabled={index >= (opsAll.length - 1)}
+                onClick={() => {
+                  if (index < opsAll.length - 1) reorder(index, index + 1);
+                }}
+              >
+                <ArrowDown />
+                Move Down
+              </Button>
             </div>
+
+            {/* Delete */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    remove(op.id);
+                    setMobileActionsOpen(false);
+                  }}
+                >
+                  <Trash2 />
+                  Delete
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete operation</TooltipContent>
+            </Tooltip>
           </div>
         </SheetContent>
       </Sheet>
@@ -617,13 +679,13 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
           {collapsed ? "▶" : "▽"} {op.type}
         </button>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" {...attributes} {...listeners}>
-            Drag
+          <Button variant="outline" size="icon" {...attributes} {...listeners}>
+             <GripVertical />
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={() => onDelete(op.id)}>
-                Delete
+              <Button variant="outline" size="icon" onClick={() => onDelete(op.id)}>
+            <Trash2 />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Delete operation</TooltipContent>
