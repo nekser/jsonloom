@@ -49,7 +49,13 @@ export default function Header() {
       <div className="font-semibold mr-auto">JSON Transformation Tool</div>
       {!isMobile ? (
         <div className="flex items-center gap-2">
-          <DropdownMenu>
+          <Button variant="ghost" size="icon" onClick={undo} aria-label="Undo">
+            <Undo2 className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={redo} aria-label="Redo">
+            <Redo2 className="h-4 w-4" />
+          </Button>
+           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <UIButton variant="outline" size="sm">Demo</UIButton>
             </DropdownMenuTrigger>
@@ -59,12 +65,6 @@ export default function Header() {
               <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="icon" onClick={undo} aria-label="Undo">
-            <Undo2 className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={redo} aria-label="Redo">
-            <Redo2 className="h-4 w-4" />
-          </Button>
           <ThemeToggle />
         </div>
       ) : (
