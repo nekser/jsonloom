@@ -3,6 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useOpsStore, type State, type OperationType } from "../store/operations";
 import { operationCatalog, type OperationMeta } from "../operations/operationRegistry";
 import { useIsMobile } from "./hooks/useMediaQuery";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function OperationPicker({ open, onOpenChange, onSelect }: { open: boolean; onOpenChange: (v: boolean) => void; onSelect?: (type: OperationType) => void }) {
   const add = useOpsStore((s: State) => s.addOperation);
@@ -36,54 +46,46 @@ export default function OperationPicker({ open, onOpenChange, onSelect }: { open
 
   return (
     <div>
-      <button className="text-sm px-3 py-1.5 rounded border" onClick={() => onOpenChange(true)}>
-        Add Operation
-      </button>
-      {open && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => onOpenChange(false)}>
-          {isMobile ? (
-            <div className="absolute inset-x-0 bottom-0 h-[85vh] op-surface rounded-t-md shadow-lg p-4 flex flex-col" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-semibold">Add Operation</div>
-                <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
-              </div>
-              <div className="space-y-3 flex-1 min-h-0">
-                <div>
-                  <input
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="Search operations…"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </div>
-                <div className="flex-1 min-h-0 overflow-auto">
-                  <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
-                </div>
-              </div>
+      <Button variant="outline" onClick={() => onOpenChange(true)}>Add Operation</Button>
+      {/* Mobile: Sheet */}
+      <Sheet open={isMobile && open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="h-[85vh]">
+          <SheetHeader>
+            <SheetTitle>Add Operation</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-3 flex-1 min-h-0 flex flex-col mt-2">
+            <div>
+              <Input
+                placeholder="Search operations…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
-          ) : (
-            <div className="flex items-center justify-center w-full h-full" onClick={(e) => e.stopPropagation()}>
-              <div className="op-surface rounded-md shadow-lg w-[620px] max-w-[95vw] p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="font-semibold">Add Operation</div>
-                  <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <input
-                      className="w-full border rounded px-3 py-2"
-                      placeholder="Search operations…"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
-                  <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
-                </div>
-              </div>
+            <div className="flex-1 min-h-0 overflow-auto">
+              <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        </SheetContent>
+      </Sheet>
+      {/* Desktop: Dialog */}
+      <Dialog open={!isMobile && open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[640px]">
+          <DialogHeader>
+            <DialogTitle>Add Operation</DialogTitle>
+            <DialogDescription>Search and pick an operation to add to your pipeline.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Input
+                placeholder="Search operations…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <CatalogList items={filtered} query={debounced} onSelect={commitSelection} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -124,28 +126,32 @@ function CatalogList({ items, query, onSelect }: { items: OperationMeta[]; query
 
   return (
     <div className="space-y-2 max-h-[60vh] overflow-auto">
-    {grouped.map(([cat, ops]) => {
+      {grouped.map(([cat, ops]) => {
         const isCollapsed = !!collapsed[cat];
         return (
-      <div key={cat} className="border rounded op-surface">
-            <button
-        className="w-full flex items-center justify-between px-3 py-2 text-left op-surface"
+          <div key={cat} className="border rounded op-surface">
+            <Button
+              variant="ghost"
+              className="w-full flex items-center justify-between px-3 py-2"
               onClick={() => setCollapsed((s) => ({ ...s, [cat]: !s[cat] }))}
             >
               <span className="font-medium">{cat} Operations</span>
               <span className="text-xs text-neutral-500">{isCollapsed ? "Expand" : "Collapse"}</span>
-            </button>
+            </Button>
             {!isCollapsed && (
               <div className="p-2 space-y-2">
                 {ops.map((item) => (
-                  <button
+                  <Button
                     key={item.type}
-          className="w-full text-left border rounded p-3 op-surface hover:border-neutral-300 dark:hover:border-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-700"
+                    variant="outline"
+                    className="w-full justify-start text-left p-3"
                     onClick={() => onSelect(item)}
                   >
-                    <div className="font-medium">{highlight(item.label, query)}</div>
-                    <div className="text-xs text-neutral-500">{highlight(item.description, query)}</div>
-                  </button>
+                    <div className="text-left">
+                      <div className="font-medium">{highlight(item.label, query)}</div>
+                      <div className="text-xs text-neutral-500">{highlight(item.description, query)}</div>
+                    </div>
+                  </Button>
                 ))}
               </div>
             )}

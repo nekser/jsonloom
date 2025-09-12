@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import clsx from "clsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "./hooks/useMediaQuery";
 
 type Col = {
@@ -44,30 +45,26 @@ export function ResizableColumns({ cols }: { cols: Col[] }) {
   if (isMobile) {
     return (
       <div ref={containerRef} className="flex w-full h-full min-h-0 overflow-hidden flex-col">
-        <div className="flex items-center gap-1 p-2 border-b border-neutral-200 dark:border-neutral-800" role="tablist" aria-label="Views">
-          {cols.map((c, i) => (
-            <button
-              key={c.id}
-              className={clsx("tab-btn", i === activeIdx && "tab-btn--active")}
-              role="tab"
-              aria-selected={i === activeIdx}
-              onClick={() => setActiveIdx(i)}
-            >
-              {c.id}
-            </button>
-          ))}
-        </div>
-        {/* Swipeable content area */}
-        <SwipeContainer
-          activeIdx={activeIdx}
-          count={cols.length}
-          onChange={setActiveIdx}
-          className="flex-1 min-h-0 overflow-auto"
-        >
-          {cols.map((col, i) => (
-            <div key={col.id} className={clsx("h-full min-h-0 flex flex-col", i === activeIdx ? "block" : "hidden")}>{col.content}</div>
-          ))}
-        </SwipeContainer>
+        <Tabs value={String(activeIdx)} onValueChange={(v) => setActiveIdx(Number(v))} className="flex-1 min-h-0 overflow-hidden flex flex-col">
+          <div className="p-2 border-b border-neutral-200 dark:border-neutral-800">
+            <TabsList>
+              {cols.map((c, i) => (
+                <TabsTrigger key={c.id} value={String(i)}>{c.id}</TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          {/* Swipeable content area */}
+          <SwipeContainer
+            activeIdx={activeIdx}
+            count={cols.length}
+            onChange={setActiveIdx}
+            className="flex-1 min-h-0 overflow-auto"
+          >
+            {cols.map((col, i) => (
+              <TabsContent key={col.id} value={String(i)} className={clsx("h-full min-h-0 flex flex-col", i === activeIdx ? "block" : "hidden")}>{col.content}</TabsContent>
+            ))}
+          </SwipeContainer>
+        </Tabs>
       </div>
     );
   }

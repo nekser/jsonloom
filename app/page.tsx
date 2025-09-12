@@ -5,7 +5,16 @@ import { OperationsPanel } from "../components/OperationsPanel";
 import { useOpsStore, State } from "../store/operations";
 import { useState } from "react";
 import { useIsMobile } from "../components/hooks/useMediaQuery";
-import ThemeToggle from "../components/ThemeToggle";
+import ThemeToggle from "../components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function Home() {
   const undo = useOpsStore((s: State) => s.undo);
@@ -52,21 +61,21 @@ export default function Home() {
         <div className="font-semibold mr-auto">JSON Transformations</div>
         {!isMobile ? (
           <>
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={paste}>Paste JSON</button>
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={upload}>Upload</button>
-            <div className="w-px h-6 bg-neutral-300 mx-1" />
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={undo}>Undo</button>
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={redo}>Redo</button>
-            <div className="w-px h-6 bg-neutral-300 mx-1" />
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Download</button>
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
+            <Button variant="outline"  onClick={paste}>Paste JSON</Button>
+            <Button variant="outline"  onClick={upload}>Upload</Button>
+            <Separator orientation="vertical" className="h-6 mx-1" />
+            <Button variant="outline" onClick={undo}>Undo</Button>
+            <Button variant="outline" onClick={redo}>Redo</Button>
+            <Separator orientation="vertical" className="h-6 mx-1" />
+            <Button variant="outline" onClick={copy}>Copy</Button>
+            <Button variant="outline" onClick={download}>Download</Button>
+            <Button variant="outline" onClick={() => setDemoOpen(true)}>Demo</Button>
             <ThemeToggle />
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setDemoOpen(true)}>Demo</button>
-            <button className="text-sm px-3 py-1.5 rounded border" onClick={copy}>Copy</button>
+            <Button variant="outline" onClick={() => setDemoOpen(true)}>Demo</Button>
+            <Button variant="outline" onClick={copy}>Copy</Button>
             <ThemeToggle />
           </div>
         )}
@@ -81,62 +90,59 @@ export default function Home() {
         />
       </main>
       {isMobile && (
-        <nav className="border-t border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-around">
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={paste}>Paste</button>
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={upload}>Upload</button>
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={undo}>Undo</button>
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={redo}>Redo</button>
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={download}>Save</button>
+        <nav className="border-t border-neutral-200 dark:border-neutral-800 p-2 flex items-center justify-around gap-2">
+          <Button variant="outline" size="sm" onClick={paste}>Paste</Button>
+          <Button variant="outline" size="sm" onClick={upload}>Upload</Button>
+          <Button variant="outline" size="sm" onClick={undo}>Undo</Button>
+          <Button variant="outline" size="sm" onClick={redo}>Redo</Button>
+          <Button variant="outline" size="sm" onClick={download}>Save</Button>
         </nav>
       )}
-      {demoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setDemoOpen(false)}>
-          <div className="op-surface rounded-md shadow-lg w-[640px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-semibold">Load Demo</div>
-              <button className="text-sm" onClick={() => setDemoOpen(false)}>Close</button>
-            </div>
-            <div className="space-y-3 text-sm">
-              <p>This will replace the current Source JSON and Operations with a sample dataset and a prebuilt pipeline.</p>
-              {demoError && (
-                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{demoError}</div>
-              )}
-              <div className="flex gap-2">
-                <button
-                  disabled={demoLoading}
-                  className="text-sm px-3 py-1.5 rounded border disabled:opacity-60"
-                  onClick={async () => {
-                    try {
-                      setDemoError(undefined);
-                      setDemoLoading(true);
-                      const [dataRes, pipeRes] = await Promise.all([
-                        fetch("/demo/data.json", { cache: "no-cache" }),
-                        fetch("/demo/pipeline.json", { cache: "no-cache" }),
-                      ]);
-                      if (!dataRes.ok) throw new Error(`Failed to load demo data (${dataRes.status})`);
-                      if (!pipeRes.ok) throw new Error(`Failed to load demo pipeline (${pipeRes.status})`);
-                      const data = await dataRes.json();
-                      const pipelineDoc = await pipeRes.json();
-                      const ops = (await import("../utils/sharing/PipelineSerializer")).PipelineSerializer.deserialize(pipelineDoc);
-                      if (!ops) throw new Error("Invalid demo pipeline payload");
-                      const { PipelineValidator } = await import("../utils/sharing/PipelineValidator");
-                      const v = PipelineValidator.validate(ops as any);
-                      if (!v.ok) throw new Error(v.error);
-                      setSourceText(JSON.stringify(data, null, 2));
-                      setOperations(ops as any);
-                      setDemoOpen(false);
-                    } catch (e: any) {
-                      setDemoError(e?.message || "Failed to load demo");
-                    } finally {
-                      setDemoLoading(false);
-                    }
-                  }}
-                >{demoLoading ? "Loading…" : "Load Demo JSON + Pipeline"}</button>
-              </div>
-            </div>
+      <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Load Demo</DialogTitle>
+            <DialogDescription>
+              This will replace the current Source JSON and Operations with a sample dataset and a prebuilt pipeline.
+            </DialogDescription>
+          </DialogHeader>
+          {demoError && (
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{demoError}</div>
+          )}
+          <div className="flex gap-2">
+            <Button
+              disabled={demoLoading}
+              variant="default"
+              onClick={async () => {
+                try {
+                  setDemoError(undefined);
+                  setDemoLoading(true);
+                  const [dataRes, pipeRes] = await Promise.all([
+                    fetch("/demo/data.json", { cache: "no-cache" }),
+                    fetch("/demo/pipeline.json", { cache: "no-cache" }),
+                  ]);
+                  if (!dataRes.ok) throw new Error(`Failed to load demo data (${dataRes.status})`);
+                  if (!pipeRes.ok) throw new Error(`Failed to load demo pipeline (${pipeRes.status})`);
+                  const data = await dataRes.json();
+                  const pipelineDoc = await pipeRes.json();
+                  const ops = (await import("../utils/sharing/PipelineSerializer")).PipelineSerializer.deserialize(pipelineDoc);
+                  if (!ops) throw new Error("Invalid demo pipeline payload");
+                  const { PipelineValidator } = await import("../utils/sharing/PipelineValidator");
+                  const v = PipelineValidator.validate(ops as any);
+                  if (!v.ok) throw new Error(v.error);
+                  setSourceText(JSON.stringify(data, null, 2));
+                  setOperations(ops as any);
+                  setDemoOpen(false);
+                } catch (e: any) {
+                  setDemoError(e?.message || "Failed to load demo");
+                } finally {
+                  setDemoLoading(false);
+                }
+              }}
+            >{demoLoading ? "Loading…" : "Load Demo JSON + Pipeline"}</Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

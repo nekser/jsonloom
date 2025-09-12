@@ -16,6 +16,27 @@ import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../utils/sharing/PipelineValidator";
 import { useIsMobile } from "./hooks/useMediaQuery";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -54,18 +75,18 @@ function OperationCard({ id, index }: { id: string; index: number }) {
         </div>
         {!isMobile ? (
           <div className="flex gap-2">
-            <label className="flex items-center gap-1 text-xs">
-              <input type="checkbox" checked={isEnabled} onChange={(e) => update(op.id, { enabled: e.target.checked })} />
-              Enable
-            </label>
-            <button className="text-xs px-2 py-1 rounded border" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
+            <div className="flex items-center gap-2 text-xs">
+              <Label htmlFor={`op-enable-${op.id}`} className="text-xs">Enable</Label>
+              <Switch id={`op-enable-${op.id}`} checked={isEnabled} onCheckedChange={(v) => update(op.id, { enabled: v })} />
+            </div>
+            <Button variant="outline" size="sm" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
               {op.debugOpen ? "Hide Result" : "View Result"}
-            </button>
-            <button className="text-xs px-2 py-1 rounded border" {...attributes} {...listeners}>Drag</button>
-            <button className="text-xs px-2 py-1 rounded border" onClick={() => remove(op.id)}>Delete</button>
+            </Button>
+            <Button variant="outline" size="sm" {...attributes} {...listeners}>Drag</Button>
+            <Button variant="outline" size="sm" onClick={() => remove(op.id)}>Delete</Button>
           </div>
         ) : (
-          <button className="text-xs px-2 py-1 rounded border" onClick={() => setMobileActionsOpen(true)}>Actions</button>
+          <Button variant="outline" size="sm" onClick={() => setMobileActionsOpen(true)}>Actions</Button>
         )}
       </div>
       <div className="mt-2">
@@ -93,45 +114,46 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           )}
         </div>
       )}
-    {isMobile && mobileActionsOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileActionsOpen(false)}>
-  <div className="absolute inset-x-0 bottom-0 op-surface rounded-t-md p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <div className="font-medium">Actions</div>
-              <button className="text-xs" onClick={() => setMobileActionsOpen(false)}>Close</button>
+      <Sheet open={isMobile && mobileActionsOpen} onOpenChange={setMobileActionsOpen}>
+        <SheetContent side="bottom">
+          <SheetHeader>
+            <SheetTitle>Actions</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Label htmlFor={`op-enable-mobile-${op.id}`}>Enable</Label>
+              <Switch id={`op-enable-mobile-${op.id}`} checked={isEnabled} onCheckedChange={(v) => update(op.id, { enabled: v })} />
             </div>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={isEnabled} onChange={(e) => update(op.id, { enabled: e.target.checked })} />
-              Enable
-            </label>
             <div className="flex gap-2">
-              <button className="text-sm px-3 py-1.5 rounded border" onClick={() => { setMobileActionsOpen(false); setMobileResultOpen(true); }}>View Result</button>
-              <button className="text-sm px-3 py-1.5 rounded border" {...attributes} {...listeners}>Drag</button>
-              <button className="text-sm px-3 py-1.5 rounded border" onClick={() => { remove(op.id); setMobileActionsOpen(false); }}>Delete</button>
+              <Button variant="outline" onClick={() => { setMobileActionsOpen(false); setMobileResultOpen(true); }}>View Result</Button>
+              <Button variant="outline" {...attributes} {...listeners}>Drag</Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" onClick={() => { remove(op.id); setMobileActionsOpen(false); }}>Delete</Button>
+                </TooltipTrigger>
+                <TooltipContent>Delete operation</TooltipContent>
+              </Tooltip>
             </div>
           </div>
-        </div>
-      )}
-    {isMobile && mobileResultOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setMobileResultOpen(false)}>
-  <div className="absolute inset-4 op-surface rounded-md p-3" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-2">
-              <div className="font-medium">Intermediate Result</div>
-              <button className="text-xs" onClick={() => setMobileResultOpen(false)}>Close</button>
+        </SheetContent>
+      </Sheet>
+      <Dialog open={isMobile && mobileResultOpen} onOpenChange={setMobileResultOpen}>
+        <DialogContent className="max-w-[95vw]">
+          <DialogHeader>
+            <DialogTitle>Intermediate Result</DialogTitle>
+          </DialogHeader>
+          {hasErr ? (
+            <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">{hasErr}</div>
+          ) : (
+            <div className="text-xs">
+              <pre className="overflow-auto max-h-[70vh] whitespace-pre-wrap">{interText ?? ""}</pre>
             </div>
-            {hasErr ? (
-              <div className="text-xs text-red-700 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded p-2">{hasErr}</div>
-            ) : (
-              <div className="text-xs">
-                <pre className="overflow-auto max-h-[70vh] whitespace-pre-wrap">{interText ?? ""}</pre>
-              </div>
-            )}
-            <div className="mt-2 flex gap-2">
-              <button className="text-xs px-2 py-1 rounded border" onClick={async () => { await navigator.clipboard.writeText(String(interText ?? "")); }}>Copy</button>
-            </div>
+          )}
+          <div className="mt-2 flex gap-2">
+            <Button variant="outline" size="sm" onClick={async () => { await navigator.clipboard.writeText(String(interText ?? "")); }}>Copy</Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -176,6 +198,7 @@ export function OperationsPanel() {
   }, []);
 
   return (
+    <TooltipProvider>
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between p-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium flex items-center gap-2">
@@ -183,8 +206,8 @@ export function OperationsPanel() {
           <span title="Paths support '*' wildcards. Example: users.*.age applies to each user's age." className="text-xs text-neutral-500 cursor-help">?</span>
         </div>
         <div className="flex gap-2">
-          <button
-            className="text-sm px-3 py-1.5 rounded border"
+          <Button
+            variant="outline"
             onClick={() => {
               const ser = PipelineSerializer.serialize(ops as any);
               const enc = PipelineEncoder.encode(ser);
@@ -195,8 +218,8 @@ export function OperationsPanel() {
             }}
           >
             Share
-          </button>
-          <button className="text-sm px-3 py-1.5 rounded border" onClick={() => setImportOpen(true)}>Import</button>
+          </Button>
+          <Button variant="outline" onClick={() => setImportOpen(true)}>Import</Button>
           <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} />
         </div>
       </div>
@@ -211,68 +234,61 @@ export function OperationsPanel() {
         {ops.length === 0 && <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>}
       </div>
 
-      {shareOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setShareOpen(false)}>
-          <div className="absolute inset-x-0 bottom-0 sm:static sm:m-auto sm:flex sm:items-center sm:justify-center">
-            <div className="op-surface rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-semibold">Share Pipeline</div>
-                <button className="text-sm" onClick={() => setShareOpen(false)}>Close</button>
-              </div>
-              <div className="space-y-3">
-                <input className="w-full border rounded px-3 py-2" value={shareUrl} readOnly />
-                <div className="flex gap-2">
-                  <button className="text-sm px-3 py-1.5 rounded border" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>Copy link</button>
-                </div>
-              </div>
+      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Pipeline</DialogTitle>
+            <DialogDescription>Copy the link below to share your current pipeline.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input value={shareUrl} readOnly />
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>Copy link</Button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
-      {importOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40" onClick={() => setImportOpen(false)}>
-          <div className="absolute inset-x-0 bottom-0 sm:static sm:m-auto sm:flex sm:items-center sm:justify-center">
-            <div className="op-surface rounded-t-md sm:rounded-md shadow-lg w-full sm:w-[720px] max-w-[100vw] sm:max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="font-semibold">Import Pipeline</div>
-                <button className="text-sm" onClick={() => setImportOpen(false)}>Close</button>
-              </div>
-              <div className="space-y-3">
-                <textarea className="w-full border rounded px-3 py-2 h-36" placeholder="Paste the 'pipeline' query string value or full URL" value={importText} onChange={(e) => setImportText(e.target.value)} />
-                {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
-                <div className="flex gap-2">
-                  <button
-                    className="text-sm px-3 py-1.5 rounded border"
-                    onClick={() => {
-                      try {
-                        setImportError(undefined);
-                        let encoded = importText.trim();
-                        try {
-                          const maybeUrl = new URL(encoded);
-                          encoded = maybeUrl.searchParams.get("pipeline") || encoded;
-                        } catch {}
-                        const decoded = PipelineEncoder.decode(encoded);
-                        const ops = PipelineSerializer.deserialize(decoded);
-                        if (!ops) { setImportError("Invalid pipeline payload"); return; }
-                        const v = PipelineValidator.validate(ops as any);
-                        if (!v.ok) { setImportError(v.error); return; }
-                        setOperations(ops as any);
-                        setImportOpen(false);
-                      } catch (e: any) {
-                        setImportError(e?.message || "Failed to import pipeline");
-                      }
-                    }}
-                  >
-                    Import
-                  </button>
-                </div>
-              </div>
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Pipeline</DialogTitle>
+            <DialogDescription>Paste the 'pipeline' query string value or a full URL that contains it.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Textarea className="h-36" placeholder="Paste the 'pipeline' query string value or full URL" value={importText} onChange={(e) => setImportText(e.target.value)} />
+            {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  try {
+                    setImportError(undefined);
+                    let encoded = importText.trim();
+                    try {
+                      const maybeUrl = new URL(encoded);
+                      encoded = maybeUrl.searchParams.get("pipeline") || encoded;
+                    } catch {}
+                    const decoded = PipelineEncoder.decode(encoded);
+                    const ops = PipelineSerializer.deserialize(decoded);
+                    if (!ops) { setImportError("Invalid pipeline payload"); return; }
+                    const v = PipelineValidator.validate(ops as any);
+                    if (!v.ok) { setImportError(v.error); return; }
+                    setOperations(ops as any);
+                    setImportOpen(false);
+                  } catch (e: any) {
+                    setImportError(e?.message || "Failed to import pipeline");
+                  }
+                }}
+              >
+                Import
+              </Button>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        </DialogContent>
+      </Dialog>
+  </div>
+  </TooltipProvider>
   );
 }
 
@@ -342,29 +358,30 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
         />
       </div>
       <div className="flex items-center gap-2 text-sm">
-        <button className="text-xs px-2 py-1 rounded border" onClick={() => setOpen((v) => !v)}>
+        <Button variant="outline" size="sm" onClick={() => setOpen((v) => !v)}>
           {open ? "Hide" : "Show"} operations
-        </button>
-        <label className="flex items-center gap-1 text-xs">
+        </Button>
+        <div className="flex items-center gap-2 text-xs">
           <span>onError</span>
-          <select
-            className="border rounded px-2 py-1"
-            value={(op as any).config.onError ?? "propagate"}
-            onChange={(e) => onUpdate({ onError: (e.target as HTMLSelectElement).value })}
-          >
-            <option value="propagate">propagate</option>
-            <option value="skip">skip element</option>
-          </select>
-        </label>
+          <Select value={(op as any).config.onError ?? "propagate"} onValueChange={(v) => onUpdate({ onError: v })}>
+            <SelectTrigger className="h-7 px-2 py-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="propagate">propagate</SelectItem>
+              <SelectItem value="skip">skip element</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       {open && (
   <div className="mt-1 border rounded-md p-2 op-surface">
           <div className="flex items-center justify-between mb-2">
             <div className="font-medium text-sm">Operations</div>
             <div className="flex gap-2">
-              <button className="text-xs px-2 py-1 rounded border" onClick={() => setPickerOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
                 Add operation
-              </button>
+              </Button>
             </div>
           </div>
           <DndContext onDragEnd={onDragEnd}>
@@ -573,14 +590,14 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
         ) : null;
       })()}
       <div className="flex items-center gap-2">
-        <button className="text-xs px-2 py-1 rounded border" onClick={addCase}>Add case</button>
+        <Button variant="outline" size="sm" onClick={addCase}>Add case</Button>
       </div>
       {cases.map((c, i) => (
   <div key={i} className="border rounded-md p-2 op-surface">
           <div className="flex items-center justify-between mb-2">
-            <div className="font-medium text-sm">Case: <input className="border rounded px-2 py-1 w-full sm:w-40 ml-1" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
+            <div className="font-medium text-sm">Case: <Input className="w-full sm:w-40 ml-1 h-7" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
             <div className="flex gap-2">
-              <button className="text-xs px-2 py-1 rounded border" onClick={() => setPickerIndex(i)}>Add operation</button>
+              <Button variant="outline" size="sm" onClick={() => setPickerIndex(i)}>Add operation</Button>
             </div>
           </div>
           <DndContext onDragEnd={({ active, over }) => {
@@ -615,7 +632,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
         <div className="flex items-center justify-between mb-2">
           <div className="font-medium text-sm">Default</div>
           <div className="flex gap-2">
-            <button className="text-xs px-2 py-1 rounded border" onClick={() => setDefaultPickerOpen(true)}>Add operation</button>
+            <Button variant="outline" size="sm" onClick={() => setDefaultPickerOpen(true)}>Add operation</Button>
           </div>
         </div>
         <DndContext onDragEnd={({ active, over }) => {
@@ -676,19 +693,29 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
           {collapsed ? "▶" : "▽"} {op.type}
         </button>
         <div className="flex gap-2">
-          <button className="text-xs px-2 py-1 rounded border" {...attributes} {...listeners}>
+          <Button variant="outline" size="sm" {...attributes} {...listeners}>
             Drag
-          </button>
-          <button className="text-xs px-2 py-1 rounded border" onClick={() => onDelete(op.id)}>
-            Delete
-          </button>
+          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" onClick={() => onDelete(op.id)}>
+                Delete
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete operation</TooltipContent>
+          </Tooltip>
         </div>
       </div>
       {swiped && (
         <div className="mt-2">
-          <button className="text-xs px-2 py-1 rounded border border-red-500 text-red-600" onClick={() => onDelete(op.id)}>
-            Confirm delete
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="destructive" size="sm" onClick={() => onDelete(op.id)}>
+                Confirm delete
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Confirm deletion</TooltipContent>
+          </Tooltip>
         </div>
       )}
       {!collapsed && (
