@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-import { getOperationModule, Operation, OperationType, ValidationError } from "../operations";
+import { getOperationModule, Operation, OperationType, ValidationError } from "../operations/index";
 import { buildPathIndex, type PathIndex } from "../utils/pathSuggest";
 
 export type State = {
@@ -221,4 +221,6 @@ export type {
   MergeAtPathConfig,
   FlattenObjectConfig,
   UnflattenObjectConfig,
-} from "../operations";
+} from "../operations/index";
+// Keep import path consistent to avoid resolving operations.json under Turbopack
+// Note: These are type-only re-exports and do not affect runtime.

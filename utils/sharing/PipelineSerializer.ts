@@ -1,4 +1,4 @@
-import type { Operation } from "../../operations";
+import type { Operation } from "../../operations/index";
 
 export type SerializedPipelineV1 = {
   v: 1;

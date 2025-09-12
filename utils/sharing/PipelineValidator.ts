@@ -1,4 +1,4 @@
-import { getOperationModule, type Operation, type OperationType } from "../../operations";
+import { getOperationModule, type Operation, type OperationType } from "../../operations/index";
 
 export type ValidationResult = { ok: true } | { ok: false; error: string };
 

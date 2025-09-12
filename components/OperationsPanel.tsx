@@ -9,7 +9,7 @@ import AutocompleteInput from "./AutocompleteInput";
 import { buildPathIndex, suggestPathTokens } from "../utils/pathSuggest";
 import OperationPicker from "./OperationPicker";
 import { editors } from "./opEditors/registry";
-import { getOperationModule, type Operation } from "../operations";
+import { getOperationModule, type Operation } from "../operations/index";
 import { nanoid } from "nanoid";
 import { getByPath } from "../operations/utils";
 import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
