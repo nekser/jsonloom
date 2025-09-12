@@ -107,10 +107,6 @@ export default function OperationsToolbar() {
     <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
       <div className="font-medium flex items-center gap-2">Operations</div>
       <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={openPicker} size={isMobile ? "icon" : "sm"}>
-          <Plus className="h-4 w-4" />
-          {!isMobile && <span className="ml-1">Add Step</span>}
-        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="More actions">

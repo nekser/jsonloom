@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, EyeOff, GripVertical, Menu, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Menu, Trash2, ArrowUp, ArrowDown, Plus } from "lucide-react";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -270,6 +270,13 @@ export function OperationsPanel() {
           </SortableContext>
         </DndContext>
         {ops.length === 0 && <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>}
+        <div className="sticky bottom-0 pt-2 bg-gradient-to-t from-background via-background/80 to-transparent">
+            <div className="border-t pt-2 flex justify-center">
+              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setPickerOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" /> Add Step
+              </Button>
+            </div>
+          </div>
       </div>
 
   {/* Share/Import dialogs owned by OperationsToolbar */}
