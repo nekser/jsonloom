@@ -10,7 +10,8 @@ import { useOpsStore, State } from "../store/operations";
 import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../utils/sharing/PipelineValidator";
-import { Plus, MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload } from "lucide-react";
+import { Plus, MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy } from "lucide-react";
+import { downloadText } from "../lib/io";
 
 export default function OperationsToolbar() {
   const isMobile = useIsMobile();
@@ -52,16 +53,46 @@ export default function OperationsToolbar() {
     setOperations([]);
   };
 
+  const doExportJson = () => {
+    const ser = PipelineSerializer.serialize(ops as any);
+    const text = JSON.stringify(ser, null, 2);
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    downloadText(`pipeline-${ts}.json`, text, "application/json");
+  };
+
+  const doCopyJson = async () => {
+    const ser = PipelineSerializer.serialize(ops as any);
+    const text = JSON.stringify(ser, null, 2);
+    await navigator.clipboard.writeText(text);
+  };
+
   const doImport = () => {
     try {
       setImportError(undefined);
-      let encoded = importText.trim();
-      try {
-        const maybeUrl = new URL(encoded);
-        encoded = maybeUrl.searchParams.get("pipeline") || encoded;
-      } catch {}
-      const decoded = PipelineEncoder.decode(encoded);
-      const nextOps = PipelineSerializer.deserialize(decoded);
+      const raw = importText.trim();
+      let nextOps: any[] | undefined;
+
+      // 1) JSON (serialized or raw ops array)
+      if (raw.startsWith("{") || raw.startsWith("[")) {
+        try {
+          const json = JSON.parse(raw);
+          nextOps = Array.isArray(json) ? json : PipelineSerializer.deserialize(json);
+        } catch (e) {
+          // fall through to encoded/URL path
+        }
+      }
+
+      // 2) URL or encoded query string
+      if (!nextOps) {
+        let encoded = raw;
+        try {
+          const maybeUrl = new URL(encoded);
+          encoded = maybeUrl.searchParams.get("pipeline") || encoded;
+        } catch {}
+        const decoded = PipelineEncoder.decode(encoded);
+        nextOps = PipelineSerializer.deserialize(decoded);
+      }
+
       if (!nextOps) { setImportError("Invalid pipeline payload"); return; }
       const v = PipelineValidator.validate(nextOps as any);
       if (!v.ok) { setImportError(v.error); return; }
@@ -89,6 +120,12 @@ export default function OperationsToolbar() {
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={doShare}>
               <Share2 className="h-4 w-4 mr-2" /> Share
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={doCopyJson}>
+              <Copy className="h-4 w-4 mr-2" /> Copy as JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={doExportJson}>
+              <Download className="h-4 w-4 mr-2" /> Export as JSON
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 mr-2" /> Import
@@ -127,10 +164,12 @@ export default function OperationsToolbar() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Import Pipeline</DialogTitle>
-            <DialogDescription>Paste the 'pipeline' query string value or a full URL that contains it.</DialogDescription>
+            <DialogDescription>
+              Paste one of: encoded 'pipeline' value, a full URL containing it, or JSON (either the serialized object with v/ops or a raw ops array).
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
-            <Textarea className="h-36" placeholder="Paste the 'pipeline' query string value or full URL" value={importText} onChange={(e) => setImportText(e.target.value)} />
+            <Textarea className="h-36" placeholder="Paste encoded string, full URL, or JSON (serialized { v, ops } or just [ ...ops ])" value={importText} onChange={(e) => setImportText(e.target.value)} />
             {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
             <div className="flex gap-2">
               <Button variant="outline" onClick={doImport}>Import</Button>
