@@ -19,3 +19,13 @@ Notes:
 
 - All execution is client-side.
 - No persistence/auth in MVP.This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+Operations metadata export:
+
+- Generate a JSON listing of all operations, their parameters, and descriptions:
+
+```bash
+pnpm run export:ops
+```
+
+- Output file: `app/operations.json`

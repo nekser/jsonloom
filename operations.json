@@ -1,0 +1,606 @@
+{
+  "operations": [
+    {
+      "type": "Add",
+      "name": "Add",
+      "description": "Add a number to a value at a path.",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Base64",
+      "name": "Base64",
+      "description": "Encode or decode Base64 strings.",
+      "parameters": {
+        "required": [
+          "path",
+          "mode"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Clamp",
+      "name": "Clamp",
+      "description": "Clamp a number between min and max.",
+      "parameters": {
+        "required": [
+          "path",
+          "min",
+          "max"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "CoerceType",
+      "name": "CoerceType",
+      "description": "Perform the CoerceType transformation.",
+      "parameters": {
+        "required": [
+          "path",
+          "to"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Count",
+      "name": "Count",
+      "description": "Count items (e.g., array length).",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "CountArray",
+      "name": "CountArray",
+      "description": "Count items in an array, optionally by condition.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "DateAdd",
+      "name": "DateAdd",
+      "description": "Add a duration to a date/time.",
+      "parameters": {
+        "required": [
+          "path",
+          "amount",
+          "unit"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "DateDiff",
+      "name": "DateDiff",
+      "description": "Calculate the difference between two dates/times.",
+      "parameters": {
+        "required": [
+          "startPath",
+          "endPath",
+          "unit"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "DeletePath",
+      "name": "DeletePath",
+      "description": "Delete a value at a JSON path.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Divide",
+      "name": "Divide",
+      "description": "Divide a number at a path.",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "ExtractPath",
+      "name": "ExtractPath",
+      "description": "Extract value from a JSON path.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "FilterArray",
+      "name": "FilterArray",
+      "description": "Filter array items by a condition.",
+      "parameters": {
+        "required": [
+          "path",
+          "operator"
+        ],
+        "optional": [
+          "value",
+          "mode"
+        ]
+      }
+    },
+    {
+      "type": "FilterByKey",
+      "name": "FilterByKey",
+      "description": "Filter object entries by key.",
+      "parameters": {
+        "required": [
+          "mode",
+          "keys"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "FlattenArray",
+      "name": "FlattenArray",
+      "description": "Flatten nested arrays into a single-level array.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "depth"
+        ]
+      }
+    },
+    {
+      "type": "FlattenObject",
+      "name": "FlattenObject",
+      "description": "Flatten nested object keys using dot paths.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "delimiter"
+        ]
+      }
+    },
+    {
+      "type": "GroupBy",
+      "name": "GroupBy",
+      "description": "Group array items by a key.",
+      "parameters": {
+        "required": [
+          "path",
+          "by"
+        ],
+        "optional": [
+          "collect"
+        ]
+      }
+    },
+    {
+      "type": "If",
+      "name": "If",
+      "description": "Conditionally apply different operation branches.",
+      "parameters": {
+        "required": [
+          "path",
+          "op"
+        ],
+        "optional": [
+          "when"
+        ]
+      }
+    },
+    {
+      "type": "IsDateCompare",
+      "name": "IsDateCompare",
+      "description": "Compare two dates/times with an operator.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "compareTo",
+          "op"
+        ]
+      }
+    },
+    {
+      "type": "JoinArray",
+      "name": "JoinArray",
+      "description": "Join array items into a string using a separator.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "delimiter"
+        ]
+      }
+    },
+    {
+      "type": "MapArray",
+      "name": "MapArray",
+      "description": "Apply a sequence of operations to each item of an array at a path.",
+      "parameters": {
+        "required": [
+          "id",
+          "type",
+          "config"
+        ],
+        "optional": [
+          "path",
+          "operations",
+          "onError"
+        ]
+      }
+    },
+    {
+      "type": "Max",
+      "name": "Max",
+      "description": "Compute the maximum value.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "MergeAtPath",
+      "name": "MergeAtPath",
+      "description": "Deep-merge an object at a JSON path.",
+      "parameters": {
+        "required": [
+          "path",
+          "source"
+        ],
+        "optional": [
+          "strategy"
+        ]
+      }
+    },
+    {
+      "type": "Min",
+      "name": "Min",
+      "description": "Compute the minimum value.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Modulo",
+      "name": "Modulo",
+      "description": "Apply modulo to a number at a path.",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Multiply",
+      "name": "Multiply",
+      "description": "Multiply a number at a path.",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "NormalizeKeyCase",
+      "name": "NormalizeKeyCase",
+      "description": "Normalize object key casing (e.g., camel, snake).",
+      "parameters": {
+        "required": [
+          "mode"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "OmitPaths",
+      "name": "OmitPaths",
+      "description": "Remove specified paths from an object.",
+      "parameters": {
+        "required": [
+          "paths"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "ParseDate",
+      "name": "ParseDate",
+      "description": "Parse a string into a date/time value.",
+      "parameters": {
+        "required": [
+          "path",
+          "format"
+        ],
+        "optional": [
+          "timezone"
+        ]
+      }
+    },
+    {
+      "type": "PickPaths",
+      "name": "PickPaths",
+      "description": "Pick only specified paths from an object.",
+      "parameters": {
+        "required": [
+          "paths"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Power",
+      "name": "Power",
+      "description": "Raise a number at a path to a power.",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "ReduceArray",
+      "name": "ReduceArray",
+      "description": "Reduce an array to a single value using an accumulator.",
+      "parameters": {
+        "required": [
+          "path",
+          "op"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "RegexReplace",
+      "name": "RegexReplace",
+      "description": "Replace text using a regular expression.",
+      "parameters": {
+        "required": [
+          "pattern",
+          "replace"
+        ],
+        "optional": [
+          "flags"
+        ]
+      }
+    },
+    {
+      "type": "RenameKey",
+      "name": "RenameKey",
+      "description": "Rename a single object key.",
+      "parameters": {
+        "required": [
+          "from",
+          "to"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "RenameKeysByPattern",
+      "name": "RenameKeysByPattern",
+      "description": "Rename keys using a search pattern.",
+      "parameters": {
+        "required": [
+          "pattern",
+          "replace"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Round",
+      "name": "Round",
+      "description": "Round a number to a specified precision.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "precision"
+        ]
+      }
+    },
+    {
+      "type": "SetPath",
+      "name": "SetPath",
+      "description": "Set a value at a JSON path (create or overwrite).",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "SliceArray",
+      "name": "SliceArray",
+      "description": "Take a slice of an array by start/end.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "SortArray",
+      "name": "SortArray",
+      "description": "Sort array items by key or expression.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "order",
+          "nulls",
+          "caseInsensitive"
+        ]
+      }
+    },
+    {
+      "type": "StringCase",
+      "name": "StringCase",
+      "description": "Change string case (upper, lower, title, etc.).",
+      "parameters": {
+        "required": [
+          "path",
+          "mode"
+        ],
+        "optional": [
+          "coerceNonString"
+        ]
+      }
+    },
+    {
+      "type": "StringReplace",
+      "name": "StringReplace",
+      "description": "Replace substrings in a string using a simple pattern.",
+      "parameters": {
+        "required": [
+          "search",
+          "replace"
+        ],
+        "optional": [
+          "path"
+        ]
+      }
+    },
+    {
+      "type": "Subtract",
+      "name": "Subtract",
+      "description": "Subtract a number from a value at a path.",
+      "parameters": {
+        "required": [
+          "path",
+          "value"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Sum",
+      "name": "Sum",
+      "description": "Sum numeric values from an array or object.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "Switch",
+      "name": "Switch",
+      "description": "Apply operations based on a matching case value.",
+      "parameters": {
+        "required": [
+          "value",
+          "ops"
+        ],
+        "optional": [
+          "path",
+          "cases",
+          "default"
+        ]
+      }
+    },
+    {
+      "type": "TemplateInterpolate",
+      "name": "TemplateInterpolate",
+      "description": "Interpolate template strings with values from JSON.",
+      "parameters": {
+        "required": [
+          "path",
+          "template"
+        ],
+        "optional": [
+          "onMissing"
+        ]
+      }
+    },
+    {
+      "type": "TrimStrings",
+      "name": "TrimStrings",
+      "description": "Trim whitespace from strings.",
+      "parameters": {
+        "required": [],
+        "optional": []
+      }
+    },
+    {
+      "type": "UnflattenObject",
+      "name": "UnflattenObject",
+      "description": "Expand dot-path keys into a nested object.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": [
+          "delimiter"
+        ]
+      }
+    },
+    {
+      "type": "UniqueArray",
+      "name": "UniqueArray",
+      "description": "Remove duplicate items from an array.",
+      "parameters": {
+        "required": [
+          "path"
+        ],
+        "optional": []
+      }
+    },
+    {
+      "type": "ValidateJSON",
+      "name": "ValidateJSON",
+      "description": "Validate JSON against a schema or checks.",
+      "parameters": {
+        "required": [],
+        "optional": [
+          "path",
+          "schema"
+        ]
+      }
+    }
+  ]
+}
