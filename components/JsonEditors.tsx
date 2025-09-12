@@ -41,7 +41,7 @@ export function SourceEditor() {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex items-center justify-between p-2 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Source JSON</div>
         <div className="text-xs text-neutral-500">{new Blob([sourceText]).size} bytes</div>
       </div>
@@ -94,7 +94,7 @@ export function ResultEditor() {
   }, []);
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex items-center justify-between p-2 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Result JSON</div>
         <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
       </div>
