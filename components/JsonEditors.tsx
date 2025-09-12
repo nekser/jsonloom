@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useOpsStore, State } from "../store/operations";
+import SourcePanelToolbar from "./SourcePanelToolbar";
+import ResultPanelToolbar from "./ResultPanelToolbar";
 
 export function SourceEditor() {
   const sourceText = useOpsStore((s: State) => s.sourceText);
@@ -43,7 +45,10 @@ export function SourceEditor() {
     <div className="flex flex-col h-full min-h-0">
       <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Source JSON</div>
-        <div className="text-xs text-neutral-500">{new Blob([sourceText]).size} bytes</div>
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-neutral-500">{new Blob([sourceText]).size} bytes</div>
+          <SourcePanelToolbar />
+        </div>
       </div>
   <div className="flex-1 min-h-0">
         <Editor
@@ -96,7 +101,10 @@ export function ResultEditor() {
     <div className="flex flex-col h-full min-h-0">
       <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Result JSON</div>
-        <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
+          <ResultPanelToolbar />
+        </div>
       </div>
   <div className="flex-1 min-h-0">
         <Editor
