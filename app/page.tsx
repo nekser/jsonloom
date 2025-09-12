@@ -91,7 +91,7 @@ export default function Home() {
       )}
       {demoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setDemoOpen(false)}>
-          <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[640px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
+          <div className="op-surface rounded-md shadow-lg w-[640px] max-w-[95vw] p-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-3">
               <div className="font-semibold">Load Demo</div>
               <button className="text-sm" onClick={() => setDemoOpen(false)}>Close</button>
