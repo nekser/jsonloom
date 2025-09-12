@@ -42,7 +42,7 @@ export default function OperationPicker({ open, onOpenChange, onSelect }: { open
       {open && (
         <div className="fixed inset-0 z-50 bg-black/40" onClick={() => onOpenChange(false)}>
           {isMobile ? (
-            <div className="absolute inset-x-0 bottom-0 h-[85vh] bg-white dark:bg-neutral-900 rounded-t-md shadow-lg p-4 flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute inset-x-0 bottom-0 h-[85vh] op-surface rounded-t-md shadow-lg p-4 flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-3">
                 <div className="font-semibold">Add Operation</div>
                 <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
@@ -63,7 +63,7 @@ export default function OperationPicker({ open, onOpenChange, onSelect }: { open
             </div>
           ) : (
             <div className="flex items-center justify-center w-full h-full" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-white dark:bg-neutral-900 rounded-md shadow-lg w-[620px] max-w-[95vw] p-4">
+              <div className="op-surface rounded-md shadow-lg w-[620px] max-w-[95vw] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="font-semibold">Add Operation</div>
                   <button className="text-sm" onClick={() => onOpenChange(false)}>Close</button>
@@ -124,12 +124,12 @@ function CatalogList({ items, query, onSelect }: { items: OperationMeta[]; query
 
   return (
     <div className="space-y-2 max-h-[60vh] overflow-auto">
-      {grouped.map(([cat, ops]) => {
+    {grouped.map(([cat, ops]) => {
         const isCollapsed = !!collapsed[cat];
         return (
-          <div key={cat} className="border rounded">
+      <div key={cat} className="border rounded op-surface">
             <button
-              className="w-full flex items-center justify-between px-3 py-2 text-left bg-neutral-50 dark:bg-neutral-800"
+        className="w-full flex items-center justify-between px-3 py-2 text-left op-surface"
               onClick={() => setCollapsed((s) => ({ ...s, [cat]: !s[cat] }))}
             >
               <span className="font-medium">{cat} Operations</span>
@@ -140,7 +140,7 @@ function CatalogList({ items, query, onSelect }: { items: OperationMeta[]; query
                 {ops.map((item) => (
                   <button
                     key={item.type}
-                    className="w-full text-left border rounded p-3 hover:bg-neutral-50 dark:hover:bg-neutral-900"
+          className="w-full text-left border rounded p-3 op-surface hover:border-neutral-300 dark:hover:border-neutral-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 dark:focus-visible:ring-neutral-700"
                     onClick={() => onSelect(item)}
                   >
                     <div className="font-medium">{highlight(item.label, query)}</div>

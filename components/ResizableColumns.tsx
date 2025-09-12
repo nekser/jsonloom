@@ -48,10 +48,7 @@ export function ResizableColumns({ cols }: { cols: Col[] }) {
           {cols.map((c, i) => (
             <button
               key={c.id}
-              className={clsx(
-                "text-xs px-2 py-1 rounded border",
-                i === activeIdx ? "bg-neutral-100 dark:bg-neutral-800" : "bg-transparent"
-              )}
+              className={clsx("tab-btn", i === activeIdx && "tab-btn--active")}
               onClick={() => setActiveIdx(i)}
             >
               {c.id}
@@ -59,7 +56,7 @@ export function ResizableColumns({ cols }: { cols: Col[] }) {
           ))}
           <div className="ml-auto">
             <button
-              className="text-xs px-2 py-1 rounded border"
+              className="tab-btn"
               onClick={() => {
                 try {
                   window.dispatchEvent(new CustomEvent("open-catalog"));

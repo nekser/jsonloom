@@ -37,3 +37,33 @@ body {
 /* Themed surface for operation cards and modals (class-based, follows ThemeToggle) */
 .op-surface { background-color: #ffffff; }
 html.dark .op-surface { background-color: #000000; }
+
+/* Mobile tab buttons (Source / Pipeline / Preview) */
+.tab-btn {
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.tab-btn--active {
+  background-color: #ffffff; /* keep white in light theme */
+  color: #000000;
+  border: 2px solid #000000;
+}
+html.dark .tab-btn {
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+}
+html.dark .tab-btn--active {
+  background-color: #000000; /* keep black in dark theme */
+  color: #ffffff;
+  border: 2px solid #ffffff;
+}
+
+/* Optional: neutral header area inside pickers stays surface-colored */
+.op-section-header {
+  background-color: transparent;
+}
