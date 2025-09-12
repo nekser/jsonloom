@@ -12,6 +12,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.1",
     "@monaco-editor/react": "^4.6.0",
+    "@radix-ui/react-tabs": "^1.0.5",
     "ajv": "^8.17.1",
     "clsx": "^2.1.1",
     "luxon": "^3.7.2",

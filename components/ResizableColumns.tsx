@@ -44,34 +44,30 @@ export function ResizableColumns({ cols }: { cols: Col[] }) {
   if (isMobile) {
     return (
       <div ref={containerRef} className="flex w-full h-full min-h-0 overflow-hidden flex-col">
-        <div className="flex items-center gap-1 p-2 border-b border-neutral-200 dark:border-neutral-800">
+        <div className="flex items-center gap-1 p-2 border-b border-neutral-200 dark:border-neutral-800" role="tablist" aria-label="Views">
           {cols.map((c, i) => (
             <button
               key={c.id}
               className={clsx("tab-btn", i === activeIdx && "tab-btn--active")}
+              role="tab"
+              aria-selected={i === activeIdx}
               onClick={() => setActiveIdx(i)}
             >
               {c.id}
             </button>
           ))}
-          <div className="ml-auto">
-            <button
-              className="tab-btn"
-              onClick={() => {
-                try {
-                  window.dispatchEvent(new CustomEvent("open-catalog"));
-                } catch {}
-              }}
-            >
-              Catalog
-            </button>
-          </div>
         </div>
-        <div className="flex-1 min-h-0 overflow-auto">
+        {/* Swipeable content area */}
+        <SwipeContainer
+          activeIdx={activeIdx}
+          count={cols.length}
+          onChange={setActiveIdx}
+          className="flex-1 min-h-0 overflow-auto"
+        >
           {cols.map((col, i) => (
             <div key={col.id} className={clsx("h-full min-h-0 flex flex-col", i === activeIdx ? "block" : "hidden")}>{col.content}</div>
           ))}
-        </div>
+        </SwipeContainer>
       </div>
     );
   }
@@ -96,6 +92,47 @@ export function ResizableColumns({ cols }: { cols: Col[] }) {
           )}
         </React.Fragment>
       ))}
+    </div>
+  );
+}
+
+// Simple horizontal swipe detector: moves prev/next among tabs when a left/right swipe is detected.
+function SwipeContainer({
+  activeIdx,
+  count,
+  onChange,
+  className,
+  children,
+}: {
+  activeIdx: number;
+  count: number;
+  onChange: (idx: number) => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const startX = useRef<number | null>(null);
+  const startY = useRef<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const t = e.touches[0];
+    startX.current = t.clientX;
+    startY.current = t.clientY;
+  };
+  const onTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (startX.current == null || startY.current == null) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX.current;
+    const dy = t.clientY - startY.current;
+    startX.current = null;
+    startY.current = null;
+    const horiz = Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.4;
+    if (!horiz) return;
+    if (dx < 0 && activeIdx < count - 1) onChange(activeIdx + 1); // swipe left -> next
+    else if (dx > 0 && activeIdx > 0) onChange(activeIdx - 1); // swipe right -> prev
+  };
+  return (
+    <div className={className} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      {children}
     </div>
   );
 }
