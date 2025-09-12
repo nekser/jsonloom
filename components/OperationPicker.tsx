@@ -46,7 +46,6 @@ export default function OperationPicker({ open, onOpenChange, onSelect }: { open
 
   return (
     <div>
-      <Button variant="outline" onClick={() => onOpenChange(true)}>Add Operation</Button>
       {/* Mobile: Sheet */}
       <Sheet open={isMobile && open} onOpenChange={onOpenChange}>
         <SheetContent side="bottom" className="h-[85vh]">
@@ -139,15 +138,15 @@ function CatalogList({ items, query, onSelect }: { items: OperationMeta[]; query
               <span className="text-xs text-neutral-500">{isCollapsed ? "Expand" : "Collapse"}</span>
             </Button>
             {!isCollapsed && (
-              <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2">
                 {ops.map((item) => (
                   <Button
                     key={item.type}
                     variant="outline"
-                    className="w-full justify-start text-left p-3"
+        className="w-full justify-start text-left h-auto px-3 py-2 items-start gap-3"
                     onClick={() => onSelect(item)}
                   >
-                    <div className="text-left">
+        <div className="text-left space-y-1">
                       <div className="font-medium">{highlight(item.label, query)}</div>
                       <div className="text-xs text-neutral-500">{highlight(item.description, query)}</div>
                     </div>

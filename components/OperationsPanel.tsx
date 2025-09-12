@@ -15,6 +15,7 @@ import { getByPath } from "../operations/utils";
 import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../utils/sharing/PipelineValidator";
+import OperationsToolbar from "./OperationsToolbar";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -164,11 +165,7 @@ export function OperationsPanel() {
   const reorder = useOpsStore((s: State) => s.reorderOperations);
   const setOperations = useOpsStore((s: State) => s.setOperations);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState("");
-  const [importOpen, setImportOpen] = useState(false);
-  const [importText, setImportText] = useState("");
-  const [importError, setImportError] = useState<string | undefined>(undefined);
+  // Toolbar now owns share/import UI
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
@@ -200,29 +197,8 @@ export function OperationsPanel() {
   return (
     <TooltipProvider>
     <div className="flex flex-col h-full min-h-0">
-  <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
-        <div className="font-medium flex items-center gap-2">
-          Operations
-          <span title="Paths support '*' wildcards. Example: users.*.age applies to each user's age." className="text-xs text-neutral-500 cursor-help">?</span>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              const ser = PipelineSerializer.serialize(ops as any);
-              const enc = PipelineEncoder.encode(ser);
-              const url = new URL(window.location.href);
-              url.searchParams.set("pipeline", enc);
-              setShareUrl(url.toString());
-              setShareOpen(true);
-            }}
-          >
-            Share
-          </Button>
-          <Button variant="outline" onClick={() => setImportOpen(true)}>Import</Button>
-          <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} />
-        </div>
-      </div>
+      <OperationsToolbar />
+      <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} />
       <div className={clsx("flex-1 min-h-0 overflow-auto p-3", isMobile ? "space-y-2" : "space-y-3")}>
         <DndContext onDragEnd={onDragEnd}>
           <SortableContext items={ops.map((o: { id: string }) => o.id)} strategy={verticalListSortingStrategy}>
@@ -234,59 +210,7 @@ export function OperationsPanel() {
         {ops.length === 0 && <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>}
       </div>
 
-      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share Pipeline</DialogTitle>
-            <DialogDescription>Copy the link below to share your current pipeline.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input value={shareUrl} readOnly />
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>Copy link</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import Pipeline</DialogTitle>
-            <DialogDescription>Paste the 'pipeline' query string value or a full URL that contains it.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Textarea className="h-36" placeholder="Paste the 'pipeline' query string value or full URL" value={importText} onChange={(e) => setImportText(e.target.value)} />
-            {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  try {
-                    setImportError(undefined);
-                    let encoded = importText.trim();
-                    try {
-                      const maybeUrl = new URL(encoded);
-                      encoded = maybeUrl.searchParams.get("pipeline") || encoded;
-                    } catch {}
-                    const decoded = PipelineEncoder.decode(encoded);
-                    const ops = PipelineSerializer.deserialize(decoded);
-                    if (!ops) { setImportError("Invalid pipeline payload"); return; }
-                    const v = PipelineValidator.validate(ops as any);
-                    if (!v.ok) { setImportError(v.error); return; }
-                    setOperations(ops as any);
-                    setImportOpen(false);
-                  } catch (e: any) {
-                    setImportError(e?.message || "Failed to import pipeline");
-                  }
-                }}
-              >
-                Import
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+  {/* Share/Import dialogs owned by OperationsToolbar */}
   </div>
   </TooltipProvider>
   );
