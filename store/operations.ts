@@ -6,6 +6,7 @@ import { buildPathIndex, type PathIndex } from "../utils/pathSuggest";
 export type State = {
   sourceText: string;
   sourceError?: string;
+  sourceFormat: "json" | "yaml" | "csv";
   operations: Operation[];
   resultText: string;
   pipelineError?: ValidationError | undefined;
@@ -16,6 +17,7 @@ export type State = {
   future: Operation[][];
   // actions
   setSourceText: (text: string) => void;
+  setSourceFormat: (fmt: "json" | "yaml" | "csv") => void;
   addOperation: (type: OperationType, config?: any) => void;
   setOperations: (ops: Operation[]) => void;
   updateOperation: (id: string, patch: Partial<Operation>) => void;
@@ -28,13 +30,9 @@ export type State = {
 };
 
 // ---------- Utilities ----------
-const parseJSON = (txt: string): { value?: any; error?: string } => {
-  try {
-    return { value: txt.trim() === "" ? null : JSON.parse(txt) };
-  } catch (e: any) {
-    return { error: e?.message ?? "Invalid JSON" };
-  }
-};
+import { importJSON } from "../importers/json";
+import { importYAML } from "../importers/yaml";
+import { importCSV } from "../importers/csv";
 
 const safeStringify = (v: any): string => {
   try {
@@ -77,6 +75,7 @@ function runAll(input: any, ops: Operation[]): { output?: any; error?: Validatio
 
 export const useOpsStore = create<State>()((set, get) => ({
   sourceText: "{\n  \"items\": [1, 2, 3],\n  \"user\": { \"id\": 1, \"name\": \"Alice\" }\n}",
+  sourceFormat: "json",
   operations: [],
   resultText: "",
   opIndexes: [],
@@ -89,8 +88,17 @@ export const useOpsStore = create<State>()((set, get) => ({
       set({ sourceText: text.slice(0, 1024), sourceError: "JSON exceeds 5 MB limit" });
       return;
     }
-    const parsed = parseJSON(text);
+    const fmt = get().sourceFormat;
+    const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
     set({ sourceText: text, sourceError: parsed.error });
+    get().runPipeline();
+  },
+  setSourceFormat: (fmt) => {
+    set({ sourceFormat: fmt });
+    // re-parse current text with new format
+    const text = get().sourceText;
+    const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
+    set({ sourceError: parsed.error });
     get().runPipeline();
   },
   addOperation: (type: OperationType, config: any = {}) => {
@@ -135,8 +143,8 @@ export const useOpsStore = create<State>()((set, get) => ({
     get().runPipeline();
   },
   runPipeline: () => {
-    const { sourceText, operations } = get();
-    const parsed = parseJSON(sourceText);
+  const { sourceText, sourceFormat, operations } = get();
+  const parsed = sourceFormat === "json" ? importJSON(sourceText) : sourceFormat === "yaml" ? importYAML(sourceText) : importCSV(sourceText);
   if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [], intermediate: {} });
   const res = runAll(parsed.value, operations);
   if (res.error) return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes, intermediate: res.inter });

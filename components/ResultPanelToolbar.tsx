@@ -1,25 +1,40 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Copy, Download } from "lucide-react";
+import { Copy, Download, MoreHorizontal } from "lucide-react";
 import { useOpsStore, State } from "../store/operations";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { exportJSON } from "../exporters/json";
+import { exportYAML } from "../exporters/yaml";
+import { copyToClipboard, downloadText } from "../lib/io";
 
 export default function ResultPanelToolbar() {
   const resultText = useOpsStore((s: State) => s.resultText);
 
   const copy = async () => {
     await navigator.clipboard.writeText(resultText);
-    // Placeholder for toast integration
   };
-
-  const download = () => {
-    const text = resultText ?? "";
-    const blob = new Blob([text], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `result-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+  const copyAsJSON = async () => {
+    const txt = resultText || "";
+    await copyToClipboard(txt);
+  };
+  const copyAsYAML = async () => {
+    const obj = safeParse(resultText);
+    const txt = exportYAML(obj);
+    await copyToClipboard(txt);
+  };
+  const downloadJSON = () => {
+    const txt = resultText || "";
+    downloadText(`result-${ts()}.json`, txt, "application/json");
+  };
+  const downloadYAML = () => {
+    const obj = safeParse(resultText);
+    const txt = exportYAML(obj);
+    downloadText(`result-${ts()}.yaml`, txt, "text/yaml");
+  };
+  const ts = () => new Date().toISOString().replace(/[:.]/g, "-");
+  const safeParse = (t: string) => {
+    try { return t ? JSON.parse(t) : null; } catch { return null; }
   };
 
   return (
@@ -33,14 +48,19 @@ export default function ResultPanelToolbar() {
           </TooltipTrigger>
           <TooltipContent>Copy result</TooltipContent>
         </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Download result" onClick={download}>
-              <Download className="h-4 w-4" />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Export options">
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>Download result</TooltipContent>
-        </Tooltip>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={copyAsJSON}>Copy as JSON</DropdownMenuItem>
+            <DropdownMenuItem onClick={copyAsYAML}>Copy as YAML</DropdownMenuItem>
+            <DropdownMenuItem onClick={downloadJSON}>Download as JSON</DropdownMenuItem>
+            <DropdownMenuItem onClick={downloadYAML}>Download as YAML</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </TooltipProvider>
   );

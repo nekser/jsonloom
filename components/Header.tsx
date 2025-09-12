@@ -4,6 +4,8 @@ import { Undo2, Redo2 } from "lucide-react";
 import ThemeToggle from "./theme-toggle";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { useOpsStore, State } from "../store/operations";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button as UIButton } from "@/components/ui/button";
 import { useState } from "react";
 
 export default function Header() {
@@ -12,11 +14,51 @@ export default function Header() {
   const redo = useOpsStore((s: State) => s.redo);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const setSourceText = useOpsStore((s: State) => s.setSourceText);
+  const setSourceFormat = useOpsStore((s: State) => s.setSourceFormat);
+  const setOperations = useOpsStore((s: State) => s.setOperations);
+
+  async function loadDemo(kind: "json" | "yaml" | "csv") {
+    try {
+      const dataUrl = kind === "json" ? "/demo/demo.json" : kind === "yaml" ? "/demo/demo.yaml" : "/demo/demo.csv";
+      const res = await fetch(dataUrl, { cache: "no-cache" });
+      if (!res.ok) throw new Error(`Failed to load ${kind} demo (${res.status})`);
+      const text = await res.text();
+      setSourceFormat(kind);
+      setSourceText(text);
+  // Load pipeline; CSV uses a dedicated pipeline since its shape differs
+  const pipelineUrl = kind === "csv" ? "/demo/pipeline-csv.json" : "/demo/pipeline.json";
+  const pRes = await fetch(pipelineUrl, { cache: "no-cache" });
+      if (pRes.ok) {
+        const pipelineDoc = await pRes.json();
+        const { PipelineSerializer } = await import("../utils/sharing/PipelineSerializer");
+        const { PipelineValidator } = await import("../utils/sharing/PipelineValidator");
+        const ops = PipelineSerializer.deserialize(pipelineDoc);
+        if (ops) {
+          const v = PipelineValidator.validate(ops as any);
+          if (v.ok) setOperations(ops as any);
+        }
+      }
+    } catch (e) {
+      // silent fail; optionally hook toasts
+    }
+  }
+
   return (
     <header className="h-12 px-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
       <div className="font-semibold mr-auto">JSON Transformation Tool</div>
       {!isMobile ? (
         <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <UIButton variant="outline" size="sm">Demo</UIButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => loadDemo("json")}>Load JSON Demo</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => loadDemo("yaml")}>Load YAML Demo</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="ghost" size="icon" onClick={undo} aria-label="Undo">
             <Undo2 className="h-4 w-4" />
           </Button>
@@ -27,6 +69,16 @@ export default function Header() {
         </div>
       ) : (
         <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <UIButton variant="outline" size="sm">Demo</UIButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => loadDemo("json")}>Load JSON Demo</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => loadDemo("yaml")}>Load YAML Demo</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="ghost" size="icon" onClick={undo} aria-label="Undo">
             <Undo2 className="h-4 w-4" />
           </Button>

@@ -1,0 +1,25 @@
+{
+  "v": 1,
+  "ops": [
+    {
+      "id": "op-map-rows",
+      "type": "MapArray",
+      "config": {
+        "path": ".",
+        "operations": [
+          { "id": "op-name-upper", "type": "StringCase", "config": { "path": "name", "mode": "uppercase", "coerceNonString": false } },
+          { "id": "op-label", "type": "TemplateInterpolate", "config": { "path": "label", "template": "${name} <${email}>", "onMissing": "literal" } },
+          { "id": "op-coerce-order-count", "type": "CoerceType", "config": { "path": "orderCount", "to": "number", "fallback": 0 } },
+          { "id": "op-coerce-created", "type": "CoerceType", "config": { "path": "latestCreatedAt", "to": "string" } },
+          { "id": "op-coerce-shipped", "type": "CoerceType", "config": { "path": "latestShippedAt", "to": "string" } },
+          { "id": "op-parse-createdAt", "type": "ParseDate", "config": { "path": "latestCreatedAt", "format": "yyyy-LL-dd'T'HH:mm:ss'Z'", "timezone": "utc" } },
+          { "id": "op-parse-shippedAt", "type": "ParseDate", "config": { "path": "latestShippedAt", "format": "yyyy-LL-dd'T'HH:mm:ss'Z'", "timezone": "utc" } },
+          { "id": "op-diff-days-ship", "type": "DateDiff", "config": { "startPath": "latestCreatedAt", "endPath": "latestShippedAt", "unit": "days" } },
+          { "id": "op-coerce-total", "type": "CoerceType", "config": { "path": "latestOrderTotal", "to": "number", "fallback": 0 } }
+        ],
+  "onError": "skip"
+      }
+    },
+    { "id": "op-sort-by-name", "type": "SortArray", "config": { "path": ".", "by": "name", "order": "asc", "caseInsensitive": true, "nulls": "last" } }
+  ]
+}
