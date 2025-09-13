@@ -6,11 +6,15 @@ import { useOpsStore, State } from "../store/operations";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button as UIButton } from "@/components/ui/button";
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
   const isMobile = useIsMobile();
   // Undo/Redo moved to Operations toolbar
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const isLanding = pathname === "/";
 
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
   const setSourceFormat = useOpsStore((s: State) => s.setSourceFormat);
@@ -42,13 +46,29 @@ export default function Header() {
     }
   }
 
+  if (isLanding) {
+    return (
+      <header className="h-14 px-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-4">
+        <Link href="/" className="font-semibold">YourApp</Link>
+        <nav className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
+          <a href="#features">Features</a>
+          <Link href="/pricing">Pricing</Link>
+          <Link href="/blog">Blog</Link>
+        </nav>
+        <div className="ml-auto flex items-center gap-2">
+          <Button asChild size="sm"><Link href="/free">Try Free Transformer</Link></Button>
+          <ThemeToggle />
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="h-12 px-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
       <div className="font-semibold mr-auto">JSON Transformation Tool</div>
       {!isMobile ? (
         <div className="flex items-center gap-2">
-          {/* Undo/Redo controls moved to Operations panel toolbar */}
-           <DropdownMenu>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <UIButton variant="outline" size="sm">Demo</UIButton>
             </DropdownMenuTrigger>
@@ -72,7 +92,6 @@ export default function Header() {
               <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {/* Undo/Redo controls moved to Operations panel toolbar */}
           <ThemeToggle />
         </div>
       )}

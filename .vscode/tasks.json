@@ -16,6 +16,22 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "build-next-landing",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"-C",
+				"app",
+				"-s",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }
