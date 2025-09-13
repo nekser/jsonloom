@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import ThemeToggle from "./ThemeToggle";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { useOpsStore, State } from "../src/store/operations";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button as UIButton } from "@/components/ui/button";
+// removed dropdown for Demo button; use a direct button
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -66,30 +65,12 @@ export default function Header() {
       <div className="font-semibold mr-auto">JSON Transformation Tool</div>
       {!isMobile ? (
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <UIButton variant="outline" size="sm">Demo</UIButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => loadDemo("json")}>Load JSON Demo</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => loadDemo("yaml")}>Load YAML Demo</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button variant="outline" size="sm" onClick={() => loadDemo("json")}>Demo</Button>
           <ThemeToggle />
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <UIButton variant="outline" size="sm">Demo</UIButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => loadDemo("json")}>Load JSON Demo</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => loadDemo("yaml")}>Load YAML Demo</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button variant="outline" size="sm" onClick={() => loadDemo("json")}>Demo</Button>
           <ThemeToggle />
         </div>
       )}

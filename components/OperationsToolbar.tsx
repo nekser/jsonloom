@@ -10,8 +10,9 @@ import { useOpsStore, State } from "../src/store/operations";
 import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
-import { MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy, Undo2, Redo2 } from "lucide-react";
+import { MoreVertical, Share2, Download, Copy, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2 } from "lucide-react";
 import { downloadText } from "../lib/io";
+import GenerateCodeDialog from "./GenerateCodeDialog";
 
 export default function OperationsToolbar() {
   useIsMobile();
@@ -24,11 +25,12 @@ export default function OperationsToolbar() {
 
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  const [shareJson, setShareJson] = useState("");
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
   const [importError, setImportError] = useState<string | undefined>(undefined);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
-
+  const [codeOpen, setCodeOpen] = useState(false);
   // Picker trigger is dispatched elsewhere
 
   const doShare = () => {
@@ -38,6 +40,7 @@ export default function OperationsToolbar() {
     url.searchParams.set("pipeline", enc);
     const link = url.toString();
     setShareUrl(link);
+    setShareJson(JSON.stringify(ser, null, 2));
     setShareOpen(true);
     void navigator.clipboard.writeText(link);
   };
@@ -110,7 +113,7 @@ export default function OperationsToolbar() {
 
   return (
     <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
-      <div className="font-medium flex items-center gap-2">Operations</div>
+     <div className="font-medium flex items-center gap-2">Operations</div>
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" aria-label="Undo" disabled={!canUndo} onClick={undo}>
           <Undo2 className="h-4 w-4" />
@@ -128,11 +131,8 @@ export default function OperationsToolbar() {
             <DropdownMenuItem onClick={doShare}>
               <Share2 className="h-4 w-4 mr-2" /> Share
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={doCopyJson}>
-              <Copy className="h-4 w-4 mr-2" /> Copy as JSON
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={doExportJson}>
-              <Download className="h-4 w-4 mr-2" /> Export as JSON
+            <DropdownMenuItem onClick={() => setCodeOpen(true)}>
+              <Code2 className="h-4 w-4 mr-2" /> Generate Code
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 mr-2" /> Import
@@ -149,18 +149,30 @@ export default function OperationsToolbar() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       {/* Share dialog */}
       <Dialog open={shareOpen} onOpenChange={setShareOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Share Pipeline</DialogTitle>
-            <DialogDescription>Copy the link below to share your current pipeline.</DialogDescription>
+            <DialogDescription>Copy the link or JSON for your current pipeline.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             <Input value={shareUrl} readOnly />
             <div className="flex gap-2">
-              <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>Copy link</Button>
+              <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>
+                <Copy className="h-4 w-4 mr-2"/>Copy link
+              </Button>
+              <Button variant="outline" onClick={doExportJson}>
+                <Download className="h-4 w-4 mr-2"/>Export JSON
+              </Button>
+            </div>
+            <div>
+              <Textarea className="h-36" value={shareJson} readOnly />
+              <div className="mt-2 flex gap-2">
+                <Button variant="outline" onClick={doCopyJson}>
+                  <Copy className="h-4 w-4 mr-2"/>Copy JSON
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
@@ -198,6 +210,8 @@ export default function OperationsToolbar() {
           </div>
         </DialogContent>
       </Dialog>
+
+  <GenerateCodeDialog open={codeOpen} onOpenChange={setCodeOpen} />
     </div>
   );
 }
