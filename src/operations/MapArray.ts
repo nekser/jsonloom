@@ -2,6 +2,7 @@ import Ajv from "ajv";
 import type { OperationModule, Operation, OperationType } from "./types";
 import { getByPath, setByPath } from "./utils";
 import { getOperationModule } from "./index";
+import type { JSONValue } from "../types/json";
 
 export type MapArrayConfig = {
   path: string;
@@ -38,14 +39,14 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: MapArrayConfig): any {
+function apply(input: JSONValue, cfg: MapArrayConfig): JSONValue {
   const target = getByPath(input, cfg.path);
   if (!Array.isArray(target)) return input;
 
   const onError = cfg.onError ?? "propagate";
   const maxDepth = cfg.maxDepth ?? 20;
 
-  const runNested = (val: any, ops: Operation[] | undefined, depth: number): any => {
+  const runNested = (val: JSONValue, ops: Operation[] | undefined, depth: number): JSONValue => {
     if (!ops || ops.length === 0) return val;
     if (depth > maxDepth) throw new Error(`MapArray nested depth exceeded (${maxDepth})`);
     let cur = val;
@@ -53,18 +54,19 @@ function apply(input: any, cfg: MapArrayConfig): any {
       const mod = getOperationModule(op.type as OperationType);
       if (!mod) throw new Error(`Nested operation type '${op.type}' is not registered`);
   // If the operation supports a 'path' field, default empty/undefined to current context '.'
-  const hasPathField = op && op.config && Object.prototype.hasOwnProperty.call(op.config, "path");
-  const defaultHasPath = mod && mod.defaultConfig && Object.prototype.hasOwnProperty.call(mod.defaultConfig as any, "path");
-  const needsDot = (hasPathField && ((op.config as any).path == null || (op.config as any).path === "")) || (defaultHasPath && (op.config as any).path == null);
-  const effectiveConfig = needsDot ? { ...(op.config as any), path: "." } : (op.config as any);
-  const err = mod.validate(effectiveConfig, cur);
+  const hasPathField = op && op.config && Object.prototype.hasOwnProperty.call(op.config as Record<string, unknown>, "path");
+  const defaultHasPath = mod && mod.defaultConfig && Object.prototype.hasOwnProperty.call(mod.defaultConfig as Record<string, unknown>, "path");
+  const cfgObj = op.config as Record<string, unknown>;
+  const needsDot = (hasPathField && (cfgObj.path == null || cfgObj.path === "")) || (defaultHasPath && cfgObj.path == null);
+  const effectiveConfig = needsDot ? { ...cfgObj, path: "." } : cfgObj;
+  const err = mod.validate(effectiveConfig as unknown, cur);
       if (err) throw new Error(err);
-  cur = mod.apply(cur, effectiveConfig);
+  cur = mod.apply(cur, effectiveConfig as unknown);
     }
     return cur;
   };
 
-  const out = target.reduce<any[]>((acc, el) => {
+  const out = target.reduce<JSONValue[]>((acc, el) => {
     try {
   const mapped = runNested(el, cfg.operations, 1);
       acc.push(mapped);
@@ -82,7 +84,7 @@ function apply(input: any, cfg: MapArrayConfig): any {
   return setByPath(input, cfg.path, out);
 }
 
-function validate(config: MapArrayConfig, input: any): string | undefined {
+function validate(config: MapArrayConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid MapArray config";
   const arr = getByPath(input, config.path);
@@ -100,7 +102,7 @@ function validate(config: MapArrayConfig, input: any): string | undefined {
       const sample = arr[0];
       for (const op of config.operations) {
         const mod = getOperationModule(op.type as OperationType);
-        const err = mod.validate(op.config as any, sample);
+        const err = mod.validate(op.config as unknown, sample);
         if (err) return `Nested op '${op.type}' invalid: ${err}`;
       }
     }

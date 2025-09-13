@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { omitPaths } from "./objectUtils";
+import { JSONValue } from "../types/json";
 
 export type OmitPathsConfig = {
   paths: string[];
@@ -16,17 +17,17 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: OmitPathsConfig): any {
+function apply(input: JSONValue, cfg: OmitPathsConfig): JSONValue {
   return omitPaths(input, cfg.paths);
 }
 
-function validate(config: OmitPathsConfig, _input: any): string | undefined {
+function validate(config: OmitPathsConfig, _input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid OmitPaths config";
 }
 
 const mod: OperationModule<OmitPathsConfig> = {
-  type: "OmitPaths" as any,
+  type: "OmitPaths",
   apply,
   validate,
   defaultConfig: { paths: [] },

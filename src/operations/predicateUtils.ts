@@ -1,25 +1,25 @@
 export type Operator = "eq" | "neq" | "gt" | "lt" | "in" | "contains";
+import type { JSONValue } from "../types/json";
 
-function toNumber(v: any): number | null {
+function toNumber(v: JSONValue): number | null {
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
-
-function equalNumericAware(a: any, b: any): boolean {
+function equalNumericAware(a: JSONValue, b: JSONValue): boolean {
   const an = toNumber(a);
   const bn = toNumber(b);
   if (an != null && bn != null) return an === bn;
   return a === b;
 }
 
-function arrayIncludesNumericAware(arr: any[], value: any): boolean {
+function arrayIncludesNumericAware(arr: JSONValue[], value: JSONValue): boolean {
   for (const el of arr) if (equalNumericAware(el, value)) return true;
   return false;
 }
 
-export function evaluatePredicate(item: any, key: string, op: Operator, value: any): boolean {
-  const lhs = key ? (item?.[key]) : item;
+export function evaluatePredicate(item: JSONValue, key: string, op: Operator, value: JSONValue): boolean {
+  const lhs = key ? ((item as Record<string, JSONValue> | undefined)?.[key] as JSONValue) : item;
   const rhs = value;
   switch (op) {
     case "eq":
@@ -37,7 +37,7 @@ export function evaluatePredicate(item: any, key: string, op: Operator, value: a
       return a != null && b != null && a < b;
     }
     case "in": {
-      if (Array.isArray(rhs)) return arrayIncludesNumericAware(rhs, lhs);
+      if (Array.isArray(rhs)) return arrayIncludesNumericAware(rhs as JSONValue[], lhs);
       // comma-separated string list
       if (typeof rhs === "string") {
         const parts = rhs.split(",").map((s) => s.trim());
@@ -48,7 +48,7 @@ export function evaluatePredicate(item: any, key: string, op: Operator, value: a
     }
     case "contains": {
       if (typeof lhs === "string") return lhs.toLowerCase().includes(String(rhs).toLowerCase());
-      if (Array.isArray(lhs)) return arrayIncludesNumericAware(lhs, rhs);
+      if (Array.isArray(lhs)) return arrayIncludesNumericAware(lhs as JSONValue[], rhs);
       return false;
     }
     default:

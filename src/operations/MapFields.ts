@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { applyFieldMap } from "./mapUtils";
 
@@ -19,16 +20,16 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: MapFieldsConfig): any {
+function apply(input: JSONValue, cfg: MapFieldsConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
   // Convert Record<string, string> to FieldMap[]
   const fieldMaps = Object.entries(cfg.mapping).map(([to, from]) => ({ from, to }));
-  const out = arr.map((it) => applyFieldMap(it, fieldMaps));
-  return setByPath(input, cfg.path, out);
+  const out = arr.map((it) => applyFieldMap(it as Record<string, unknown>, fieldMaps));
+  return setByPath(input, cfg.path, out as JSONValue);
 }
 
-function validate(config: MapFieldsConfig, input: any): string | undefined {
+function validate(config: MapFieldsConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid MapFields config";
   const arr = getByPath(input, config.path);

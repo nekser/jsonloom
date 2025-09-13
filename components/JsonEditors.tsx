@@ -49,7 +49,7 @@ export function SourceEditor() {
       <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium flex items-center gap-2">
           Source
-          <Select value={sourceFormat} onValueChange={(v: any) => setSourceFormat(v)}>
+          <Select value={sourceFormat} onValueChange={(v: string) => setSourceFormat(v as State["sourceFormat"])}>
             <SelectTrigger className="h-7 w-[110px]">
               <SelectValue />
             </SelectTrigger>

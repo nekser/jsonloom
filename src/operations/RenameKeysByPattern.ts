@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { renameKeysByRegex } from "./objectUtils";
 
 export type RenameKeysByPatternConfig = {
@@ -23,18 +24,18 @@ const validateSchema = ajv.compile({
 function tryRegex(pattern: string, flags?: string): RegExp | string {
   try {
     return new RegExp(pattern, flags);
-  } catch (e: any) {
-    return e?.message || "Invalid regex";
+  } catch (e: unknown) {
+    return e instanceof Error ? e.message : "Invalid regex";
   }
 }
 
-function apply(input: any, cfg: RenameKeysByPatternConfig): any {
+function apply(input: JSONValue, cfg: RenameKeysByPatternConfig): JSONValue {
   const built = tryRegex(cfg.pattern, cfg.flags);
   if (!(built instanceof RegExp)) return input;
   return renameKeysByRegex(input, built, cfg.replace);
 }
 
-function validate(config: RenameKeysByPatternConfig, _input: any): string | undefined {
+function validate(config: RenameKeysByPatternConfig, _input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid RenameKeysByPattern config";
   if (config.flags && /[^gimsuy]/.test(config.flags)) return `Invalid regex flags '${config.flags}'`;
@@ -43,7 +44,7 @@ function validate(config: RenameKeysByPatternConfig, _input: any): string | unde
 }
 
 const mod: OperationModule<RenameKeysByPatternConfig> = {
-  type: "RenameKeysByPattern" as any,
+  type: "RenameKeysByPattern" as const,
   apply,
   validate,
   defaultConfig: { pattern: "", replace: "" },

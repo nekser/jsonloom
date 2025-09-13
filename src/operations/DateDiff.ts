@@ -2,6 +2,7 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import { diffBetween, type DateUnit, siblingPathWithSuffix } from "./dateUtils";
+import type { JSONValue } from "../types/json";
 
 export type DateDiffConfig = {
   startPath: string;
@@ -21,7 +22,7 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: DateDiffConfig): any {
+function apply(input: JSONValue, cfg: DateDiffConfig): JSONValue {
   const a = getByPath(input, cfg.startPath);
   const b = getByPath(input, cfg.endPath);
   const diff = diffBetween(a, b, cfg.unit);
@@ -30,13 +31,13 @@ function apply(input: any, cfg: DateDiffConfig): any {
   return setByPath(input, outPath, diff);
 }
 
-function validate(config: DateDiffConfig, _input: any): string | undefined {
+function validate(config: DateDiffConfig, _input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid DateDiff config";
 }
 
 const mod: OperationModule<DateDiffConfig> = {
-  type: "DateDiff" as any,
+  type: "DateDiff",
   apply,
   validate,
   defaultConfig: { startPath: "", endPath: "", unit: "days" },

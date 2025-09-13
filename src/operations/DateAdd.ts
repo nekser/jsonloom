@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
+import type { JSONValue } from "../types/json";
 import { addToDate, type DateUnit } from "./dateUtils";
 
 export type DateAddConfig = {
@@ -21,20 +22,20 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: DateAddConfig): any {
+function apply(input: JSONValue, cfg: DateAddConfig): JSONValue {
   const cur = getByPath(input, cfg.path);
   const iso = addToDate(cur, cfg.amount, cfg.unit);
   if (!iso) throw new Error(`DateAdd: invalid date at '${cfg.path}'`);
   return setByPath(input, cfg.path, iso);
 }
 
-function validate(config: DateAddConfig, _input: any): string | undefined {
+function validate(config: DateAddConfig, _input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid DateAdd config";
 }
 
 const mod: OperationModule<DateAddConfig> = {
-  type: "DateAdd" as any,
+  type: "DateAdd",
   apply,
   validate,
   defaultConfig: { path: "", amount: 0, unit: "days" },

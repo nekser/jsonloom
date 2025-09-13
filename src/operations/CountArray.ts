@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 
 export type CountArrayConfig = {
@@ -16,13 +17,13 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: CountArrayConfig): any {
+function apply(input: JSONValue, cfg: CountArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
   return setByPath(input, cfg.path, arr.length);
 }
 
-function validate(config: CountArrayConfig, input: any): string | undefined {
+function validate(config: CountArrayConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid CountArray config";
   const arr = getByPath(input, config.path);

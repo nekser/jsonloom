@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath } from "./utils";
+import type { JSONValue } from "../types/json";
 
 export type ExtractPathConfig = { path: string };
 
@@ -12,7 +13,7 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: ExtractPathConfig): any {
+function apply(input: JSONValue, cfg: ExtractPathConfig): JSONValue {
   return getByPath(input, cfg.path);
 }
 

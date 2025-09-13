@@ -9,7 +9,7 @@ export interface OperationMeta {
   description: string;
   // Optional: form component for rendering this operation's config UI
   // Lazy-load later to optimize bundle size
-  component?: React.ComponentType<any>;
+  component?: React.ComponentType<unknown>;
 }
 
 export const operationCatalog: OperationMeta[] = [

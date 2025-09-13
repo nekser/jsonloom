@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { buildComparator, stableSort, type Order } from "./sortUtils";
 
@@ -25,7 +26,7 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: SortArrayConfig): any {
+function apply(input: JSONValue, cfg: SortArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
   const cmp = buildComparator({ by: cfg.by, order: cfg.order, caseInsensitive: cfg.caseInsensitive, nulls: cfg.nulls });
@@ -33,7 +34,7 @@ function apply(input: any, cfg: SortArrayConfig): any {
   return setByPath(input, cfg.path, sorted);
 }
 
-function validate(config: SortArrayConfig, input: any): string | undefined {
+function validate(config: SortArrayConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid SortArray config";
   const arr = getByPath(input, config.path);

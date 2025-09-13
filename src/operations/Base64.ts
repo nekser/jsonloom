@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 
 export type Base64Mode = "encode" | "decode";
@@ -19,7 +20,7 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: Base64Config): any {
+function apply(input: JSONValue, cfg: Base64Config): JSONValue {
   const cur = getByPath(input, cfg.path);
   if (cfg.mode === "encode") {
     const s = cur == null ? "" : String(cur);
@@ -36,7 +37,7 @@ function apply(input: any, cfg: Base64Config): any {
   }
 }
 
-function validate(config: Base64Config, input: any): string | undefined {
+function validate(config: Base64Config, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid Base64 config";
   const cur = getByPath(input, config.path);

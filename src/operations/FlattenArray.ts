@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { flattenDepth } from "./arrayUtils";
 
@@ -19,7 +20,7 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: FlattenArrayConfig): any {
+function apply(input: JSONValue, cfg: FlattenArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
   const depth = cfg.depth === "infinity" ? Infinity : (cfg.depth ?? 1);
@@ -27,7 +28,7 @@ function apply(input: any, cfg: FlattenArrayConfig): any {
   return setByPath(input, cfg.path, out);
 }
 
-function validate(config: FlattenArrayConfig, input: any): string | undefined {
+function validate(config: FlattenArrayConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid FlattenArray config";
   const arr = getByPath(input, config.path);

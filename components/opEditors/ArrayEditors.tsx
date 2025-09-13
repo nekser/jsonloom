@@ -2,12 +2,20 @@ import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
 import { suggestPathTokens, suggestIndexKeys } from "../../src/utils/pathSuggest";
 
-export function FilterArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type FilterArrayConfig = {
+  path?: string;
+  key?: string;
+  operator?: "eq" | "neq" | "gt" | "lt" | "in" | "contains";
+  value?: string;
+  mode?: "keep" | "remove";
+};
+
+export function FilterArrayEditor({ config, onChange, pathIndex }: EditorProps<FilterArrayConfig>) {
   return (
     <div className="flex flex-wrap gap-2">
       <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path e.g. items" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
       <AutocompleteInput className="w-40" placeholder="key (optional)" value={config.key ?? ""} getSuggestions={(q) => suggestIndexKeys(pathIndex, q)} onChange={(v) => onChange({ key: v })} />
-      <select className="border rounded px-2 py-1" value={config.operator ?? "eq"} onChange={(e) => onChange({ operator: e.target.value })}>
+  <select className="border rounded px-2 py-1" value={config.operator ?? "eq"} onChange={(e) => onChange({ operator: (e.target as HTMLSelectElement).value as NonNullable<FilterArrayConfig["operator"]> })}>
         <option value="eq">eq</option>
         <option value="neq">neq</option>
         <option value="gt">gt</option>
@@ -16,7 +24,7 @@ export function FilterArrayEditor({ config, onChange, pathIndex }: EditorProps<a
         <option value="contains">contains</option>
       </select>
       <input className="border rounded px-2 py-1 flex-1 min-w-[20%]" placeholder="value" value={config.value ?? ""} onChange={(e) => onChange({ value: e.target.value })} />
-      <select className="border rounded px-2 py-1" value={config.mode ?? "keep"} onChange={(e) => onChange({ mode: e.target.value })}>
+  <select className="border rounded px-2 py-1" value={config.mode ?? "keep"} onChange={(e) => onChange({ mode: (e.target as HTMLSelectElement).value as NonNullable<FilterArrayConfig["mode"]> })}>
         <option value="keep">keep</option>
         <option value="remove">remove</option>
       </select>
@@ -24,12 +32,20 @@ export function FilterArrayEditor({ config, onChange, pathIndex }: EditorProps<a
   );
 }
 
-export function SortArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type SortArrayConfig = {
+  path?: string;
+  by?: string;
+  order?: "asc" | "desc";
+  caseInsensitive?: boolean;
+  nulls?: "first" | "last";
+};
+
+export function SortArrayEditor({ config, onChange, pathIndex }: EditorProps<SortArrayConfig>) {
   return (
     <div className="flex flex-wrap gap-2">
       <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
       <AutocompleteInput className="w-40" placeholder="by (optional)" value={config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(pathIndex, q)} onChange={(v) => onChange({ by: v })} />
-      <select className="border rounded px-2 py-1" value={config.order ?? "asc"} onChange={(e) => onChange({ order: e.target.value })}>
+  <select className="border rounded px-2 py-1" value={config.order ?? "asc"} onChange={(e) => onChange({ order: (e.target as HTMLSelectElement).value as NonNullable<SortArrayConfig["order"]> })}>
         <option value="asc">asc</option>
         <option value="desc">desc</option>
       </select>
@@ -37,7 +53,7 @@ export function SortArrayEditor({ config, onChange, pathIndex }: EditorProps<any
         <input type="checkbox" checked={!!config.caseInsensitive} onChange={(e) => onChange({ caseInsensitive: e.target.checked })} />
         case-insensitive
       </label>
-      <select className="border rounded px-2 py-1" value={config.nulls ?? "last"} onChange={(e) => onChange({ nulls: e.target.value })}>
+  <select className="border rounded px-2 py-1" value={config.nulls ?? "last"} onChange={(e) => onChange({ nulls: (e.target as HTMLSelectElement).value as NonNullable<SortArrayConfig["nulls"]> })}>
         <option value="first">nulls first</option>
         <option value="last">nulls last</option>
       </select>
@@ -45,7 +61,9 @@ export function SortArrayEditor({ config, onChange, pathIndex }: EditorProps<any
   );
 }
 
-export function UniqueArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type UniqueArrayConfig = { path?: string; by?: string };
+
+export function UniqueArrayEditor({ config, onChange, pathIndex }: EditorProps<UniqueArrayConfig>) {
   return (
     <div className="flex gap-2">
       <AutocompleteInput className="flex-1" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
@@ -54,7 +72,9 @@ export function UniqueArrayEditor({ config, onChange, pathIndex }: EditorProps<a
   );
 }
 
-export function FlattenArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type FlattenArrayConfig = { path?: string; depth?: number | "infinity" };
+
+export function FlattenArrayEditor({ config, onChange, pathIndex }: EditorProps<FlattenArrayConfig>) {
   return (
     <div className="flex gap-2">
       <AutocompleteInput className="flex-1" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
@@ -63,7 +83,9 @@ export function FlattenArrayEditor({ config, onChange, pathIndex }: EditorProps<
   );
 }
 
-export function SliceArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type SliceArrayConfig = { path?: string; start?: number; end?: number; step?: number };
+
+export function SliceArrayEditor({ config, onChange, pathIndex }: EditorProps<SliceArrayConfig>) {
   return (
     <div className="flex gap-2">
       <AutocompleteInput className="flex-1" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
@@ -74,12 +96,14 @@ export function SliceArrayEditor({ config, onChange, pathIndex }: EditorProps<an
   );
 }
 
-export function GroupByEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type GroupByConfig = { path?: string; by?: string; collect?: "array" | "count" | "sum"; sumPath?: string };
+
+export function GroupByEditor({ config, onChange, pathIndex }: EditorProps<GroupByConfig>) {
   return (
     <div className="flex flex-wrap gap-2">
       <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
       <AutocompleteInput className="w-40" placeholder="group by" value={config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(pathIndex, q)} onChange={(v) => onChange({ by: v })} />
-      <select className="border rounded px-2 py-1" value={config.collect ?? "array"} onChange={(e) => onChange({ collect: e.target.value })}>
+  <select className="border rounded px-2 py-1" value={config.collect ?? "array"} onChange={(e) => onChange({ collect: (e.target as HTMLSelectElement).value as NonNullable<GroupByConfig["collect"]> })}>
         <option value="array">array</option>
         <option value="count">count</option>
         <option value="sum">sum</option>
@@ -91,12 +115,14 @@ export function GroupByEditor({ config, onChange, pathIndex }: EditorProps<any>)
   );
 }
 
-export function ReduceArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type ReduceArrayConfig = { path?: string; by?: string; op?: "sum" | "avg" | "min" | "max" | "concat" };
+
+export function ReduceArrayEditor({ config, onChange, pathIndex }: EditorProps<ReduceArrayConfig>) {
   return (
     <div className="flex flex-wrap gap-2">
       <AutocompleteInput className="flex-1 min-w-[40%]" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
       <AutocompleteInput className="w-40" placeholder="by (optional)" value={config.by ?? ""} getSuggestions={(q) => suggestIndexKeys(pathIndex, q)} onChange={(v) => onChange({ by: v })} />
-      <select className="border rounded px-2 py-1" value={config.op ?? "sum"} onChange={(e) => onChange({ op: e.target.value })}>
+  <select className="border rounded px-2 py-1" value={config.op ?? "sum"} onChange={(e) => onChange({ op: (e.target as HTMLSelectElement).value as NonNullable<ReduceArrayConfig["op"]> })}>
         <option value="sum">sum</option>
         <option value="avg">avg</option>
         <option value="min">min</option>
@@ -107,7 +133,9 @@ export function ReduceArrayEditor({ config, onChange, pathIndex }: EditorProps<a
   );
 }
 
-export function CountArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type CountArrayConfig = { path?: string };
+
+export function CountArrayEditor({ config, onChange, pathIndex }: EditorProps<CountArrayConfig>) {
   return (
     <div className="flex gap-2">
       <AutocompleteInput className="w-full" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />
@@ -115,7 +143,9 @@ export function CountArrayEditor({ config, onChange, pathIndex }: EditorProps<an
   );
 }
 
-export function JoinArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
+type JoinArrayConfig = { path?: string; delimiter?: string };
+
+export function JoinArrayEditor({ config, onChange, pathIndex }: EditorProps<JoinArrayConfig>) {
   return (
     <div className="flex gap-2">
       <AutocompleteInput className="flex-1" placeholder="array path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />

@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { applyNumberAtPath, validateNumberPath } from "./numericUtils";
 
 export type MultiplyConfig = { path: string; value: number };
@@ -11,14 +12,14 @@ const schema = ajv.compile({
   additionalProperties: false,
 });
 
-function apply(input: any, cfg: MultiplyConfig): any {
+function apply(input: JSONValue, cfg: MultiplyConfig): JSONValue {
   return applyNumberAtPath(input, cfg.path, (n) => n * cfg.value);
 }
-function validate(cfg: MultiplyConfig, input: any): string | undefined {
+function validate(cfg: MultiplyConfig, input: JSONValue): string | undefined {
   const ok = schema(cfg);
   if (!ok) return schema.errors?.[0]?.message || "Invalid Multiply config";
   return validateNumberPath(input, cfg.path);
 }
 
-const mod: OperationModule<MultiplyConfig> = { type: "Multiply" as any, apply, validate, defaultConfig: { path: "", value: 1 } };
+const mod: OperationModule<MultiplyConfig> = { type: "Multiply", apply, validate, defaultConfig: { path: "", value: 1 } };
 export default mod;

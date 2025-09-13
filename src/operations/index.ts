@@ -48,7 +48,7 @@ import IsDateCompare from "./IsDateCompare";
 import DateAdd from "./DateAdd";
 import DateDiff from "./DateDiff";
 
-const registry: Record<OperationType, OperationModule> = {
+const registry: Record<OperationType, OperationModule<any>> = {
   FilterByKey,
   RenameKey,
   MapArray,
@@ -99,7 +99,7 @@ const registry: Record<OperationType, OperationModule> = {
   DateDiff,
 };
 
-export function getOperationModule(type: OperationType): OperationModule {
+export function getOperationModule(type: OperationType): OperationModule<any> {
   return registry[type];
 }
 

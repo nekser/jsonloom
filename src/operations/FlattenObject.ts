@@ -2,6 +2,7 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import { flattenObject } from "./objectUtils";
+import type { JSONValue } from "../types/json";
 
 export type FlattenObjectConfig = {
   path: string;
@@ -21,14 +22,14 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: FlattenObjectConfig): any {
+function apply(input: JSONValue, cfg: FlattenObjectConfig): JSONValue {
   const cur = getByPath(input, cfg.path);
   if (!(cur && typeof cur === "object" && !Array.isArray(cur))) return input;
   const flat = flattenObject(cur, cfg.delimiter ?? ".", cfg.maxDepth);
   return setByPath(input, cfg.path, flat);
 }
 
-function validate(config: FlattenObjectConfig, input: any): string | undefined {
+function validate(config: FlattenObjectConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid FlattenObject config";
   const cur = getByPath(input, config.path);
@@ -36,7 +37,7 @@ function validate(config: FlattenObjectConfig, input: any): string | undefined {
 }
 
 const mod: OperationModule<FlattenObjectConfig> = {
-  type: "FlattenObject" as any,
+  type: "FlattenObject",
   apply,
   validate,
   defaultConfig: { path: "", delimiter: "." },

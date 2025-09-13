@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { reduceValues, type ReduceOp } from "./reduceUtils";
 
@@ -21,15 +22,15 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: ReduceArrayConfig): any {
+function apply(input: JSONValue, cfg: ReduceArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
-  const values = cfg.by ? arr.map((it) => (it as any)?.[cfg.by!]) : arr;
+  const values = cfg.by ? arr.map((it) => (it as Record<string, JSONValue>)?.[cfg.by!]) : arr;
   const out = reduceValues(values, cfg.op);
   return setByPath(input, cfg.path, out);
 }
 
-function validate(config: ReduceArrayConfig, input: any): string | undefined {
+function validate(config: ReduceArrayConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid ReduceArray config";
   const arr = getByPath(input, config.path);

@@ -1,12 +1,13 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
+import type { JSONValue } from "../types/json";
 
 export type TargetType = "string" | "number" | "boolean" | "object" | "array";
 export type CoerceTypeConfig = {
   path: string;
   to: TargetType;
-  fallback?: any;
+  fallback?: JSONValue;
 };
 
 const ajv = new Ajv();
@@ -21,7 +22,7 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function tryCoerce(val: any, to: TargetType): { ok: true; value: any } | { ok: false } {
+function tryCoerce(val: JSONValue, to: TargetType): { ok: true; value: JSONValue } | { ok: false } {
   try {
     switch (to) {
       case "string":
@@ -42,7 +43,7 @@ function tryCoerce(val: any, to: TargetType): { ok: true; value: any } | { ok: f
         return { ok: true, value: !!val };
       }
       case "object": {
-        if (val && typeof val === "object" && !Array.isArray(val)) return { ok: true, value: val };
+  if (val && typeof val === "object" && !Array.isArray(val)) return { ok: true, value: val };
         if (typeof val === "string") {
           const parsed = JSON.parse(val);
           return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? { ok: true, value: parsed } : { ok: false };
@@ -50,7 +51,7 @@ function tryCoerce(val: any, to: TargetType): { ok: true; value: any } | { ok: f
         return { ok: false };
       }
       case "array": {
-        if (Array.isArray(val)) return { ok: true, value: val };
+  if (Array.isArray(val)) return { ok: true, value: val };
         if (typeof val === "string") {
           const parsed = JSON.parse(val);
           return Array.isArray(parsed) ? { ok: true, value: parsed } : { ok: false };
@@ -63,7 +64,7 @@ function tryCoerce(val: any, to: TargetType): { ok: true; value: any } | { ok: f
   }
 }
 
-function apply(input: any, cfg: CoerceTypeConfig): any {
+function apply(input: JSONValue, cfg: CoerceTypeConfig): JSONValue {
   const current = getByPath(input, cfg.path);
   const res = tryCoerce(current, cfg.to);
   if (!res || !res.ok) {
@@ -73,7 +74,7 @@ function apply(input: any, cfg: CoerceTypeConfig): any {
   return setByPath(input, cfg.path, res.value);
 }
 
-function validate(config: CoerceTypeConfig, input: any): string | undefined {
+function validate(config: CoerceTypeConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid CoerceType config";
   const cur = getByPath(input, config.path);

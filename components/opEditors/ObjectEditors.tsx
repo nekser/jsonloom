@@ -1,5 +1,6 @@
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
+import type { JSONValue } from "../../src/types/json";
 import { suggestPathTokens } from "../../src/utils/pathSuggest";
 
 export function RenameKeysByPatternEditor({ config, onChange }: EditorProps<{ pattern?: string; flags?: string; replace?: string }>) {
@@ -35,7 +36,7 @@ export function PickPathsEditor({ config, onChange }: EditorProps<{ paths?: stri
 
 export const OmitPathsEditor = PickPathsEditor;
 
-export function SetPathEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; value?: any }>) {
+export function SetPathEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; value?: JSONValue }>) {
   return (
     <div className="flex flex-col gap-2">
       <AutocompleteInput className="w-full" placeholder="path" value={config.path ?? ""} getSuggestions={(q) => suggestPathTokens(pathIndex, q)} onChange={(v) => onChange({ path: v })} />

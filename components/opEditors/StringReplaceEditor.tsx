@@ -1,5 +1,6 @@
 import { EditorProps } from "./common";
 import AutocompleteInput from "../AutocompleteInput";
+import { suggestPathTokens } from "../../src/utils/pathSuggest";
 
 export default function StringReplaceEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; search?: string; replace?: string }>) {
   return (
@@ -8,7 +9,7 @@ export default function StringReplaceEditor({ config, onChange, pathIndex }: Edi
         className="w-full"
         placeholder="path (optional, leave empty to apply globally)"
         value={config.path ?? ""}
-        getSuggestions={(q) => (window as any).suggestPathTokens ? (window as any).suggestPathTokens(pathIndex, q) : []}
+        getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
         onChange={(v) => onChange({ path: v })}
       />
       <div className="flex gap-2">

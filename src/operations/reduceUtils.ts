@@ -1,6 +1,7 @@
 export type ReduceOp = "sum" | "avg" | "min" | "max" | "concat";
+import type { JSONValue } from "../types/json";
 
-export function reduceValues(arr: any[], op: ReduceOp): any {
+export function reduceValues(arr: JSONValue[], op: ReduceOp): JSONValue {
   if (op === "concat") return arr.map((v) => String(v ?? "")).join("");
   const nums = arr.map((v) => (typeof v === "number" ? v : Number(v))).filter((n) => Number.isFinite(n));
   if (nums.length === 0) return op === "avg" ? 0 : 0;

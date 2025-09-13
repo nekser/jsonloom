@@ -2,6 +2,7 @@ import Ajv from "ajv";
 import type { Operation, OperationModule, OperationType } from "./types";
 import { getByPath } from "./utils";
 import { getOperationModule } from "./index";
+import type { JSONValue } from "../types/json";
 
 export type SwitchCase = { value: string; ops: Operation[] };
 export type SwitchConfig = {
@@ -31,22 +32,22 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function runPipeline(input: any, ops: Operation[] | undefined): any {
+function runPipeline(input: JSONValue, ops: Operation[] | undefined): JSONValue {
   if (!ops || ops.length === 0) return input;
   let cur = input;
   for (const op of ops) {
     const mod = getOperationModule(op.type as OperationType);
     if (!mod) throw new Error(`Operation type '${op.type}' is not registered`);
-    const err = mod.validate(op.config as any, cur);
+    const err = mod.validate(op.config as unknown, cur);
     if (err) throw new Error(err);
-    cur = mod.apply(cur, op.config as any);
+    cur = mod.apply(cur, op.config as unknown);
   }
   return cur;
 }
 
-function apply(input: any, cfg: SwitchConfig): any {
+function apply(input: JSONValue, cfg: SwitchConfig): JSONValue {
   const val = getByPath(input, cfg.path);
-  const values: any[] = Array.isArray(val) ? val : [val];
+  const values: JSONValue[] = Array.isArray(val) ? (val as JSONValue[]) : [val as JSONValue];
   // choose case if ANY value matches a case's value; if multiple cases match, first wins
   let chosenOps: Operation[] | undefined;
   outer: for (const c of cfg.cases) {
@@ -61,7 +62,7 @@ function apply(input: any, cfg: SwitchConfig): any {
   return runPipeline(input, chosenOps);
 }
 
-function validate(config: SwitchConfig, input: any): string | undefined {
+function validate(config: SwitchConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid Switch config";
   const check = (ops?: Operation[]) => {
@@ -69,7 +70,7 @@ function validate(config: SwitchConfig, input: any): string | undefined {
     for (const op of ops) {
       const mod = getOperationModule(op.type as OperationType);
       if (!mod) return `Nested operation type '${op.type}' is not registered`;
-      const err = mod.validate(op.config as any, input);
+      const err = mod.validate(op.config as unknown, input);
       if (err) return `Nested op '${op.type}' invalid: ${err}`;
     }
   };
@@ -81,7 +82,7 @@ function validate(config: SwitchConfig, input: any): string | undefined {
 }
 
 const mod: OperationModule<SwitchConfig> = {
-  type: "Switch" as any,
+  type: "Switch",
   apply,
   validate,
   defaultConfig: { path: "", cases: [], default: [] },

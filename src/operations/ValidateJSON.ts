@@ -1,22 +1,24 @@
-import Ajv, { ErrorObject } from "ajv";
+import Ajv, { type ErrorObject, type ValidateFunction, type AnySchema } from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath } from "./utils";
 
 export type ValidateJSONConfig = {
   path?: string;
-  schema?: any;
+  schema?: AnySchema;
   failOnError?: boolean; // default true
 };
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 
-function compileSchema(schema: any): { validate?: (data: any) => boolean; error?: string } {
-  if (!schema || (typeof schema === "object" && Object.keys(schema).length === 0)) return {}; // empty schema → accept anything
+function compileSchema(schema: AnySchema | undefined): { validate?: ValidateFunction<unknown>; error?: string } {
+  if (!schema || (typeof schema === "object" && Object.keys(schema as Record<string, unknown>).length === 0)) return {}; // empty schema → accept anything
   try {
     const v = ajv.compile(schema);
     return { validate: v };
-  } catch (e: any) {
-    return { error: e?.message || "Invalid JSON Schema" };
+  } catch (e: unknown) {
+    const msg = (e as { message?: string })?.message || "Invalid JSON Schema";
+    return { error: msg };
   }
 }
 
@@ -31,27 +33,27 @@ function formatErrors(errors: ErrorObject[] | null | undefined): string {
     .join("; ");
 }
 
-function apply(input: any, cfg: ValidateJSONConfig): any {
+function apply(input: JSONValue, cfg: ValidateJSONConfig): JSONValue {
   const target = cfg.path ? getByPath(input, cfg.path) : input;
   const { validate, error } = compileSchema(cfg.schema);
   if (error) throw new Error(error);
   if (!validate) return input; // empty schema
-  const ok = (validate as any)(target);
+  const ok = validate(target as unknown);
   if (ok) return input;
-  const message = formatErrors((validate as any).errors);
+  const message = formatErrors(validate.errors);
   if (cfg.failOnError ?? true) throw new Error(message || "JSON Schema validation failed");
   // Non-fatal: pass through unchanged
   return input;
 }
 
-function validate(config: ValidateJSONConfig, _input: any): string | undefined {
+function validate(config: ValidateJSONConfig, _input: JSONValue): string | undefined {
   // Basic shape only; compile schema here for early feedback
   const { error } = compileSchema(config.schema);
   if (error) return error;
 }
 
 const mod: OperationModule<ValidateJSONConfig> = {
-  type: "ValidateJSON" as any,
+  type: "ValidateJSON",
   apply,
   validate,
   defaultConfig: { path: "", schema: {}, failOnError: true },

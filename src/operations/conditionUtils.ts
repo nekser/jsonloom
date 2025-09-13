@@ -1,13 +1,14 @@
 import { getByPath } from "./utils";
 import { evaluatePredicate, type Operator } from "./predicateUtils";
+import type { JSONValue } from "../types/json";
 
 export type WhenCondition = {
   path: string;
   op: Operator | "exists";
-  value?: any;
+  value?: JSONValue;
 };
 
-export function evaluateCondition(input: any, cond: WhenCondition): boolean {
+export function evaluateCondition(input: JSONValue, cond: WhenCondition): boolean {
   // Resolve value at path; wildcard returns array of matches
   const val = getByPath(input, cond.path);
   const op = cond.op;
@@ -16,6 +17,6 @@ export function evaluateCondition(input: any, cond: WhenCondition): boolean {
     return val !== undefined && val !== null;
   }
   // Delegate to predicate utils; when wildcard produced array -> true if ANY element satisfies predicate
-  if (Array.isArray(val)) return val.some((v) => evaluatePredicate(v, "", op as Operator, cond.value));
-  return evaluatePredicate(val, "", op as Operator, cond.value);
+  if (Array.isArray(val)) return val.some((v) => evaluatePredicate(v as JSONValue, "", op as Operator, cond.value));
+  return evaluatePredicate(val as JSONValue, "", op as Operator, cond.value);
 }

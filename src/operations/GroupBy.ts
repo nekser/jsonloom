@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { groupBy, aggregateGroups, type CollectMode } from "./groupUtils";
 
@@ -23,15 +24,15 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: GroupByConfig): any {
+function apply(input: JSONValue, cfg: GroupByConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
-  const groups = groupBy(arr, cfg.by);
+  const groups = groupBy(arr as Record<string, unknown>[], cfg.by);
   const out = aggregateGroups(groups, cfg.collect ?? "array", cfg.sumPath);
-  return setByPath(input, cfg.path, out);
+  return setByPath(input, cfg.path, out as JSONValue);
 }
 
-function validate(config: GroupByConfig, input: any): string | undefined {
+function validate(config: GroupByConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid GroupBy config";
   const arr = getByPath(input, config.path);

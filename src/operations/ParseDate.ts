@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
+import type { JSONValue } from "../types/json";
 import { parseWithFormat, toISO } from "./dateUtils";
 
 export type ParseDateConfig = {
@@ -21,14 +22,14 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: ParseDateConfig): any {
+function apply(input: JSONValue, cfg: ParseDateConfig): JSONValue {
   const cur = getByPath(input, cfg.path);
   const dt = parseWithFormat(cur, cfg.format, cfg.timezone || "utc");
   if (!dt) throw new Error(`ParseDate: invalid or mismatched format at '${cfg.path}'`);
   return setByPath(input, cfg.path, toISO(dt));
 }
 
-function validate(config: ParseDateConfig, input: any): string | undefined {
+function validate(config: ParseDateConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid ParseDate config";
   const cur = getByPath(input, config.path);
@@ -36,7 +37,7 @@ function validate(config: ParseDateConfig, input: any): string | undefined {
 }
 
 const mod: OperationModule<ParseDateConfig> = {
-  type: "ParseDate" as any,
+  type: "ParseDate",
   apply,
   validate,
   defaultConfig: { path: "", format: "YYYY-MM-DD", timezone: "utc" },

@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 
 export type RenameKeyConfig = { from: string; to: string };
 
@@ -11,10 +12,10 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: RenameKeyConfig): any {
+function apply(input: JSONValue, cfg: RenameKeyConfig): JSONValue {
   if (input === null || typeof input !== "object") return input;
   if (Array.isArray(input)) return input.map((x) => apply(x, cfg));
-  const out: any = {};
+  const out: Record<string, JSONValue> = {};
   for (const [k, v] of Object.entries(input)) {
     const key = k === cfg.from ? cfg.to : k;
     out[key] = apply(v, cfg);

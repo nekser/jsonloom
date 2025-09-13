@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { applyNumberAtPath, validateNumberPath } from "./numericUtils";
 
 export type ModuloConfig = { path: string; value: number };
@@ -11,15 +12,15 @@ const schema = ajv.compile({
   additionalProperties: false,
 });
 
-function apply(input: any, cfg: ModuloConfig): any {
+function apply(input: JSONValue, cfg: ModuloConfig): JSONValue {
   return applyNumberAtPath(input, cfg.path, (n) => n % cfg.value);
 }
-function validate(cfg: ModuloConfig, input: any): string | undefined {
+function validate(cfg: ModuloConfig, input: JSONValue): string | undefined {
   const ok = schema(cfg);
   if (!ok) return schema.errors?.[0]?.message || "Invalid Modulo config";
   if (cfg.value === 0) return "Modulo by zero";
   return validateNumberPath(input, cfg.path);
 }
 
-const mod: OperationModule<ModuloConfig> = { type: "Modulo" as any, apply, validate, defaultConfig: { path: "", value: 1 } };
+const mod: OperationModule<ModuloConfig> = { type: "Modulo", apply, validate, defaultConfig: { path: "", value: 1 } };
 export default mod;
