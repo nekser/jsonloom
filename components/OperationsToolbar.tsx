@@ -10,13 +10,17 @@ import { useOpsStore, State } from "../store/operations";
 import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../utils/sharing/PipelineValidator";
-import { Plus, MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy } from "lucide-react";
+import { Plus, MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy, Undo2, Redo2 } from "lucide-react";
 import { downloadText } from "../lib/io";
 
 export default function OperationsToolbar() {
   const isMobile = useIsMobile();
   const ops = useOpsStore((s: State) => s.operations);
   const setOperations = useOpsStore((s: State) => s.setOperations);
+  const undo = useOpsStore((s: State) => s.undo);
+  const redo = useOpsStore((s: State) => s.redo);
+  const canUndo = useOpsStore((s: State) => s.past.length > 0);
+  const canRedo = useOpsStore((s: State) => s.future.length > 0);
 
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
@@ -107,6 +111,12 @@ export default function OperationsToolbar() {
     <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
       <div className="font-medium flex items-center gap-2">Operations</div>
       <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" aria-label="Undo" disabled={!canUndo} onClick={undo}>
+          <Undo2 className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" aria-label="Redo" disabled={!canRedo} onClick={redo}>
+          <Redo2 className="h-4 w-4" />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="More actions">

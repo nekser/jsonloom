@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Undo2, Redo2 } from "lucide-react";
-import ThemeToggle from "./theme-toggle";
+import ThemeToggle from "./ThemeToggle";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { useOpsStore, State } from "../store/operations";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -10,8 +9,7 @@ import { useState } from "react";
 
 export default function Header() {
   const isMobile = useIsMobile();
-  const undo = useOpsStore((s: State) => s.undo);
-  const redo = useOpsStore((s: State) => s.redo);
+  // Undo/Redo moved to Operations toolbar
   const [menuOpen, setMenuOpen] = useState(false);
 
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
@@ -49,12 +47,7 @@ export default function Header() {
       <div className="font-semibold mr-auto">JSON Transformation Tool</div>
       {!isMobile ? (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={undo} aria-label="Undo">
-            <Undo2 className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={redo} aria-label="Redo">
-            <Redo2 className="h-4 w-4" />
-          </Button>
+          {/* Undo/Redo controls moved to Operations panel toolbar */}
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <UIButton variant="outline" size="sm">Demo</UIButton>
@@ -79,12 +72,7 @@ export default function Header() {
               <DropdownMenuItem onClick={() => loadDemo("csv")}>Load CSV Demo</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="icon" onClick={undo} aria-label="Undo">
-            <Undo2 className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={redo} aria-label="Redo">
-            <Redo2 className="h-4 w-4" />
-          </Button>
+          {/* Undo/Redo controls moved to Operations panel toolbar */}
           <ThemeToggle />
         </div>
       )}
