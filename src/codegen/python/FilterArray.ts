@@ -1,4 +1,4 @@
-import type { JSONValue } from "../../types/json";
+import type { JSONValue } from "../../src/types/json";
 import { accessExpr } from "../utils/pathResolution";
 
 type Cfg = { path: string; key?: string; operator: string; value: JSONValue; mode?: "keep" | "remove" };

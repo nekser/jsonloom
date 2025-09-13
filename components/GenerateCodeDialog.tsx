@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Copy, Download } from "lucide-react";
 import { useOpsStore, State } from "../src/store/operations";
-import { generatePipeline, type Lang } from "../codegen/generate";
+import { generatePipeline, type Lang } from "@/src/codegen/generate";
 import { downloadText } from "../lib/io";
 
 export default function GenerateCodeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {

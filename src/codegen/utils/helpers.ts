@@ -1,9 +1,8 @@
-import type { JSONValue } from "../../types/json";
+import type { JSONValue } from "../../src/types/json";
 
 export type Language = "javascript" | "python" | "php";
 
 export function mapOperator(lang: Language, op: string): string {
-  // Normalize small set of common ops
   const m: Record<string, Record<string, string>> = {
     javascript: { eq: "===", neq: "!==", gt: ">", lt: "<", gte: ">=", lte: "<=", contains: "includes", in: "includes" },
     python: { eq: "==", neq: "!=", gt: ">", lt: "<", gte: ">=", lte: "<=", contains: "in", in: "in" },
@@ -13,7 +12,6 @@ export function mapOperator(lang: Language, op: string): string {
 }
 
 export function literal(lang: Language, v: JSONValue): string {
-  // Stringify JSON scalars and objects appropriately for each language
   if (lang === "javascript") return JSON.stringify(v, null, 2);
   if (lang === "python") return toPythonLiteral(v);
   return toPhpLiteral(v);
