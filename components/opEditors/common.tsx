@@ -1,4 +1,4 @@
-import type { OperationType } from "../../store/operations";
+import type { OperationType } from "../../src/store/operations";
 
 export type EditorProps<T = any> = {
   config: T;

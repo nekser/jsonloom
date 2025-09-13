@@ -1,7 +1,7 @@
 import AutocompleteInput from "../AutocompleteInput";
 import MultiAutocompleteChips from "../MultiAutocompleteChips";
 import { EditorProps } from "./common";
-import { suggestIndexKeys } from "../../utils/pathSuggest";
+import { suggestIndexKeys } from "../../src/utils/pathSuggest";
 
 export default function FilterByKeyEditor({ config, onChange, pathIndex }: EditorProps<{ mode?: string; keys?: string[] }>) {
   return (

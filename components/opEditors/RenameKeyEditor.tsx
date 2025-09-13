@@ -1,6 +1,6 @@
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
-import { suggestIndexKeys } from "../../utils/pathSuggest";
+import { suggestIndexKeys } from "../../src/utils/pathSuggest";
 
 export default function RenameKeyEditor({ config, onChange, pathIndex }: EditorProps<{ from?: string; to?: string }>) {
   return (

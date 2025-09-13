@@ -1,6 +1,6 @@
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
-import { suggestPathTokens } from "../../utils/pathSuggest";
+import { suggestPathTokens } from "../../src/utils/pathSuggest";
 
 export function RenameKeysByPatternEditor({ config, onChange }: EditorProps<{ pattern?: string; flags?: string; replace?: string }>) {
   return (

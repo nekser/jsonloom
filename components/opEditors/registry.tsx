@@ -1,4 +1,4 @@
-import type { OperationType } from "../../store/operations";
+import type { OperationType } from "../../src/store/operations";
 import type { OperationEditors } from "./common";
 import FilterByKeyEditor from "./FilterByKeyEditor";
 import RenameKeyEditor from "./RenameKeyEditor";

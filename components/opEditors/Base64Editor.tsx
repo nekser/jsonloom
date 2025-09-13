@@ -1,6 +1,6 @@
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
-import { suggestPathTokens } from "../../utils/pathSuggest";
+import { suggestPathTokens } from "../../src/utils/pathSuggest";
 
 export default function Base64Editor({ config, onChange, pathIndex }: EditorProps<{ path?: string; mode?: string }>) {
   return (

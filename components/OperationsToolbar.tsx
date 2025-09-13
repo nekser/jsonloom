@@ -6,10 +6,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "./hooks/useMediaQuery";
-import { useOpsStore, State } from "../store/operations";
-import { PipelineSerializer } from "../utils/sharing/PipelineSerializer";
-import { PipelineEncoder } from "../utils/sharing/PipelineEncoder";
-import { PipelineValidator } from "../utils/sharing/PipelineValidator";
+import { useOpsStore, State } from "../src/store/operations";
+import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
+import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
+import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
 import { Plus, MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy, Undo2, Redo2 } from "lucide-react";
 import { downloadText } from "../lib/io";
 

@@ -2,10 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Copy, Download, MoreHorizontal } from "lucide-react";
-import { useOpsStore, State } from "../store/operations";
+import { useOpsStore, State } from "../src/store/operations";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { exportJSON } from "../exporters/json";
-import { exportYAML } from "../exporters/yaml";
+import { exportJSON } from "../src/exporters/json";
+import { exportYAML } from "../src/exporters/yaml";
 import { copyToClipboard, downloadText } from "../lib/io";
 
 export default function ResultPanelToolbar() {

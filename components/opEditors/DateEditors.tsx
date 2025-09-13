@@ -1,6 +1,6 @@
 import React from "react";
 import AutocompleteInput from "../../components/AutocompleteInput";
-import { suggestPathTokens } from "../../utils/pathSuggest";
+import { suggestPathTokens } from "../../src/utils/pathSuggest";
 
 type PathIndex = any;
 

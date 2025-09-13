@@ -1,7 +1,7 @@
 import AutocompleteInput from "../AutocompleteInput";
 import MultiAutocompleteChips from "../MultiAutocompleteChips";
 import { EditorProps } from "./common";
-import { suggestPathTokens, suggestIndexKeys } from "../../utils/pathSuggest";
+import { suggestPathTokens, suggestIndexKeys } from "../../src/utils/pathSuggest";
 
 export function FilterArrayEditor({ config, onChange, pathIndex }: EditorProps<any>) {
   return (

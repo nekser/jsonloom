@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "./ThemeToggle";
 import { useIsMobile } from "./hooks/useMediaQuery";
-import { useOpsStore, State } from "../store/operations";
+import { useOpsStore, State } from "../src/store/operations";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button as UIButton } from "@/components/ui/button";
 import { useState } from "react";
@@ -33,8 +33,8 @@ export default function Header() {
   const pRes = await fetch(pipelineUrl, { cache: "no-cache" });
       if (pRes.ok) {
         const pipelineDoc = await pRes.json();
-        const { PipelineSerializer } = await import("../utils/sharing/PipelineSerializer");
-        const { PipelineValidator } = await import("../utils/sharing/PipelineValidator");
+        const { PipelineSerializer } = await import("../src/utils/sharing/PipelineSerializer");
+        const { PipelineValidator } = await import("../src/utils/sharing/PipelineValidator");
         const ops = PipelineSerializer.deserialize(pipelineDoc);
         if (ops) {
           const v = PipelineValidator.validate(ops as any);

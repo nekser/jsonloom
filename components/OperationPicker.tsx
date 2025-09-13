@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useOpsStore, type State, type OperationType } from "../store/operations";
-import { operationCatalog, type OperationMeta } from "../operations/operationRegistry";
+import { useOpsStore, type State, type OperationType } from "../src/store/operations";
+import { operationCatalog, type OperationMeta } from "../src/operations/operationRegistry";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

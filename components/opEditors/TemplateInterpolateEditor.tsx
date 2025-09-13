@@ -1,6 +1,6 @@
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
-import { suggestPathTokens } from "../../utils/pathSuggest";
+import { suggestPathTokens } from "../../src/utils/pathSuggest";
 
 export default function TemplateInterpolateEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; template?: string; onMissing?: string }>) {
   return (

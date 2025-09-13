@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Upload } from "lucide-react";
-import { useOpsStore, State } from "../store/operations";
+import { useOpsStore, State } from "../src/store/operations";
 
 export default function SourcePanelToolbar() {
   const setSourceText = useOpsStore((s: State) => s.setSourceText);

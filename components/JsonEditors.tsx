@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { useOpsStore, State } from "../store/operations";
+import { useOpsStore, State } from "../src/store/operations";
 import SourcePanelToolbar from "./SourcePanelToolbar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ResultPanelToolbar from "./ResultPanelToolbar";
