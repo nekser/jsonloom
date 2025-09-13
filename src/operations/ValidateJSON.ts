@@ -44,7 +44,7 @@ function apply(input: any, cfg: ValidateJSONConfig): any {
   return input;
 }
 
-function validate(config: ValidateJSONConfig, input: any): string | undefined {
+function validate(config: ValidateJSONConfig, _input: any): string | undefined {
   // Basic shape only; compile schema here for early feedback
   const { error } = compileSchema(config.schema);
   if (error) return error;

@@ -1,5 +1,6 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
+import type { JSONValue } from "../types/json";
 import { deepStringReplace, getByPath, setByPath } from "./utils";
 export type StringReplaceConfig = { path?: string; search: string; replace: string };
 
@@ -15,12 +16,12 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: StringReplaceConfig): any {
+function apply(input: JSONValue, cfg: StringReplaceConfig): JSONValue {
   const search = cfg.search ?? "";
   const replace = cfg.replace ?? "";
   if (!cfg.path) return deepStringReplace(input, search, replace);
   const target = getByPath(input, cfg.path);
-  const replaceStr = (s: any) => (typeof s === "string" ? s.split(search).join(replace) : s);
+  const replaceStr = (s: JSONValue) => (typeof s === "string" ? (s as string).split(search).join(replace) : s);
   if (typeof target === "string") return setByPath(input, cfg.path, replaceStr(target));
   if (Array.isArray(target)) return setByPath(input, cfg.path, target.map(replaceStr));
   if (target && typeof target === "object") return setByPath(input, cfg.path, deepStringReplace(target, search, replace));

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { useOpsStore, OperationType, State } from "../src/store/operations";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import AutocompleteInput from "./AutocompleteInput";
 import { buildPathIndex, suggestPathTokens } from "../src/utils/pathSuggest";
@@ -19,7 +19,6 @@ import OperationsToolbar from "./OperationsToolbar";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -27,7 +26,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -39,6 +37,9 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Eye, EyeOff, GripVertical, Menu, Trash2, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import type { CSSProperties } from "react";
+import type { JSONValue, JSONObject } from "../src/types/json";
+import type { PathIndex } from "../src/utils/pathSuggest";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -50,7 +51,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
   const opIndexes = useOpsStore((s: State) => s.opIndexes);
   const interText = useOpsStore((s: State) => s.intermediate?.[op?.id ?? ""]);
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition } as React.CSSProperties;
+  const style: CSSProperties = { transform: CSS.Transform.toString(transform), transition };
   const err = useOpsStore((s: State) => s.pipelineError);
   const hasErr = err && err.opId === op?.id ? err.message : undefined;
   const isEnabled = op?.enabled !== false;
@@ -66,7 +67,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
     }
   }, [sourceText]);
   const fallbackIndex = useMemo(() => buildPathIndex(sourceObj), [sourceObj]);
-  const pathIndex = opIndexes[index] ?? fallbackIndex;
+  const pathIndex: PathIndex = (opIndexes[index] as PathIndex) ?? fallbackIndex;
 
   if (!op) return null;
   return (
@@ -100,16 +101,50 @@ function OperationCard({ id, index }: { id: string; index: number }) {
       </div>
       <div className="mt-2">
         {op.type === "MapArray" ? (
-          <MapArrayEditor op={op as any} pathIndex={pathIndex} onUpdate={(cfg: any) => update(op.id, { config: { ...op.config, ...cfg } })} />
+          <MapArrayEditor
+            op={op}
+            pathIndex={pathIndex}
+            onUpdate={(cfg) => {
+              const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+              const merged = { ...base, ...(cfg as Record<string, unknown>) } as unknown as JSONObject;
+              update(op.id, { config: merged });
+            }}
+          />
         ) : op.type === "If" ? (
-          <IfEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg: any) => update(op.id, { config: { ...op.config, ...cfg } })} />
+          <IfEditorCard
+            op={op}
+            pathIndex={pathIndex}
+            onUpdate={(cfg) => {
+              const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+              const merged = { ...base, ...(cfg as Record<string, unknown>) } as unknown as JSONObject;
+              update(op.id, { config: merged });
+            }}
+          />
         ) : op.type === "Switch" ? (
-          <SwitchEditorCard op={op as any} pathIndex={pathIndex} onUpdate={(cfg: any) => update(op.id, { config: { ...op.config, ...cfg } })} />
+          <SwitchEditorCard
+            op={op}
+            pathIndex={pathIndex}
+            onUpdate={(cfg) => {
+              const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+              const merged = { ...base, ...(cfg as Record<string, unknown>) } as unknown as JSONObject;
+              update(op.id, { config: merged });
+            }}
+          />
         ) : (() => {
           const t = op.type as keyof typeof editors;
           const Editor = editors[t];
-          if (!Editor) return <div className="text-xs text-neutral-500">No editor available for type '{op.type}'.</div>;
-          return <Editor config={op.config} onChange={(patch: any) => update(op.id, { config: { ...op.config, ...patch } })} pathIndex={pathIndex} />;
+          if (!Editor) return <div className="text-xs text-neutral-500">No editor available for type &#39;{op.type}&#39;.</div>;
+          return (
+            <Editor
+              config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
+              onChange={(patch) => {
+                const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+                const merged = { ...base, ...(patch as Record<string, unknown>) } as unknown as JSONObject;
+                update(op.id, { config: merged });
+              }}
+              pathIndex={pathIndex}
+            />
+          );
         })()}
       </div>
       {!isMobile && op.debugOpen && (
@@ -200,7 +235,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           </div>
         </SheetContent>
       </Sheet>
-      <Dialog open={isMobile && mobileResultOpen} onOpenChange={setMobileResultOpen}>
+  <Dialog open={isMobile && mobileResultOpen} onOpenChange={setMobileResultOpen}>
         <DialogContent className="max-w-[95vw]">
           <DialogHeader>
             <DialogTitle>Intermediate Result</DialogTitle>
@@ -241,19 +276,19 @@ export function OperationsPanel() {
     const url = new URL(window.location.href);
     const encoded = url.searchParams.get("pipeline");
     if (!encoded) return;
-    const decoded = PipelineEncoder.decode(encoded);
-    const ops = PipelineSerializer.deserialize(decoded);
+  const decoded = PipelineEncoder.decode(encoded);
+  const ops = PipelineSerializer.deserialize(decoded);
     if (!ops) return;
-    const v = PipelineValidator.validate(ops as any);
+  const v = PipelineValidator.validate(ops);
     if (!v.ok) return;
-    setOperations(ops as any);
+  setOperations(ops);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    const handler = () => setPickerOpen(true);
-    window.addEventListener("open-catalog" as any, handler);
-    return () => window.removeEventListener("open-catalog" as any, handler);
+  const handler = () => setPickerOpen(true);
+  window.addEventListener("open-catalog" as unknown as keyof WindowEventMap, handler as EventListener);
+  return () => window.removeEventListener("open-catalog" as unknown as keyof WindowEventMap, handler as EventListener);
   }, []);
 
   return (
@@ -286,7 +321,7 @@ export function OperationsPanel() {
 }
 
 // Nested editor for MapArray
-function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
+function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: PathIndex; onUpdate: (patch: Record<string, unknown>) => void }) {
   const [open, setOpen] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
@@ -298,27 +333,39 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
       return null;
     }
   }, [sourceText]);
-  const sampleIndex = useMemo(() => {
+  const cfgPath = useMemo(() => {
+    const cfg = (op.config as Record<string, unknown>) || {};
+    return typeof cfg.path === "string" ? cfg.path : "";
+  }, [op.config]);
+  const sampleIndex: PathIndex = useMemo(() => {
     if (!sourceObj) return pathIndex;
     try {
-      const arr = getByPath(sourceObj, (op as any).config.path ?? "");
+      const arr = getByPath(sourceObj as JSONValue, cfgPath);
       if (Array.isArray(arr) && arr.length > 0) return buildPathIndex(arr[0]);
-    } catch {}
+    } catch {
+      // ignore JSON path errors when building sample index
+      // console.debug("sampleIndex build error", e);
+    }
     return pathIndex;
-  }, [sourceObj, (op as any).config.path, pathIndex]);
+  }, [sourceObj, pathIndex, cfgPath]);
 
-  const nestedOps: Operation[] = (op as any).config.operations ?? [];
+  const nestedOps: Operation[] = (op.config as Record<string, unknown>)?.operations as Operation[] ?? [];
 
   const onAddNested = (type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
     onUpdate({ operations: [...nestedOps, newOp] });
     setPickerOpen(false);
-  setLastAddedId(newOp.id);
+    setLastAddedId(newOp.id);
   };
 
   const onUpdateNested = (id: string, patch: Partial<Operation>) => {
-    const next = nestedOps.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
+    const next = nestedOps.map((n) => {
+      if (n.id !== id) return n;
+      const base = (n.config && typeof n.config === "object" && !Array.isArray(n.config) ? (n.config as Record<string, unknown>) : {});
+      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config) ? (patch.config as Record<string, unknown>) : {});
+      return { ...n, ...patch, config: ({ ...base, ...patchCfg } as unknown as JSONObject) };
+    });
     onUpdate({ operations: next });
   };
 
@@ -345,7 +392,7 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
         <AutocompleteInput
       className="w-full"
           placeholder="path e.g. items"
-          value={(op as any).config.path ?? ""}
+          value={typeof (op.config as Record<string, unknown>)?.path === "string" ? ((op.config as Record<string, unknown>).path as string) : ""}
           getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
           onChange={(v) => onUpdate({ path: v })}
         />
@@ -356,7 +403,7 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
         </Button>
         <div className="flex items-center gap-2 text-xs">
           <span>onError</span>
-          <Select value={(op as any).config.onError ?? "propagate"} onValueChange={(v) => onUpdate({ onError: v })}>
+          <Select value={(op.config as Record<string, unknown>)?.onError as string ?? "propagate"} onValueChange={(v) => onUpdate({ onError: v })}>
             <SelectTrigger className="h-7 px-2 py-1">
               <SelectValue />
             </SelectTrigger>
@@ -401,11 +448,11 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
 }
 
 // If editor with nested Then/Else pipelines
-function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
+function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: PathIndex; onUpdate: (patch: Record<string, unknown>) => void }) {
   const [thenOpen, setThenOpen] = useState(true);
   const [elseOpen, setElseOpen] = useState(true);
-  const nestedThen: Operation[] = (op as any).config.then ?? [];
-  const nestedElse: Operation[] = (op as any).config.else ?? [];
+  const nestedThen: Operation[] = (op.config as Record<string, unknown>)?.then as Operation[] ?? [];
+  const nestedElse: Operation[] = (op.config as Record<string, unknown>)?.else as Operation[] ?? [];
   const [thenPickerOpen, setThenPickerOpen] = useState(false);
   const [elsePickerOpen, setElsePickerOpen] = useState(false);
   const [lastAddedThenId, setLastAddedThenId] = useState<string | null>(null);
@@ -413,9 +460,10 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
 
   const addNested = (block: "then" | "else", type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
-    const key = block === "then" ? "then" : "else";
-    const arr = (op as any).config[key] ?? [];
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
+  const key = block === "then" ? "then" : "else";
+  const base = op.config as Record<string, unknown>;
+  const arr = (base?.[key] as Operation[]) ?? [];
     onUpdate({ [key]: [...arr, newOp] });
     if (block === "then") {
       setThenOpen(true);
@@ -429,23 +477,30 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
   };
 
   const updateNested = (block: "then" | "else", id: string, patch: Partial<Operation>) => {
-    const arr: Operation[] = (op as any).config[block] ?? [];
-    const next = arr.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
+    const base = op.config as Record<string, unknown>;
+    const arr: Operation[] = (base?.[block] as Operation[]) ?? [];
+    const next = arr.map((n) => {
+      if (n.id !== id) return n;
+      const baseCfg = (n.config && typeof n.config === "object" && !Array.isArray(n.config) ? (n.config as Record<string, unknown>) : {});
+      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config) ? (patch.config as Record<string, unknown>) : {});
+      return { ...n, ...patch, config: ({ ...baseCfg, ...patchCfg } as unknown as JSONObject) };
+    });
     onUpdate({ [block]: next });
   };
 
   const deleteNested = (block: "then" | "else", id: string) => {
-    const arr: Operation[] = (op as any).config[block] ?? [];
+    const base = op.config as Record<string, unknown>;
+    const arr: Operation[] = (base?.[block] as Operation[]) ?? [];
     onUpdate({ [block]: arr.filter((n) => n.id !== id) });
   };
 
   return (
     <div className="flex flex-col gap-3">
       {(() => {
-        const t = (op as any).type as keyof typeof editors;
+        const t = op.type as keyof typeof editors;
         const Editor = editors[t];
         return Editor ? (
-          <Editor config={(op as any).config} onChange={(patch: any) => onUpdate(patch)} pathIndex={pathIndex} />
+          <Editor config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})} onChange={(patch) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
   <div className="border rounded-md p-2 op-surface">
@@ -523,10 +578,10 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: a
 }
 
 // Switch editor with cases
-function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: any; onUpdate: (patch: any) => void }) {
-  const config = (op as any).config || {};
-  const cases: Array<{ value: string; ops: Operation[] }> = config.cases ?? [];
-  const defOps: Operation[] | undefined = config.default ?? [];
+function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: PathIndex; onUpdate: (patch: Record<string, unknown>) => void }) {
+  const config = (op.config as Record<string, unknown>) || {};
+  const cases: Array<{ value: string; ops: Operation[] }> = (config.cases as Array<{ value: string; ops: Operation[] }>) ?? [];
+  const defOps: Operation[] | undefined = (config.default as Operation[]) ?? [];
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
   const [lastAddedCaseOpId, setLastAddedCaseOpId] = useState<Record<number, string | null>>({});
@@ -542,14 +597,22 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
   };
   const addOpToCase = (i: number, type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
     const next = cases.map((c, idx) => (idx === i ? { ...c, ops: [...c.ops, newOp] } : c));
     onUpdate({ cases: next });
     setPickerIndex(null);
   setLastAddedCaseOpId((prev) => ({ ...prev, [i]: newOp.id }));
   };
   const updateNested = (i: number, id: string, patch: Partial<Operation>) => {
-    const next = cases.map((c, idx) => (idx === i ? { ...c, ops: c.ops.map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n)) } : c));
+    const next = cases.map((c, idx) => (idx === i ? {
+      ...c,
+      ops: c.ops.map((n) => {
+        if (n.id !== id) return n;
+        const baseCfg = (n.config && typeof n.config === "object" && !Array.isArray(n.config) ? (n.config as Record<string, unknown>) : {});
+        const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config) ? (patch.config as Record<string, unknown>) : {});
+        return { ...n, ...patch, config: ({ ...baseCfg, ...patchCfg } as unknown as JSONObject) };
+      })
+    } : c));
     onUpdate({ cases: next });
   };
   const deleteNested = (i: number, id: string) => {
@@ -559,14 +622,19 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
 
   const addDefaultOp = (type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: mod?.defaultConfig ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
     const next = [...(defOps ?? []), newOp];
     onUpdate({ default: next });
     setDefaultPickerOpen(false);
   setLastAddedDefaultOpId(newOp.id);
   };
   const updateDefaultNested = (id: string, patch: Partial<Operation>) => {
-    const next = (defOps ?? []).map((n) => (n.id === id ? { ...n, ...patch, config: { ...n.config, ...patch.config } } : n));
+    const next = (defOps ?? []).map((n) => {
+      if (n.id !== id) return n;
+      const baseCfg = (n.config && typeof n.config === "object" && !Array.isArray(n.config) ? (n.config as Record<string, unknown>) : {});
+      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config) ? (patch.config as Record<string, unknown>) : {});
+      return { ...n, ...patch, config: ({ ...baseCfg, ...patchCfg } as unknown as JSONObject) };
+    });
     onUpdate({ default: next });
   };
   const deleteDefaultNested = (id: string) => {
@@ -576,10 +644,10 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
   return (
     <div className="flex flex-col gap-3">
       {(() => {
-        const t = (op as any).type as keyof typeof editors;
+        const t = op.type as keyof typeof editors;
         const Editor = editors[t];
         return Editor ? (
-          <Editor config={config} onChange={(patch: any) => onUpdate(patch)} pathIndex={pathIndex} />
+          <Editor config={config as Record<string, unknown>} onChange={(patch) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
       <div className="flex items-center gap-2">
@@ -587,7 +655,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
       </div>
       {cases.map((c, i) => (
   <div key={i} className="border rounded-md p-2 op-surface">
-          <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2">
             <div className="font-medium text-sm">Case: <Input className="w-full sm:w-40 ml-1 h-7" value={c.value} onChange={(e) => updateCaseValue(i, e.target.value)} /></div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setPickerIndex(i)}>Add operation</Button>
@@ -628,7 +696,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
             <Button variant="outline" size="sm" onClick={() => setDefaultPickerOpen(true)}>Add operation</Button>
           </div>
         </div>
-        <DndContext onDragEnd={({ active, over }) => {
+  <DndContext onDragEnd={({ active, over }) => {
           if (!over || active.id === over.id) return;
           const ids = (defOps ?? []).map((n) => n.id);
           const from = ids.indexOf(String(active.id));
@@ -658,9 +726,9 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
   );
 }
 
-function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialCollapsed }: { op: Operation; sampleIndex: any; onUpdate: (id: string, patch: Partial<Operation>) => void; onDelete: (id: string) => void; initialCollapsed?: boolean }) {
+function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialCollapsed }: { op: Operation; sampleIndex: PathIndex; onUpdate: (id: string, patch: Partial<Operation>) => void; onDelete: (id: string) => void; initialCollapsed?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: op.id });
-  const style: any = { transform: CSS.Transform.toString(transform), transition };
+  const style: CSSProperties = { transform: CSS.Transform.toString(transform), transition };
   const [collapsed, setCollapsed] = useState(initialCollapsed ?? false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [swiped, setSwiped] = useState(false);
@@ -669,7 +737,7 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
       ref={setNodeRef}
       style={style}
   className="border rounded p-2 op-surface"
-      onTouchStart={(e) => setTouchStartX(e.changedTouches[0]?.clientX ?? null)}
+  onTouchStart={(e) => setTouchStartX(e.changedTouches[0]?.clientX ?? null)}
       onTouchEnd={(e) => {
         if (touchStartX == null) return;
         const dx = (e.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
@@ -714,39 +782,51 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
       {!collapsed && (
         <div className="mt-2">
           {/* MapArray recursive */}
-          {op.type === "MapArray" && (
+      {op.type === "MapArray" && (
             <MapArrayEditor
-              op={op as any}
+        op={op}
               pathIndex={sampleIndex}
-              onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
+              onUpdate={(cfg) => {
+                const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+                onUpdate(op.id, { config: ({ ...base, ...(cfg as Record<string, unknown>) } as unknown as JSONObject) });
+              }}
             />
           )}
           {/* If / Switch nested editors with full Then/Else & Cases/Default UI */}
-          {op.type === "If" && (
+      {op.type === "If" && (
             <IfEditorCard
-              op={op as any}
+        op={op}
               pathIndex={sampleIndex}
-              onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
+              onUpdate={(cfg) => {
+                const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+                onUpdate(op.id, { config: ({ ...base, ...(cfg as Record<string, unknown>) } as unknown as JSONObject) });
+              }}
             />
           )}
-          {op.type === "Switch" && (
+      {op.type === "Switch" && (
             <SwitchEditorCard
-              op={op as any}
+        op={op}
               pathIndex={sampleIndex}
-              onUpdate={(cfg) => onUpdate(op.id, { config: { ...(op as any).config, ...cfg } })}
+              onUpdate={(cfg) => {
+                const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+                onUpdate(op.id, { config: ({ ...base, ...(cfg as Record<string, unknown>) } as unknown as JSONObject) });
+              }}
             />
           )}
           {/* Generic editors via registry */}
           {(() => {
-            const t = (op as any).type as keyof typeof editors;
+      const t = op.type as keyof typeof editors;
             const Editor = editors[t];
             if (!Editor) return null;
             // Avoid double-rendering when specific nested editors above handled the type
             if (op.type === "MapArray" || op.type === "If" || op.type === "Switch") return null;
             return (
               <Editor
-                config={(op as any).config}
-                onChange={(patch: any) => onUpdate(op.id, { config: { ...(op as any).config, ...patch } })}
+                config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
+                onChange={(patch) => {
+                  const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
+                  onUpdate(op.id, { config: ({ ...base, ...(patch as Record<string, unknown>) } as unknown as JSONObject) });
+                }}
                 pathIndex={sampleIndex}
               />
             );

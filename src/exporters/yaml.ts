@@ -1,6 +1,8 @@
 import YAML from "yaml";
 
-export function exportYAML(value: any): string {
+import type { JSONValue } from "../types/json";
+
+export function exportYAML(value: JSONValue): string {
   try {
     return YAML.stringify(value);
   } catch {

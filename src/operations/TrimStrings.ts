@@ -35,7 +35,7 @@ function apply(input: any, cfg: TrimStringsConfig): any {
   return input;
 }
 
-function validate(config: TrimStringsConfig, input: any): string | undefined {
+function validate(config: TrimStringsConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid TrimStrings config";
 }

@@ -5,9 +5,6 @@ function toNumber(v: any): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function normalize(val: any): any {
-  return val;
-}
 
 function equalNumericAware(a: any, b: any): boolean {
   const an = toNumber(a);

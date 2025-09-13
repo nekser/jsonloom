@@ -1,4 +1,4 @@
-import { useState } from "react";
+// no local state needed here
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
 

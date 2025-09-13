@@ -49,7 +49,7 @@ export default function AutocompleteInput({
     const el = inputRef.current;
     if (!el) return;
     setInputWidth(el.offsetWidth);
-  }, [inputRef.current]);
+  }, []);
 
   useEffect(() => {
     setHighlight(0);
@@ -94,7 +94,7 @@ export default function AutocompleteInput({
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        onBlur={(e) => {
+  onBlur={() => {
           // delay close to allow click selection
           setTimeout(() => setOpen(false), 100);
         }}

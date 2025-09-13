@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Editor from "@monaco-editor/react";
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
+import type { JSONValue } from "../../src/types/json";
 
-export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; schema?: any; failOnError?: boolean }>) {
+export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; schema?: JSONValue; failOnError?: boolean }>) {
   const [text, setText] = useState<string>(() => toPretty(config.schema));
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -11,11 +12,12 @@ export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<
     const t = val ?? "";
     setText(t);
     try {
-      const parsed = t.trim() ? JSON.parse(t) : {};
+      const parsed = t.trim() ? (JSON.parse(t) as JSONValue) : {};
       setError(undefined);
       onChange({ schema: parsed });
-    } catch (e: any) {
-      setError(e?.message || "Invalid JSON");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Invalid JSON";
+      setError(msg);
     }
   };
 
@@ -25,7 +27,7 @@ export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<
         className="w-full"
         placeholder="path (optional)"
         value={config.path ?? ""}
-        getSuggestions={(q) => (window as any).suggestPathTokens ? (window as any).suggestPathTokens(pathIndex, q) : []}
+  getSuggestions={(q) => (globalThis as unknown as { suggestPathTokens?: (idx: unknown, q: string) => string[] }).suggestPathTokens ? (globalThis as unknown as { suggestPathTokens?: (idx: unknown, q: string) => string[] }).suggestPathTokens!(pathIndex, q) : []}
         onChange={(v) => onChange({ path: v })}
       />
       <div className="flex items-center gap-3 text-xs">
@@ -49,6 +51,6 @@ export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<
   );
 }
 
-function toPretty(obj: any): string {
+function toPretty(obj: unknown): string {
   try { return JSON.stringify(obj ?? {}, null, 2); } catch { return "{}"; }
 }

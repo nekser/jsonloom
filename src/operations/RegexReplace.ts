@@ -54,7 +54,7 @@ function apply(input: any, cfg: RegexReplaceConfig): any {
   return input;
 }
 
-function validate(config: RegexReplaceConfig, input: any): string | undefined {
+function validate(config: RegexReplaceConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid RegexReplace config";
   // ensure flags contain only valid ones

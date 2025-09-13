@@ -47,7 +47,7 @@ function apply(input: any, cfg: StringCaseConfig): any {
   return setByPath(input, cfg.path, convert(cur, cfg.mode, coerce));
 }
 
-function validate(config: StringCaseConfig, input: any): string | undefined {
+function validate(config: StringCaseConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid StringCase config";
 }

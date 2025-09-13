@@ -7,28 +7,30 @@
 // - setByPath writes immutably; for wildcard paths, if 'val' is an array with the same arity as matches,
 //   values are applied element-wise in traversal order; otherwise a single value is broadcast to all matches
 
-export function getByPath(obj: any, path: string): any {
+import type { JSONValue, JSONObject } from "../types/json";
+
+export function getByPath(obj: JSONValue, path: string): JSONValue | JSONValue[] {
   if (!path || path === ".") return obj;
   const parts = path.split(".");
   const hasWildcard = parts.includes("*");
   if (!hasWildcard) {
-    return parts.reduce((acc, seg) => (acc == null ? acc : (acc as any)[seg]), obj);
+    return parts.reduce<JSONValue | undefined>((acc, seg) => (acc == null ? acc : (acc as JSONObject)[seg]), obj as JSONValue) as JSONValue;
   }
   // wildcard resolution -> collect flat matches
-  let nodes: any[] = [obj];
+  let nodes: JSONValue[] = [obj];
   for (const seg of parts) {
-    const next: any[] = [];
+    const next: JSONValue[] = [];
     if (seg === "*") {
       for (const n of nodes) {
         if (Array.isArray(n)) {
           for (const v of n) next.push(v);
         } else if (n && typeof n === "object") {
-          for (const v of Object.values(n)) next.push(v);
+          for (const v of Object.values(n as JSONObject)) next.push(v as JSONValue);
         } // else: not traversable -> no matches
       }
     } else {
       for (const n of nodes) {
-        if (n != null && typeof n === "object") next.push((n as any)[seg]);
+        if (n != null && typeof n === "object") next.push((n as JSONObject)[seg]);
       }
     }
     nodes = next;
@@ -37,7 +39,7 @@ export function getByPath(obj: any, path: string): any {
   return nodes;
 }
 
-export function setByPath(obj: any, path: string, val: any): any {
+export function setByPath(obj: JSONValue, path: string, val: JSONValue | JSONValue[]): JSONValue {
   if (!path || path === ".") return val;
   const parts = path.split(".");
   const hasWildcard = parts.includes("*");
@@ -45,10 +47,10 @@ export function setByPath(obj: any, path: string, val: any): any {
   // provider yields element-wise values for wildcard matches, or broadcasts a single value
   const provider = createValueProvider(val, hasWildcard);
 
-  function rec(node: any, idx: number): any {
+  function rec(node: JSONValue, idx: number): JSONValue {
     if (idx >= parts.length) {
       // leaf replacement
-      return provider.next();
+      return provider.next() as JSONValue;
     }
     const seg = parts[idx];
     if (seg === "*") {
@@ -63,9 +65,9 @@ export function setByPath(obj: any, path: string, val: any): any {
       }
       if (node && typeof node === "object") {
         let changed = false;
-        const out: any = { ...node };
-        for (const k of Object.keys(node)) {
-          const child = (node as any)[k];
+        const out: JSONObject = { ...(node as JSONObject) };
+        for (const k of Object.keys(node as JSONObject)) {
+          const child = (node as JSONObject)[k] as JSONValue;
           const nextChild = rec(child, idx + 1);
           if (nextChild !== child) {
             out[k] = nextChild;
@@ -82,49 +84,49 @@ export function setByPath(obj: any, path: string, val: any): any {
       // For wildcard scenarios, do not create missing branches (no-op). For concrete full path, mimic previous behavior.
       if (hasWildcard) return node;
       // create branches
-      const nextContainer: any = {};
-      const nextChild = rec(undefined, idx + 1);
+      const nextContainer: JSONObject = {};
+      const nextChild = rec(undefined as unknown as JSONValue, idx + 1);
       nextContainer[seg] = nextChild;
       return nextContainer;
     }
-    const curChild = (node as any)[seg];
+    const curChild = (node as JSONObject)[seg] as JSONValue;
     const nextChild = rec(curChild, idx + 1);
     if (nextChild === curChild) return node;
-    const clone = Array.isArray(node) ? [...node] : { ...node };
-    (clone as any)[seg] = nextChild;
+    const clone: JSONValue = Array.isArray(node) ? [...node] : { ...(node as JSONObject) };
+    (clone as JSONObject)[seg] = nextChild;
     return clone;
   }
 
   return rec(obj, 0);
 }
 
-function createValueProvider(val: any, wildcard: boolean) {
+function createValueProvider(val: JSONValue | JSONValue[], wildcard: boolean) {
   if (!wildcard) {
     return { next: () => val };
   }
   if (Array.isArray(val)) {
     let i = 0;
-    let last = val.length > 0 ? val[val.length - 1] : undefined;
+    let last: JSONValue | undefined = val.length > 0 ? (val[val.length - 1] as JSONValue) : undefined;
     return {
       next: () => {
         if (i < val.length) {
-          const v = val[i++];
+          const v = val[i++] as JSONValue;
           last = v;
           return v;
         }
-        return last;
+        return last as JSONValue;
       },
     };
   }
   return { next: () => val };
 }
 
-export function deepStringReplace(input: any, search: string, replace: string): any {
+export function deepStringReplace(input: JSONValue, search: string, replace: string): JSONValue {
   if (typeof input === "string") return input.split(search).join(replace);
   if (Array.isArray(input)) return input.map((x) => deepStringReplace(x, search, replace));
   if (input && typeof input === "object") {
-    const out: any = {};
-    for (const [k, v] of Object.entries(input)) out[k] = deepStringReplace(v, search, replace);
+    const out: JSONObject = {};
+    for (const [k, v] of Object.entries(input as JSONObject)) out[k] = deepStringReplace(v, search, replace);
     return out;
   }
   return input;

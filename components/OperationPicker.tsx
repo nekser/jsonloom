@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useOpsStore, type State, type OperationType } from "../src/store/operations";
 import { operationCatalog, type OperationMeta } from "../src/operations/operationRegistry";
 import { useIsMobile } from "./hooks/useMediaQuery";
@@ -28,14 +28,14 @@ export default function OperationPicker({ open, onOpenChange, onSelect }: { open
     return () => clearTimeout(t);
   }, [search]);
 
-  const normalize = (s: string) => s.toLowerCase();
-  const match = (item: OperationMeta, q: string) =>
-    normalize(item.label).includes(normalize(q)) || normalize(item.description).includes(normalize(q)) || normalize(item.type).includes(normalize(q));
+  const normalize = useCallback((s: string) => s.toLowerCase(), []);
+  const match = useCallback((item: OperationMeta, q: string) =>
+    normalize(item.label).includes(normalize(q)) || normalize(item.description).includes(normalize(q)) || normalize(item.type).includes(normalize(q)), [normalize]);
 
   const filtered = useMemo(() => {
     if (!debounced.trim()) return catalog;
     return catalog.filter((it) => match(it, debounced));
-  }, [catalog, debounced]);
+  }, [catalog, debounced, match]);
 
   const commitSelection = (item: OperationMeta) => {
     if (onSelect) onSelect(item.type);

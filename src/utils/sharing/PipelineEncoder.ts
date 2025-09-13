@@ -1,15 +1,15 @@
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string";
 
 export const PipelineEncoder = {
-  encode(json: any): string {
+  encode(json: unknown): string {
     const raw = JSON.stringify(json);
     return compressToEncodedURIComponent(raw);
   },
-  decode(s: string): any | undefined {
+  decode<T = unknown>(s: string): T | undefined {
     try {
       const raw = decompressFromEncodedURIComponent(s);
       if (!raw) return undefined;
-      return JSON.parse(raw);
+      return JSON.parse(raw) as T;
     } catch {
       return undefined;
     }

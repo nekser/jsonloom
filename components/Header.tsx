@@ -5,14 +5,12 @@ import { useIsMobile } from "./hooks/useMediaQuery";
 import { useOpsStore, State } from "../src/store/operations";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button as UIButton } from "@/components/ui/button";
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Header() {
   const isMobile = useIsMobile();
   // Undo/Redo moved to Operations toolbar
-  const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const isLanding = pathname === "/";
 
@@ -37,11 +35,11 @@ export default function Header() {
         const { PipelineValidator } = await import("../src/utils/sharing/PipelineValidator");
         const ops = PipelineSerializer.deserialize(pipelineDoc);
         if (ops) {
-          const v = PipelineValidator.validate(ops as any);
-          if (v.ok) setOperations(ops as any);
+          const v = PipelineValidator.validate(ops);
+          if (v.ok) setOperations(ops);
         }
       }
-    } catch (e) {
+  } catch {
       // silent fail; optionally hook toasts
     }
   }

@@ -1,7 +1,9 @@
-export function importJSON(text: string): { value?: any; error?: string } {
+import type { JSONValue } from "../types/json";
+
+export function importJSON(text: string): { value?: JSONValue; error?: string } {
   try {
     return { value: text.trim() === "" ? null : JSON.parse(text) };
-  } catch (e: any) {
-    return { error: e?.message ?? "Invalid JSON" };
+  } catch (e: unknown) {
+    return { error: (e as { message?: string })?.message ?? "Invalid JSON" };
   }
 }

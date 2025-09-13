@@ -1,4 +1,6 @@
-export function exportJSON(value: any): string {
+import type { JSONValue } from "../types/json";
+
+export function exportJSON(value: JSONValue): string {
   try {
     return JSON.stringify(value, null, 2);
   } catch {

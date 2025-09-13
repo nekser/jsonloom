@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { JSONValue } from "../../src/types/json";
 
 // Build all possible dot-notation paths for object keys, expanding arrays as [index] only for indexing,
 // but for suggestions we focus on object keys and support depth-aware next-key suggestions.
@@ -14,7 +15,7 @@ export type PathIndex = {
   anyKeys: Set<string>;
 };
 
-export function buildPathIndex(root: any): PathIndex {
+export function buildPathIndex(root: JSONValue | undefined | null): PathIndex {
   const allPaths: string[] = [];
   const children = new Map<string, Set<string>>();
   const roots = new Set<string>();
@@ -28,7 +29,7 @@ export function buildPathIndex(root: any): PathIndex {
     children.set(prefix, set);
   };
 
-  const visit = (node: any, prefix: string) => {
+  const visit = (node: JSONValue | undefined | null, prefix: string) => {
     if (!node || typeof node !== "object") return;
     if (Array.isArray(node)) {
       // Suggest a limited range of numeric indices at this prefix
@@ -57,7 +58,8 @@ export function buildPathIndex(root: any): PathIndex {
       if (!prefix) roots.add(k);
       addChild(prefix, k);
       anyKeys.add(k);
-      visit((node as any)[k], cur);
+  const rec: Record<string, JSONValue | undefined | null> = node as Record<string, JSONValue | undefined | null>;
+  visit(rec[k], cur);
     }
   };
 
@@ -90,24 +92,25 @@ export function suggestPathTokens(index: PathIndex, input: string): string[] {
 }
 
 // Suggest object keys (for operations like FilterByKey) at the top level based on the source root value.
-export function suggestTopLevelKeys(root: any, startsWith: string): string[] {
+export function suggestTopLevelKeys(root: JSONValue, startsWith: string): string[] {
   if (!root || typeof root !== "object" || Array.isArray(root)) return [];
   const s = startsWith.toLowerCase();
-  return Object.keys(root).filter((k) => k.toLowerCase().startsWith(s));
+  return Object.keys(root as Record<string, unknown>).filter((k) => k.toLowerCase().startsWith(s));
 }
 
 // Collect unique keys across the entire object tree
-export function suggestAnyKeys(root: any, startsWith: string): string[] {
+export function suggestAnyKeys(root: JSONValue, startsWith: string): string[] {
   const set = new Set<string>();
-  const visit = (node: any) => {
+  const visit = (node: JSONValue) => {
     if (!node || typeof node !== "object") return;
     if (Array.isArray(node)) {
       for (let i = 0; i < Math.min(100, node.length); i++) visit(node[i]);
       return;
     }
-    for (const k of Object.keys(node)) {
+    for (const k of Object.keys(node as Record<string, unknown>)) {
       set.add(k);
-      visit((node as any)[k]);
+      const rec = node as Record<string, JSONValue>;
+      visit(rec[k]);
     }
   };
   visit(root);
@@ -115,7 +118,7 @@ export function suggestAnyKeys(root: any, startsWith: string): string[] {
   return Array.from(set).filter((k) => k.toLowerCase().startsWith(s)).sort();
 }
 
-export function usePathIndex(root: any): PathIndex {
+export function usePathIndex(root: JSONValue): PathIndex {
   return useMemo(() => buildPathIndex(root), [root]);
 }
 

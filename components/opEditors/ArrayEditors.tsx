@@ -1,5 +1,4 @@
 import AutocompleteInput from "../AutocompleteInput";
-import MultiAutocompleteChips from "../MultiAutocompleteChips";
 import { EditorProps } from "./common";
 import { suggestPathTokens, suggestIndexKeys } from "../../src/utils/pathSuggest";
 

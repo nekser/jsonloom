@@ -57,7 +57,9 @@ export type OperationType =
 
 // OperationType is the single source of truth for operation identifiers.
 
-export interface Operation<T = any> {
+import type { JSONValue } from "../types/json";
+
+export interface Operation<T = JSONValue> {
   id: string;
   type: OperationType;
   config: T;
@@ -65,10 +67,10 @@ export interface Operation<T = any> {
   debugOpen?: boolean; // persisted UI state for intermediate viewer
 }
 
-export interface OperationModule<TConfig = any> {
+export interface OperationModule<TConfig = unknown> {
   type: OperationType;
-  apply: (input: any, config: TConfig) => any;
-  validate: (config: TConfig, input: any) => string | undefined;
+  apply: (input: JSONValue, config: TConfig) => JSONValue;
+  validate: (config: TConfig, input: JSONValue) => string | undefined;
   defaultConfig?: TConfig;
 }
 

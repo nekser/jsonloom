@@ -20,7 +20,7 @@ function apply(input: any, cfg: DeletePathConfig): any {
   return deleteByPath(input, cfg.path);
 }
 
-function validate(config: DeletePathConfig, input: any): string | undefined {
+function validate(config: DeletePathConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid DeletePath config";
 }

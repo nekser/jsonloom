@@ -11,10 +11,10 @@ export function uniqueBy<T>(arr: T[], by?: string): T[] {
     }
     return out;
   }
-  const seen = new Set<any>();
+  const seen = new Set<unknown>();
   const out: T[] = [];
   for (const item of arr) {
-    const key = (item as any)?.[by];
+    const key = (typeof item === "object" && item !== null ? (item as Record<string, unknown>)[by] : undefined);
     if (!seen.has(key)) {
       seen.add(key);
       out.push(item);

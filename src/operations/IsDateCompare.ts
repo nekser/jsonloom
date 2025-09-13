@@ -1,6 +1,7 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
-import { getByPath } from "./utils";
+import { getByPath, setByPath } from "./utils";
+import type { JSONValue } from "../types/json";
 import { compareDates, parseDateString } from "./dateUtils";
 
 export type DateCompareOp = "after" | "afterOrEqual" | "before" | "beforeOrEqual";
@@ -35,20 +36,19 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-function apply(input: any, cfg: IsDateCompareConfig): any {
+function apply(input: JSONValue, cfg: IsDateCompareConfig): JSONValue {
   const a = getByPath(input, cfg.path);
   const b = typeof cfg.compareTo === "string" ? cfg.compareTo : getByPath(input, cfg.compareTo.path);
   const res = compareDates(a, b, cfg.op);
   if (res == null) throw new Error("IsDateCompare: invalid date(s)");
   if (cfg.resultPath && cfg.resultPath.length > 0) {
     // Write result at provided path relative to current input
-    const { setByPath } = require("./utils");
-    return setByPath(input, cfg.resultPath, res);
+    return setByPath(input, cfg.resultPath, res as unknown as JSONValue);
   }
-  return res; // returns boolean usable by If/FilterArray directly
+  return res as unknown as JSONValue; // returns boolean usable by If/FilterArray directly
 }
 
-function validate(config: IsDateCompareConfig, input: any): string | undefined {
+function validate(config: IsDateCompareConfig, input: JSONValue): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid IsDateCompare config";
   const a = getByPath(input, config.path);
@@ -59,7 +59,7 @@ function validate(config: IsDateCompareConfig, input: any): string | undefined {
 }
 
 const mod: OperationModule<IsDateCompareConfig> = {
-  type: "IsDateCompare" as any,
+  type: "IsDateCompare",
   apply,
   validate,
   defaultConfig: { path: "", compareTo: "", op: "after" },

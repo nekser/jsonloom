@@ -28,7 +28,7 @@ function apply(input: any, cfg: DateAddConfig): any {
   return setByPath(input, cfg.path, iso);
 }
 
-function validate(config: DateAddConfig, input: any): string | undefined {
+function validate(config: DateAddConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid DateAdd config";
 }

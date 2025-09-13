@@ -21,7 +21,7 @@ function apply(input: any, cfg: NormalizeKeyCaseConfig): any {
   return normalizeKeyCase(input, cfg.mode);
 }
 
-function validate(config: NormalizeKeyCaseConfig, input: any): string | undefined {
+function validate(config: NormalizeKeyCaseConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid NormalizeKeyCase config";
 }

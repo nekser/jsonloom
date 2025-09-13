@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 import { getOperationModule, Operation, OperationType, ValidationError } from "../operations/index";
+import type { JSONValue } from "../types/json";
 import { buildPathIndex, type PathIndex } from "../utils/pathSuggest";
 
 export type State = {
@@ -18,7 +19,7 @@ export type State = {
   // actions
   setSourceText: (text: string) => void;
   setSourceFormat: (fmt: "json" | "yaml" | "csv") => void;
-  addOperation: (type: OperationType, config?: any) => void;
+  addOperation: (type: OperationType, config?: JSONValue) => void;
   setOperations: (ops: Operation[]) => void;
   updateOperation: (id: string, patch: Partial<Operation>) => void;
   deleteOperation: (id: string) => void;
@@ -34,7 +35,7 @@ import { importJSON } from "../importers/json";
 import { importYAML } from "../importers/yaml";
 import { importCSV } from "../importers/csv";
 
-const safeStringify = (v: any): string => {
+const safeStringify = (v: JSONValue): string => {
   try {
     return JSON.stringify(v, null, 2);
   } catch {
@@ -42,16 +43,13 @@ const safeStringify = (v: any): string => {
   }
 };
 
-function validateOp(op: Operation, input: any): string | undefined {
-  const mod = getOperationModule(op.type);
-  return mod?.validate(op.config as any, input);
-}
+const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
 
-function runAll(input: any, ops: Operation[]): { output?: any; error?: ValidationError; indexes: PathIndex[]; inter: Record<string, any> } {
+function runAll(input: JSONValue, ops: Operation[]): { output?: JSONValue; error?: ValidationError; indexes: PathIndex[]; inter: Record<string, JSONValue> } {
   try {
     let cur = input;
     const indexes: PathIndex[] = [];
-    const inter: Record<string, any> = {};
+    const inter: Record<string, JSONValue> = {};
     for (const op of ops) {
       // Index the state BEFORE applying this op
       indexes.push(buildPathIndex(cur));
@@ -62,14 +60,14 @@ function runAll(input: any, ops: Operation[]): { output?: any; error?: Validatio
   }
   const mod = getOperationModule(op.type);
   if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes, inter };
-  const err = mod.validate(op.config as any, cur);
+  const err = mod.validate(op.config as unknown, cur);
   if (err) return { error: { opId: op.id, message: err }, indexes, inter };
-  cur = mod.apply(cur, op.config as any);
+  cur = mod.apply(cur, op.config as unknown);
       inter[op.id] = cur;
     }
     return { output: cur, indexes, inter };
-  } catch (e: any) {
-    return { error: { message: e?.message ?? "Pipeline failed" }, indexes: [], inter: {} };
+  } catch (e: unknown) {
+    return { error: { message: (e as { message?: string })?.message ?? "Pipeline failed" }, indexes: [], inter: {} as Record<string, JSONValue> };
   }
 }
 
@@ -101,9 +99,11 @@ export const useOpsStore = create<State>()((set, get) => ({
     set({ sourceError: parsed.error });
     get().runPipeline();
   },
-  addOperation: (type: OperationType, config: any = {}) => {
+  addOperation: (type: OperationType, config: JSONValue = {} as JSONValue) => {
     const mod = getOperationModule(type);
-    const initial = Object.keys(config).length ? config : (mod?.defaultConfig ?? {});
+    const initial: JSONValue = isObject(config) && Object.keys(config).length > 0
+      ? (config as JSONValue)
+      : ((mod?.defaultConfig as JSONValue | undefined) ?? ({} as JSONValue));
     set((s) => ({
       past: [...s.past, s.operations],
       future: [],
@@ -119,9 +119,16 @@ export const useOpsStore = create<State>()((set, get) => ({
   set((s) => ({
       past: [...s.past, s.operations],
       future: [],
-      operations: s.operations.map((op) =>
-        op.id === id ? { ...op, ...patch, config: { ...op.config, ...patch.config } } : op
-      ),
+      operations: s.operations.map((op) => {
+        if (op.id !== id) return op;
+        const base = { ...op, ...patch } as Operation;
+        if (patch.config !== undefined) {
+          base.config = isObject(op.config) && isObject(patch.config)
+            ? ({ ...(op.config as Record<string, unknown>), ...(patch.config as Record<string, unknown>) } as unknown as JSONValue)
+            : (patch.config as JSONValue);
+        }
+        return base;
+      }),
     }));
     get().runPipeline();
   },
@@ -146,11 +153,15 @@ export const useOpsStore = create<State>()((set, get) => ({
   const { sourceText, sourceFormat, operations } = get();
   const parsed = sourceFormat === "json" ? importJSON(sourceText) : sourceFormat === "yaml" ? importYAML(sourceText) : importCSV(sourceText);
   if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [], intermediate: {} });
-  const res = runAll(parsed.value, operations);
-  if (res.error) return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes, intermediate: res.inter });
+  const res = runAll(parsed.value as JSONValue, operations);
+  if (res.error) {
+    const interText: Record<string, string> = {};
+    for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v as JSONValue);
+    return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes, intermediate: interText });
+  }
   const interText: Record<string, string> = {};
-  for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v);
-  set({ resultText: safeStringify(res.output), pipelineError: undefined, opIndexes: res.indexes, intermediate: interText });
+  for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v as JSONValue);
+  set({ resultText: safeStringify((res.output ?? null) as JSONValue), pipelineError: undefined, opIndexes: res.indexes, intermediate: interText });
   },
   clearAll: () =>
     set({

@@ -9,9 +9,10 @@ export const PipelineSerializer = {
   serialize(ops: Operation[]): SerializedPipelineV1 {
     return { v: 1, ops };
   },
-  deserialize(obj: any): Operation[] | undefined {
+  deserialize(obj: unknown): Operation[] | undefined {
     if (!obj || typeof obj !== "object") return undefined;
-    if (obj.v !== 1 || !Array.isArray(obj.ops)) return undefined;
-    return obj.ops as Operation[];
+    const anyObj = obj as { v?: unknown; ops?: unknown };
+    if (anyObj.v !== 1 || !Array.isArray(anyObj.ops)) return undefined;
+    return anyObj.ops as Operation[];
   },
 };

@@ -20,7 +20,7 @@ function apply(input: any, cfg: OmitPathsConfig): any {
   return omitPaths(input, cfg.paths);
 }
 
-function validate(config: OmitPathsConfig, input: any): string | undefined {
+function validate(config: OmitPathsConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid OmitPaths config";
 }

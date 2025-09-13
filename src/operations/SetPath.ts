@@ -22,7 +22,7 @@ function apply(input: any, cfg: SetPathConfig): any {
   return setByPath(input, cfg.path, cfg.value);
 }
 
-function validate(config: SetPathConfig, input: any): string | undefined {
+function validate(config: SetPathConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid SetPath config";
 }

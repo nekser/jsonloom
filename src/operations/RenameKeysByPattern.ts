@@ -34,7 +34,7 @@ function apply(input: any, cfg: RenameKeysByPatternConfig): any {
   return renameKeysByRegex(input, built, cfg.replace);
 }
 
-function validate(config: RenameKeysByPatternConfig, input: any): string | undefined {
+function validate(config: RenameKeysByPatternConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid RenameKeysByPattern config";
   if (config.flags && /[^gimsuy]/.test(config.flags)) return `Invalid regex flags '${config.flags}'`;

@@ -10,21 +10,21 @@ export function buildComparator({
   order?: Order;
   caseInsensitive?: boolean;
   nulls?: "first" | "last";
-}) {
+}): (a: unknown, b: unknown) => number {
   const dir = order === "desc" ? -1 : 1;
-  const normalize = (v: any) => {
+  const normalize = (v: unknown) => {
     if (v == null) return v;
     if (typeof v === "string" && caseInsensitive) return v.toLowerCase();
     return v;
   };
-  return (a: any, b: any) => {
-    const va = normalize(by ? a?.[by] : a);
-    const vb = normalize(by ? b?.[by] : b);
+  return (a: unknown, b: unknown) => {
+    const va = normalize(by && typeof a === "object" && a !== null ? (a as Record<string, unknown>)[by] : a);
+    const vb = normalize(by && typeof b === "object" && b !== null ? (b as Record<string, unknown>)[by] : b);
     if (va == null && vb == null) return 0;
     if (va == null) return nulls === "first" ? -1 : 1;
     if (vb == null) return nulls === "first" ? 1 : -1;
-    if (va < vb) return -1 * dir;
-    if (va > vb) return 1 * dir;
+    if ((va as number | string) < (vb as number | string)) return -1 * dir;
+    if ((va as number | string) > (vb as number | string)) return 1 * dir;
     return 0;
   };
 }

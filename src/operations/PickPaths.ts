@@ -20,7 +20,7 @@ function apply(input: any, cfg: PickPathsConfig): any {
   return pickPaths(input, cfg.paths);
 }
 
-function validate(config: PickPathsConfig, input: any): string | undefined {
+function validate(config: PickPathsConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid PickPaths config";
 }

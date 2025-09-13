@@ -30,7 +30,7 @@ function apply(input: any, cfg: DateDiffConfig): any {
   return setByPath(input, outPath, diff);
 }
 
-function validate(config: DateDiffConfig, input: any): string | undefined {
+function validate(config: DateDiffConfig, _input: any): string | undefined {
   const ok = validateSchema(config);
   if (!ok) return validateSchema.errors?.[0]?.message || "Invalid DateDiff config";
 }

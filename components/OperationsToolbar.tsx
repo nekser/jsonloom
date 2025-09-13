@@ -10,11 +10,11 @@ import { useOpsStore, State } from "../src/store/operations";
 import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
-import { Plus, MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy, Undo2, Redo2 } from "lucide-react";
+import { MoreVertical, Trash2, ToggleRight, ToggleLeft, Share2, Upload, Download, Copy, Undo2, Redo2 } from "lucide-react";
 import { downloadText } from "../lib/io";
 
 export default function OperationsToolbar() {
-  const isMobile = useIsMobile();
+  useIsMobile();
   const ops = useOpsStore((s: State) => s.operations);
   const setOperations = useOpsStore((s: State) => s.setOperations);
   const undo = useOpsStore((s: State) => s.undo);
@@ -29,12 +29,10 @@ export default function OperationsToolbar() {
   const [importError, setImportError] = useState<string | undefined>(undefined);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
-  const openPicker = () => {
-    window.dispatchEvent(new Event("open-catalog" as any));
-  };
+  // Picker trigger is dispatched elsewhere
 
   const doShare = () => {
-    const ser = PipelineSerializer.serialize(ops as any);
+    const ser = PipelineSerializer.serialize(ops);
     const enc = PipelineEncoder.encode(ser);
     const url = new URL(window.location.href);
     url.searchParams.set("pipeline", enc);
@@ -45,12 +43,12 @@ export default function OperationsToolbar() {
   };
 
   const doEnableAll = () => {
-    const next = (ops as any[]).map(op => ({ ...op, enabled: true }));
-    setOperations(next as any);
+    const next = ops.map(op => ({ ...op, enabled: true }));
+    setOperations(next);
   };
   const doDisableAll = () => {
-    const next = (ops as any[]).map(op => ({ ...op, enabled: false }));
-    setOperations(next as any);
+    const next = ops.map(op => ({ ...op, enabled: false }));
+    setOperations(next);
   };
   const doClearAll = () => {
     setConfirmClearOpen(false);
@@ -58,14 +56,14 @@ export default function OperationsToolbar() {
   };
 
   const doExportJson = () => {
-    const ser = PipelineSerializer.serialize(ops as any);
+    const ser = PipelineSerializer.serialize(ops);
     const text = JSON.stringify(ser, null, 2);
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
     downloadText(`pipeline-${ts}.json`, text, "application/json");
   };
 
   const doCopyJson = async () => {
-    const ser = PipelineSerializer.serialize(ops as any);
+    const ser = PipelineSerializer.serialize(ops);
     const text = JSON.stringify(ser, null, 2);
     await navigator.clipboard.writeText(text);
   };
@@ -74,14 +72,14 @@ export default function OperationsToolbar() {
     try {
       setImportError(undefined);
       const raw = importText.trim();
-      let nextOps: any[] | undefined;
+  let nextOps: unknown;
 
       // 1) JSON (serialized or raw ops array)
       if (raw.startsWith("{") || raw.startsWith("[")) {
         try {
-          const json = JSON.parse(raw);
+          const json = JSON.parse(raw) as unknown;
           nextOps = Array.isArray(json) ? json : PipelineSerializer.deserialize(json);
-        } catch (e) {
+        } catch {
           // fall through to encoded/URL path
         }
       }
@@ -92,18 +90,21 @@ export default function OperationsToolbar() {
         try {
           const maybeUrl = new URL(encoded);
           encoded = maybeUrl.searchParams.get("pipeline") || encoded;
-        } catch {}
-        const decoded = PipelineEncoder.decode(encoded);
-        nextOps = PipelineSerializer.deserialize(decoded);
+        } catch {
+          // not a URL, treat as plain encoded string
+        }
+        const decoded = PipelineEncoder.decode(encoded) as unknown;
+        nextOps = PipelineSerializer.deserialize(decoded as unknown);
       }
 
-      if (!nextOps) { setImportError("Invalid pipeline payload"); return; }
-      const v = PipelineValidator.validate(nextOps as any);
+      if (!nextOps || !Array.isArray(nextOps)) { setImportError("Invalid pipeline payload"); return; }
+      const v = PipelineValidator.validate(nextOps);
       if (!v.ok) { setImportError(v.error); return; }
-      setOperations(nextOps as any);
+      setOperations(nextOps);
       setImportOpen(false);
-    } catch (e: any) {
-      setImportError(e?.message || "Failed to import pipeline");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to import pipeline";
+      setImportError(msg);
     }
   };
 
@@ -171,7 +172,7 @@ export default function OperationsToolbar() {
           <DialogHeader>
             <DialogTitle>Import Pipeline</DialogTitle>
             <DialogDescription>
-              Paste one of: encoded 'pipeline' value, a full URL containing it, or JSON (either the serialized object with v/ops or a raw ops array).
+              Paste one of: encoded &#39;pipeline&#39; value, a full URL containing it, or JSON (either the serialized object with v/ops or a raw ops array).
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
