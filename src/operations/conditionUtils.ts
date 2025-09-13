@@ -17,6 +17,7 @@ export function evaluateCondition(input: JSONValue, cond: WhenCondition): boolea
     return val !== undefined && val !== null;
   }
   // Delegate to predicate utils; when wildcard produced array -> true if ANY element satisfies predicate
-  if (Array.isArray(val)) return val.some((v) => evaluatePredicate(v as JSONValue, "", op as Operator, cond.value));
-  return evaluatePredicate(val as JSONValue, "", op as Operator, cond.value);
+  const rhs = cond.value as JSONValue | undefined;
+  if (Array.isArray(val)) return val.some((v) => evaluatePredicate(v as JSONValue, "", op as Operator, rhs as JSONValue));
+  return evaluatePredicate(val as JSONValue, "", op as Operator, rhs as JSONValue);
 }

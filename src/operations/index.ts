@@ -30,6 +30,7 @@ import Base64 from "./Base64";
 import StringCase from "./StringCase";
 import If from "./If";
 import Switch from "./Switch";
+import SetVariable from "./SetVariable";
 import Add from "./Add";
 import Subtract from "./Subtract";
 import Multiply from "./Multiply";
@@ -48,6 +49,7 @@ import IsDateCompare from "./IsDateCompare";
 import DateAdd from "./DateAdd";
 import DateDiff from "./DateDiff";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const registry: Record<OperationType, OperationModule<any>> = {
   FilterByKey,
   RenameKey,
@@ -80,6 +82,7 @@ const registry: Record<OperationType, OperationModule<any>> = {
   StringCase,
   If,
   Switch,
+  SetVariable,
   Add,
   Subtract,
   Multiply,
@@ -99,6 +102,7 @@ const registry: Record<OperationType, OperationModule<any>> = {
   DateDiff,
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getOperationModule(type: OperationType): OperationModule<any> {
   return registry[type];
 }
@@ -148,6 +152,7 @@ export type { MaxConfig } from "./Max";
 export type { ValidateJSONConfig } from "./ValidateJSON";
 export type { IfConfig } from "./If";
 export type { SwitchConfig } from "./Switch";
+export type { SetVariableConfig } from "./SetVariable";
 export type { ParseDateConfig } from "./ParseDate";
 export type { IsDateCompareConfig } from "./IsDateCompare";
 export type { DateAddConfig } from "./DateAdd";

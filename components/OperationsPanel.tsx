@@ -137,7 +137,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           return (
             <Editor
               config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
-              onChange={(patch) => {
+              onChange={(patch: Record<string, unknown>) => {
                 const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
                 const merged = { ...base, ...(patch as Record<string, unknown>) } as unknown as JSONObject;
                 update(op.id, { config: merged });
@@ -500,7 +500,7 @@ function IfEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathIndex: P
         const t = op.type as keyof typeof editors;
         const Editor = editors[t];
         return Editor ? (
-          <Editor config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})} onChange={(patch) => onUpdate(patch)} pathIndex={pathIndex} />
+          <Editor config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})} onChange={(patch: Record<string, unknown>) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
   <div className="border rounded-md p-2 op-surface">
@@ -647,7 +647,7 @@ function SwitchEditorCard({ op, pathIndex, onUpdate }: { op: Operation; pathInde
         const t = op.type as keyof typeof editors;
         const Editor = editors[t];
         return Editor ? (
-          <Editor config={config as Record<string, unknown>} onChange={(patch) => onUpdate(patch)} pathIndex={pathIndex} />
+          <Editor config={config as Record<string, unknown>} onChange={(patch: Record<string, unknown>) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
       <div className="flex items-center gap-2">
@@ -823,7 +823,7 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
             return (
               <Editor
                 config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
-                onChange={(patch) => {
+                onChange={(patch: Record<string, unknown>) => {
                   const base = (op.config && typeof op.config === "object" && !Array.isArray(op.config) ? (op.config as Record<string, unknown>) : {});
                   onUpdate(op.id, { config: ({ ...base, ...(patch as Record<string, unknown>) } as unknown as JSONObject) });
                 }}

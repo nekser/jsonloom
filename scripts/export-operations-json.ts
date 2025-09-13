@@ -1,7 +1,7 @@
 /*
   Export a JSON with all operations, their names, parameters (required/optional), and a short description.
   Heuristics:
-  - Reads operations/index.ts to discover modules.
+  - Reads src/operations/index.ts to discover modules.
   - Parses each operation file for Ajv `required: [..]` and `defaultConfig: { ... }` keys.
   - Uses a built-in description map; falls back to a generic phrase.
   Output: writes app/operations.json
@@ -18,7 +18,8 @@ type OperationMeta = {
 };
 
 const root = path.resolve(process.cwd());
-const opsDir = path.join(root, "operations");
+// Source operations live under src/operations in this project
+const opsDir = path.join(root, "src", "operations");
 const opsIndex = path.join(opsDir, "index.ts");
 const outPath = path.join(root, "operations.json");
 
@@ -74,6 +75,7 @@ const DESCRIPTIONS: Record<string, string> = {
   // Control flow
   If: "Conditionally apply different operation branches.",
   Switch: "Apply operations based on a matching case value.",
+  SetVariable: "Compute a value via a nested operation and store it as a variable.",
 
   // Validation / Dates
   ValidateJSON: "Validate JSON against a schema or checks.",

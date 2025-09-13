@@ -3,6 +3,7 @@ import type { Operation, OperationModule, OperationType } from "./types";
 import { getByPath } from "./utils";
 import { getOperationModule } from "./index";
 import type { JSONValue } from "../types/json";
+import { resolveConfig } from "./configResolver";
 
 export type SwitchCase = { value: string; ops: Operation[] };
 export type SwitchConfig = {
@@ -38,9 +39,10 @@ function runPipeline(input: JSONValue, ops: Operation[] | undefined): JSONValue 
   for (const op of ops) {
     const mod = getOperationModule(op.type as OperationType);
     if (!mod) throw new Error(`Operation type '${op.type}' is not registered`);
-    const err = mod.validate(op.config as unknown, cur);
+  const resolvedCfg = resolveConfig(op.config as unknown, { root: input });
+  const err = mod.validate(resolvedCfg as unknown, cur);
     if (err) throw new Error(err);
-    cur = mod.apply(cur, op.config as unknown);
+  cur = mod.apply(cur, resolvedCfg as unknown);
   }
   return cur;
 }

@@ -12,6 +12,7 @@ import StringCaseEditor from "./StringCaseEditor";
 import { FilterArrayEditor, SortArrayEditor, UniqueArrayEditor, FlattenArrayEditor, SliceArrayEditor, GroupByEditor, ReduceArrayEditor, CountArrayEditor, JoinArrayEditor } from "./ArrayEditors";
 import { AggregationEditor, ClampEditor, RoundEditor, ScalarMathEditor } from "./MathEditors";
 import { IfEditor, SwitchEditor } from "./ControlEditors";
+import SetVariableEditor from "./SetVariableEditor";
 import { ValidateJSONEditor } from "./ValidationEditors";
 import { NormalizeKeyCaseEditor, OmitPathsEditor, PickPathsEditor, RenameKeysByPatternEditor, SetPathEditor, DeletePathEditor, MergeAtPathEditor, FlattenObjectEditor, UnflattenObjectEditor } from "./ObjectEditors";
 import { ParseDateEditor, IsDateCompareEditor, DateAddEditor, DateDiffEditor } from "./DateEditors";
@@ -67,6 +68,7 @@ export const editors: OperationEditors = {
   // Control
   If: IfEditor,
   Switch: SwitchEditor,
+  SetVariable: SetVariableEditor,
   // Validation
   ValidateJSON: ValidateJSONEditor,
   // Date operations

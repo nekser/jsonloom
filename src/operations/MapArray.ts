@@ -3,6 +3,7 @@ import type { OperationModule, Operation, OperationType } from "./types";
 import { getByPath, setByPath } from "./utils";
 import { getOperationModule } from "./index";
 import type { JSONValue } from "../types/json";
+import { resolveConfig } from "./configResolver";
 
 export type MapArrayConfig = {
   path: string;
@@ -59,9 +60,10 @@ function apply(input: JSONValue, cfg: MapArrayConfig): JSONValue {
   const cfgObj = op.config as Record<string, unknown>;
   const needsDot = (hasPathField && (cfgObj.path == null || cfgObj.path === "")) || (defaultHasPath && cfgObj.path == null);
   const effectiveConfig = needsDot ? { ...cfgObj, path: "." } : cfgObj;
-  const err = mod.validate(effectiveConfig as unknown, cur);
+  const resolvedCfg = resolveConfig(effectiveConfig as unknown, { root: input, current: cur });
+  const err = mod.validate(resolvedCfg as unknown, cur);
       if (err) throw new Error(err);
-  cur = mod.apply(cur, effectiveConfig as unknown);
+  cur = mod.apply(cur, resolvedCfg as unknown);
     }
     return cur;
   };

@@ -85,6 +85,7 @@ export const operationCatalog: OperationMeta[] = [
   // Control Flow
   { type: "If", category: "Control", label: "If", description: "Conditionally run one of two pipelines" },
   { type: "Switch", category: "Control", label: "Switch", description: "Multi-branch pipeline based on a value" },
+  { type: "SetVariable", category: "Control", label: "Set Variable", description: "Run an operation once and store its result as a variable" },
 
   // Validation
   { type: "ValidateJSON", category: "Validation", label: "Validate JSON", description: "Validate data against a JSON Schema (AJV)" },

@@ -3,6 +3,8 @@ import { nanoid } from "nanoid";
 import { getOperationModule, Operation, OperationType, ValidationError } from "../operations/index";
 import type { JSONValue } from "../types/json";
 import { buildPathIndex, type PathIndex } from "../utils/pathSuggest";
+import { resetVarContext } from "../operations/varContext";
+import { resolveConfig } from "../operations/configResolver";
 
 export type State = {
   sourceText: string;
@@ -47,7 +49,9 @@ const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typ
 
 function runAll(input: JSONValue, ops: Operation[]): { output?: JSONValue; error?: ValidationError; indexes: PathIndex[]; inter: Record<string, JSONValue> } {
   try {
-    let cur = input;
+  // Reset variables for this execution
+  resetVarContext();
+  let cur = input;
     const indexes: PathIndex[] = [];
     const inter: Record<string, JSONValue> = {};
     for (const op of ops) {
@@ -60,9 +64,11 @@ function runAll(input: JSONValue, ops: Operation[]): { output?: JSONValue; error
   }
   const mod = getOperationModule(op.type);
   if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes, inter };
-  const err = mod.validate(op.config as unknown, cur);
+  // Resolve variables within config against the root input and current context (none for top-level)
+  const resolvedCfg = resolveConfig(op.config as unknown, { root: input });
+  const err = mod.validate(resolvedCfg as unknown, cur);
   if (err) return { error: { opId: op.id, message: err }, indexes, inter };
-  cur = mod.apply(cur, op.config as unknown);
+  cur = mod.apply(cur, resolvedCfg as unknown);
       inter[op.id] = cur;
     }
     return { output: cur, indexes, inter };

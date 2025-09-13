@@ -6,9 +6,6 @@
 			"type": "shell",
 			"command": "pnpm",
 			"args": [
-				"-C",
-				"app",
-				"-s",
 				"build"
 			],
 			"isBackground": false,
@@ -22,9 +19,6 @@
 			"type": "shell",
 			"command": "pnpm",
 			"args": [
-				"-C",
-				"app",
-				"-s",
 				"build"
 			],
 			"isBackground": false,

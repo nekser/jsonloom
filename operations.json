@@ -451,6 +451,22 @@
       }
     },
     {
+      "type": "SetVariable",
+      "name": "SetVariable",
+      "description": "Compute a value via a nested operation and store it as a variable.",
+      "parameters": {
+        "required": [
+          "name",
+          "op"
+        ],
+        "optional": [
+          "id",
+          "type",
+          "config"
+        ]
+      }
+    },
+    {
       "type": "SliceArray",
       "name": "SliceArray",
       "description": "Take a slice of an array by start/end.",
