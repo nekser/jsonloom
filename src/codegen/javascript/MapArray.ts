@@ -1,4 +1,4 @@
-import type { Operation } from "../../src/operations/types";
+import type { Operation } from "../../operations/types";
 import { accessExpr } from "../utils/pathResolution";
 
 type Cfg = { path: string; operations?: Operation[] };

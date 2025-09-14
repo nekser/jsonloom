@@ -103,7 +103,7 @@ function parseDefaultConfigKeys(source: string): string[] {
   if (!m) return [];
   const objBody = m[1];
   // capture keys like: key: value,
-  const keys = Array.from(objBody.matchAll(/([A-Za-z0-9_\-]+)\s*:/g)).map((g) => g[1]);
+  const keys = Array.from(objBody.matchAll(/([A-Za-z0-9_-]+)\s*:/g)).map((g) => g[1]);
   return uniqueStrings(keys);
 }
 

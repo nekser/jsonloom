@@ -1,4 +1,4 @@
-import type { JSONValue } from "../../src/types/json";
+import type { JSONValue } from "../../types/json";
 
 export type Language = "javascript" | "python" | "php";
 

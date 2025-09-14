@@ -4,7 +4,7 @@ type Segment = { kind: "key"; key: string } | { kind: "index"; index: number };
 
 function tokenize(path: string): Segment[] {
   const out: Segment[] = [];
-  const re = /([^.\[\]]+)|(\[(?:\d+|"[^"\\]*"|'[^'\\]*')\])/g;
+  const re = /([^.[\]]+)|(\[(?:\d+|"[^"\\]*"|'[^'\\]*')\])/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(path))) {
     if (m[1]) {

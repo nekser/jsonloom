@@ -189,7 +189,7 @@ export const useOpsStore = create<State>()((set, get) => ({
       // trigger pipeline after mutation
       setTimeout(() => {
         // run after state applied
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+         
         (useOpsStore.getState().runPipeline());
       }, 0);
       return next;
