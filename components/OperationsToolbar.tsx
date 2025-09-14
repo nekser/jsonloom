@@ -10,7 +10,7 @@ import { useOpsStore, State } from "../src/store/operations";
 import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
-import { MoreVertical, Share2, Download, Copy, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2 } from "lucide-react";
+import { MoreVertical, Share2, Download, Copy, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2, Plus } from "lucide-react";
 import { downloadText } from "../lib/io";
 import GenerateCodeDialog from "./GenerateCodeDialog";
 
@@ -115,6 +115,17 @@ export default function OperationsToolbar() {
     <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
      <div className="font-medium flex items-center gap-2">Operations</div>
       <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label="Add step"
+          onClick={() => {
+            // Open the OperationPicker in OperationsPanel via a custom event
+            window.dispatchEvent(new Event("open-catalog" as unknown as keyof WindowEventMap));
+          }}
+        >
+          <Plus className="h-4 w-4 mr-2" />Add step
+        </Button>
         <Button variant="ghost" size="icon" aria-label="Undo" disabled={!canUndo} onClick={undo}>
           <Undo2 className="h-4 w-4" />
         </Button>

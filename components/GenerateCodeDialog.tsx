@@ -53,7 +53,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} >
       <DialogContent className="max-w-[95vw] w-[900px]">
         <DialogHeader>
           <DialogTitle>Generate Code</DialogTitle>

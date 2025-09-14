@@ -304,14 +304,7 @@ export function OperationsPanel() {
             ))}
           </SortableContext>
         </DndContext>
-        {ops.length === 0 && <div className="text-sm text-neutral-500">No operations yet. Add one to get started.</div>}
-        <div className="sticky bottom-0 pt-2 bg-gradient-to-t from-background via-background/80 to-transparent">
-            <div className="border-t pt-2 flex justify-center">
-              <Button variant="outline" className="w-full sm:w-auto" onClick={() => setPickerOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" /> Add Step
-              </Button>
-            </div>
-          </div>
+  {ops.length === 0 && <div className="text-sm text-neutral-500">No operations yet. Use Add step above to get started.</div>}
       </div>
 
   {/* Share/Import dialogs owned by OperationsToolbar */}
@@ -420,7 +413,7 @@ function MapArrayEditor({ op, pathIndex, onUpdate }: { op: Operation; pathIndex:
             <div className="font-medium text-sm">Operations</div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
-                Add operation
+                <Plus className="h-4 w-4 mr-2" /> Add step
               </Button>
             </div>
           </div>
