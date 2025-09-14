@@ -85,7 +85,11 @@ function evalExpr(expr: string, scope: { root: JSONValue; current?: JSONValue })
     if (id === "root") return scope.root;
     if (id.startsWith("current.")) return readPath(scope.current as unknown, id.slice(8));
     if (id === "current") return scope.current;
-    // plain identifier -> try vars first, then root
+    // plain identifier -> prefer current item scope (array-level), then vars, then root
+    if (scope.current !== undefined) {
+      const v = readPath(scope.current as unknown, id);
+      if (v !== undefined) return v;
+    }
     const vm = getAllVars();
     if (Object.prototype.hasOwnProperty.call(vm, id)) return vm[id];
     return readPath(scope.root, id);

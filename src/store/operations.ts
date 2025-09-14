@@ -63,8 +63,16 @@ function runAll(input: JSONValue, ops: Operation[]): { output?: JSONValue; error
   }
   const mod = getOperationModule(op.type);
   if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes, inter };
-  // Resolve variables within config against the root input and current context (none for top-level)
-  const resolvedCfg = resolveConfig(op.config as unknown, { root: input });
+  // Resolve variables within config against the root input.
+  // Special-case MapArray: do NOT resolve nested operations here; MapArray will resolve them per element with the correct current scope.
+  let resolvedCfg: unknown;
+  if (op.type === "MapArray" && op.config && typeof op.config === "object" && !Array.isArray(op.config)) {
+    const { operations, ...rest } = op.config as Record<string, unknown>;
+    const resolvedRest = resolveConfig(rest as unknown, { root: input });
+    resolvedCfg = { ...(resolvedRest as Record<string, unknown>), operations } as unknown;
+  } else {
+    resolvedCfg = resolveConfig(op.config as unknown, { root: input });
+  }
   const err = mod.validate(resolvedCfg as unknown, cur);
   if (err) return { error: { opId: op.id, message: err }, indexes, inter };
   cur = mod.apply(cur, resolvedCfg as unknown);
