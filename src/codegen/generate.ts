@@ -61,6 +61,50 @@ import PH_Multiply from "./php/Multiply";
 import PH_Add from "./php/Add";
 import PH_Subtract from "./php/Subtract";
 import PH_Divide from "./php/Divide";
+import PH_MapArray from "./php/MapArray";
+import PH_Modulo from "./php/Modulo";
+import PH_Power from "./php/Power";
+import PH_Round from "./php/Round";
+import PH_Clamp from "./php/Clamp";
+import PH_Sum from "./php/Sum";
+import PH_Count from "./php/Count";
+import PH_Min from "./php/Min";
+import PH_Max from "./php/Max";
+import PH_StringReplace from "./php/StringReplace";
+import PH_SetPath from "./php/SetPath";
+import PH_DeletePath from "./php/DeletePath";
+import PH_ExtractPath from "./php/ExtractPath";
+import PH_FilterByKey from "./php/FilterByKey";
+import PH_RenameKey from "./php/RenameKey";
+import PH_RegexReplace from "./php/RegexReplace";
+import PH_TrimStrings from "./php/TrimStrings";
+import PH_CoerceType from "./php/CoerceType";
+import PH_Base64 from "./php/Base64";
+import PH_StringCase from "./php/StringCase";
+import PH_ParseDate from "./php/ParseDate";
+import PH_DateAdd from "./php/DateAdd";
+import PH_DateDiff from "./php/DateDiff";
+import PH_IsDateCompare from "./php/IsDateCompare";
+import PH_SortArray from "./php/SortArray";
+import PH_UniqueArray from "./php/UniqueArray";
+import PH_FlattenArray from "./php/FlattenArray";
+import PH_SliceArray from "./php/SliceArray";
+import PH_RenameKeysByPattern from "./php/RenameKeysByPattern";
+import PH_PickPaths from "./php/PickPaths";
+import PH_OmitPaths from "./php/OmitPaths";
+import PH_CountArray from "./php/CountArray";
+import PH_JoinArray from "./php/JoinArray";
+import PH_FlattenObject from "./php/FlattenObject";
+import PH_UnflattenObject from "./php/UnflattenObject";
+import PH_MergeAtPath from "./php/MergeAtPath";
+import PH_NormalizeKeyCase from "./php/NormalizeKeyCase";
+import PH_GroupBy from "./php/GroupBy";
+import PH_ReduceArray from "./php/ReduceArray";
+import PH_TemplateInterpolate from "./php/TemplateInterpolate";
+import PH_If from "./php/If";
+import PH_Switch from "./php/Switch";
+import PH_SetVariable from "./php/SetVariable";
+import PH_ValidateJSON from "./php/ValidateJSON";
 
 export type Lang = "javascript" | "python" | "php";
 
@@ -135,6 +179,50 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   Add: PH_Add as unknown as TemplateFn,
   Subtract: PH_Subtract as unknown as TemplateFn,
   Divide: PH_Divide as unknown as TemplateFn,
+  MapArray: PH_MapArray as unknown as TemplateFn,
+  Modulo: PH_Modulo as unknown as TemplateFn,
+  Power: PH_Power as unknown as TemplateFn,
+  Round: PH_Round as unknown as TemplateFn,
+  Clamp: PH_Clamp as unknown as TemplateFn,
+  Sum: PH_Sum as unknown as TemplateFn,
+  Count: PH_Count as unknown as TemplateFn,
+  Min: PH_Min as unknown as TemplateFn,
+  Max: PH_Max as unknown as TemplateFn,
+  StringReplace: PH_StringReplace as unknown as TemplateFn,
+  SetPath: PH_SetPath as unknown as TemplateFn,
+  DeletePath: PH_DeletePath as unknown as TemplateFn,
+  ExtractPath: PH_ExtractPath as unknown as TemplateFn,
+  FilterByKey: PH_FilterByKey as unknown as TemplateFn,
+  RenameKey: PH_RenameKey as unknown as TemplateFn,
+  RegexReplace: PH_RegexReplace as unknown as TemplateFn,
+  TrimStrings: PH_TrimStrings as unknown as TemplateFn,
+  CoerceType: PH_CoerceType as unknown as TemplateFn,
+  Base64: PH_Base64 as unknown as TemplateFn,
+  StringCase: PH_StringCase as unknown as TemplateFn,
+  ParseDate: PH_ParseDate as unknown as TemplateFn,
+  DateAdd: PH_DateAdd as unknown as TemplateFn,
+  DateDiff: PH_DateDiff as unknown as TemplateFn,
+  IsDateCompare: PH_IsDateCompare as unknown as TemplateFn,
+  SortArray: PH_SortArray as unknown as TemplateFn,
+  UniqueArray: PH_UniqueArray as unknown as TemplateFn,
+  FlattenArray: PH_FlattenArray as unknown as TemplateFn,
+  SliceArray: PH_SliceArray as unknown as TemplateFn,
+  RenameKeysByPattern: PH_RenameKeysByPattern as unknown as TemplateFn,
+  PickPaths: PH_PickPaths as unknown as TemplateFn,
+  OmitPaths: PH_OmitPaths as unknown as TemplateFn,
+  CountArray: PH_CountArray as unknown as TemplateFn,
+  JoinArray: PH_JoinArray as unknown as TemplateFn,
+  FlattenObject: PH_FlattenObject as unknown as TemplateFn,
+  UnflattenObject: PH_UnflattenObject as unknown as TemplateFn,
+  MergeAtPath: PH_MergeAtPath as unknown as TemplateFn,
+  NormalizeKeyCase: PH_NormalizeKeyCase as unknown as TemplateFn,
+  GroupBy: PH_GroupBy as unknown as TemplateFn,
+  ReduceArray: PH_ReduceArray as unknown as TemplateFn,
+  TemplateInterpolate: PH_TemplateInterpolate as unknown as TemplateFn,
+  If: PH_If as unknown as TemplateFn,
+  Switch: PH_Switch as unknown as TemplateFn,
+  SetVariable: PH_SetVariable as unknown as TemplateFn,
+  ValidateJSON: PH_ValidateJSON as unknown as TemplateFn,
   },
 };
 
