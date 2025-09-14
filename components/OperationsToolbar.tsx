@@ -112,7 +112,7 @@ export default function OperationsToolbar() {
   };
 
   return (
-    <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
+    <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
      <div className="font-medium flex items-center gap-2">Operations</div>
       <div className="flex items-center gap-2">
         <Button

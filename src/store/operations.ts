@@ -20,7 +20,6 @@ export type State = {
   future: Operation[][];
   // actions
   setSourceText: (text: string) => void;
-  setSourceFormat: (fmt: "json" | "yaml" | "csv") => void;
   addOperation: (type: OperationType, config?: JSONValue) => void;
   setOperations: (ops: Operation[]) => void;
   updateOperation: (id: string, patch: Partial<Operation>) => void;
@@ -95,14 +94,6 @@ export const useOpsStore = create<State>()((set, get) => ({
     const fmt = get().sourceFormat;
     const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
     set({ sourceText: text, sourceError: parsed.error });
-    get().runPipeline();
-  },
-  setSourceFormat: (fmt) => {
-    set({ sourceFormat: fmt });
-    // re-parse current text with new format
-    const text = get().sourceText;
-    const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
-    set({ sourceError: parsed.error });
     get().runPipeline();
   },
   addOperation: (type: OperationType, config: JSONValue = {} as JSONValue) => {

@@ -14,7 +14,6 @@ export default function Header() {
   const isLanding = pathname === "/";
 
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
-  const setSourceFormat = useOpsStore((s: State) => s.setSourceFormat);
   const setOperations = useOpsStore((s: State) => s.setOperations);
 
   async function loadDemo(kind: "json" | "yaml" | "csv") {
@@ -23,7 +22,6 @@ export default function Header() {
       const res = await fetch(dataUrl, { cache: "no-cache" });
       if (!res.ok) throw new Error(`Failed to load ${kind} demo (${res.status})`);
       const text = await res.text();
-      setSourceFormat(kind);
       setSourceText(text);
   // Load pipeline; CSV uses a dedicated pipeline since its shape differs
   const pipelineUrl = kind === "csv" ? "/demo/pipeline-csv.json" : "/demo/pipeline.json";

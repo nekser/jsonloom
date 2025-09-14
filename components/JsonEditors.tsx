@@ -3,14 +3,11 @@ import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useOpsStore, State } from "../src/store/operations";
 import SourcePanelToolbar from "./SourcePanelToolbar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ResultPanelToolbar from "./ResultPanelToolbar";
 
 export function SourceEditor() {
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const sourceError = useOpsStore((s: State) => s.sourceError);
-  const sourceFormat = useOpsStore((s: State) => s.sourceFormat);
-  const setSourceFormat = useOpsStore((s: State) => s.setSourceFormat);
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof document === "undefined") return "light";
@@ -46,20 +43,7 @@ export function SourceEditor() {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
-        <div className="font-medium flex items-center gap-2">
-          Source
-          <Select value={sourceFormat} onValueChange={(v: string) => setSourceFormat(v as State["sourceFormat"])}>
-            <SelectTrigger className="h-7 w-[110px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="json">JSON</SelectItem>
-              <SelectItem value="yaml">YAML</SelectItem>
-              <SelectItem value="csv">CSV</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center gap-3">
           <div className="text-xs text-neutral-500">{new Blob([sourceText]).size} bytes</div>
           <SourcePanelToolbar />
@@ -114,7 +98,7 @@ export function ResultEditor() {
   }, []);
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
+  <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Result JSON</div>
         <div className="flex items-center gap-3">
           <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
