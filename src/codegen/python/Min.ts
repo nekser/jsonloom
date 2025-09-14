@@ -1,6 +1,6 @@
 type Cfg = { path: string };
+import { accessExpr } from "../utils/pathResolution";
 export default function Min(cfg: Cfg, varName: string): string {
-  const access = cfg.path.split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
-  return `// Min
-${varName}${access} = (Array.isArray(${varName}${access}) && ${varName}${access}.length ? Math.min(...${varName}${access}.filter(v=>typeof v==='number')) : null);`;
+  const t = accessExpr("python", varName, cfg.path);
+  return `# Min\n${t} = (min([v for v in (${t} or []) if isinstance(v, (int, float))]) if isinstance(${t}, list) and any(isinstance(v,(int,float)) for v in (${t} or [])) else None)`;
 }

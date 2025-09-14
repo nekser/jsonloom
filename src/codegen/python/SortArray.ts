@@ -3,19 +3,11 @@ type Cfg = { path: string; by?: string; order?: "asc" | "desc"; caseInsensitive?
 export default function SortArray(cfg: Cfg, varName: string): string {
   const arr = (cfg.path||"").split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
   const by = cfg.by ? JSON.stringify(cfg.by) : undefined;
-  const dir = cfg.order === 'desc' ? -1 : 1;
+  const reverse = cfg.order === 'desc';
   const ci = !!cfg.caseInsensitive;
-  const nulls = cfg.nulls === 'first' ? -1 : 1;
-  return `// SortArray
-${varName}${arr} = (${varName}${arr}||[]).slice().sort((a,b)=>{
-  let va = ${by ? `(a && typeof a==='object'? a[${by}] : a)` : `a`};
-  let vb = ${by ? `(b && typeof b==='object'? b[${by}] : b)` : `b`};
-  if (va == null && vb == null) return 0;
-  if (va == null) return ${nulls};
-  if (vb == null) return ${-nulls};
-  if (${ci}) { va = String(va).toLowerCase(); vb = String(vb).toLowerCase(); }
-  if (va < vb) return ${-1 * dir};
-  if (va > vb) return ${1 * dir};
-  return 0;
-});`;
+  const nullsFirst = cfg.nulls === 'first';
+  const keyExpr = by ? `(x.get(${by!}) if isinstance(x, dict) else x)` : `x`;
+  const ciWrap = ci ? `((str(v).lower()) if v is not None else v)` : `v`;
+  // Python sort key: tuple to enforce nulls position then value
+  return `# SortArray\n${varName}${arr} = sorted(list(${varName}${arr} or []), key=lambda x: ((0 if ${keyExpr} is None else 1) if ${nullsFirst} else (1 if ${keyExpr} is None else 0), ${ciWrap.replace(/v/g, keyExpr)}), reverse=${reverse})`;
 }

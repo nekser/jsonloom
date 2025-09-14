@@ -1,24 +1,29 @@
 type Cfg = { path: string; compareTo: string | { path: string }; op: "after"|"afterOrEqual"|"before"|"beforeOrEqual"; resultPath?: string };
+import { accessExpr } from "../utils/pathResolution";
 
 export default function IsDateCompare(cfg: Cfg, varName: string): string {
-  const a = (cfg.path||"").split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
-  const b = typeof cfg.compareTo === 'string' ? JSON.stringify(cfg.compareTo) : (cfg.compareTo?.path||"").split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
-  const getB = typeof cfg.compareTo === 'string' ? `${JSON.stringify(cfg.compareTo)}` : `${varName}${b}`;
-  const cmp = (op: Cfg['op']) => {
-    switch(op){
-      case 'after': return '(da>db)';
-      case 'afterOrEqual': return '(da>=db)';
-      case 'before': return '(da<db)';
-      case 'beforeOrEqual': return '(da<=db)';
-    }
-  };
-  const resPath = cfg.resultPath ? (cfg.resultPath.split('.').map(s=>`[${JSON.stringify(s)}]`).join('')) : a;
-  return `// IsDateCompare
-{
-  const da = new Date(String(${varName}${a})).getTime();
-  const db = new Date(String(${getB})).getTime();
-  const ok = isFinite(da) && isFinite(db);
-  const __res = ok ? ${cmp(cfg.op)} : false;
-  ${varName}${resPath} = __res;
-}`;
+  const a = accessExpr("python", varName, cfg.path);
+  const bExpr = typeof cfg.compareTo === "string" ? JSON.stringify(cfg.compareTo) : accessExpr("python", varName, cfg.compareTo?.path || "");
+  const resTarget = cfg.resultPath ? accessExpr("python", varName, cfg.resultPath) : a;
+  const op = cfg.op;
+  let cmp: string;
+  if (op === "after") cmp = "da > db";
+  else if (op === "afterOrEqual") cmp = "da >= db";
+  else if (op === "before") cmp = "da < db";
+  else cmp = "da <= db";
+  return `# IsDateCompare (${op})
+from datetime import datetime
+
+def __parse_iso(s):
+    try:
+        # Basic ISO parse; extend as needed
+        return datetime.fromisoformat(str(s).replace('Z', '+00:00'))
+    except Exception:
+        return None
+
+_a_val = __parse_iso(${a})
+_b_val = __parse_iso(${bExpr})
+__ok = (_a_val is not None) and (_b_val is not None)
+__res = (${cmp}) if __ok else False
+${resTarget} = __res`;
 }

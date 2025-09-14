@@ -3,14 +3,15 @@ type Cfg = { path: string; by?: string; op: "sum" | "avg" | "min" | "max" | "con
 export default function ReduceArray(cfg: Cfg, varName: string): string {
   const access = (cfg.path||"").split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
   const by = cfg.by ? JSON.stringify(cfg.by) : undefined;
-  const val = by ? `(it && typeof it==='object'? it[${by}] : undefined)` : `it`;
-  const code = {
-    sum: `(${varName}${access}||[]).reduce((a,it)=>a + (typeof ${val}==='number'? ${val} : 0), 0)`,
-    avg: `(()=>{const __arr=(${varName}${access}||[]).map(it=>(${val})).filter(v=>typeof v==='number'); return __arr.length? __arr.reduce((a,b)=>a+b,0)/__arr.length : 0;})()`,
-    min: `(()=>{const __arr=(${varName}${access}||[]).map(it=>(${val})).filter(v=>typeof v==='number'); return __arr.length? Math.min(...__arr) : null;})()`,
-    max: `(()=>{const __arr=(${varName}${access}||[]).map(it=>(${val})).filter(v=>typeof v==='number'); return __arr.length? Math.max(...__arr) : null;})()`,
-    concat: `(${varName}${access}||[]).map(it=>(${val})).join('')`,
-  }[cfg.op];
-  return `// ReduceArray (${cfg.op})
-${varName}${access} = ${code};`;
+  const val = by ? `(it.get(${by!}) if isinstance(it, dict) else None)` : `it`;
+  const code = cfg.op === 'sum'
+    ? `sum([v for v in [${val} for it in (${varName}${access} or [])] if isinstance(v, (int, float))])`
+    : cfg.op === 'avg'
+    ? `((lambda __arr: (sum(__arr)/len(__arr) if __arr else 0))([v for v in [${val} for it in (${varName}${access} or [])] if isinstance(v, (int, float))]))`
+    : cfg.op === 'min'
+    ? `((lambda __arr: (min(__arr) if __arr else None))([v for v in [${val} for it in (${varName}${access} or [])] if isinstance(v, (int, float))]))`
+    : cfg.op === 'max'
+    ? `((lambda __arr: (max(__arr) if __arr else None))([v for v in [${val} for it in (${varName}${access} or [])] if isinstance(v, (int, float))]))`
+    : `''.join([str(${val}) for it in (${varName}${access} or [])])`;
+  return `# ReduceArray (${cfg.op})\n${varName}${access} = ${code}`;
 }

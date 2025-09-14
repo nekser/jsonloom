@@ -50,11 +50,55 @@ import J_IsDateCompare from "./javascript/IsDateCompare";
 import J_DateAdd from "./javascript/DateAdd";
 import J_DateDiff from "./javascript/DateDiff";
 // Python
-import P_FilterArray from "./python/FilterArray";
-import P_Multiply from "./python/Multiply";
 import P_Add from "./python/Add";
-import P_Subtract from "./python/Subtract";
+import P_Base64 from "./python/Base64";
+import P_Clamp from "./python/Clamp";
+import P_CoerceType from "./python/CoerceType";
+import P_Count from "./python/Count";
+import P_CountArray from "./python/CountArray";
+import P_DateAdd from "./python/DateAdd";
+import P_DateDiff from "./python/DateDiff";
+import P_DeletePath from "./python/DeletePath";
 import P_Divide from "./python/Divide";
+import P_ExtractPath from "./python/ExtractPath";
+import P_FilterArray from "./python/FilterArray";
+import P_FilterByKey from "./python/FilterByKey";
+import P_FlattenArray from "./python/FlattenArray";
+import P_FlattenObject from "./python/FlattenObject";
+import P_GroupBy from "./python/GroupBy";
+import P_If from "./python/If";
+import P_IsDateCompare from "./python/IsDateCompare";
+import P_JoinArray from "./python/JoinArray";
+import P_MapArray from "./python/MapArray";
+import P_Max from "./python/Max";
+import P_MergeAtPath from "./python/MergeAtPath";
+import P_Min from "./python/Min";
+import P_Modulo from "./python/Modulo";
+import P_Multiply from "./python/Multiply";
+import P_NormalizeKeyCase from "./python/NormalizeKeyCase";
+import P_OmitPaths from "./python/OmitPaths";
+import P_ParseDate from "./python/ParseDate";
+import P_PickPaths from "./python/PickPaths";
+import P_Power from "./python/Power";
+import P_ReduceArray from "./python/ReduceArray";
+import P_RegexReplace from "./python/RegexReplace";
+import P_RenameKey from "./python/RenameKey";
+import P_RenameKeysByPattern from "./python/RenameKeysByPattern";
+import P_Round from "./python/Round";
+import P_SetPath from "./python/SetPath";
+import P_SetVariable from "./python/SetVariable";
+import P_SliceArray from "./python/SliceArray";
+import P_SortArray from "./python/SortArray";
+import P_StringCase from "./python/StringCase";
+import P_StringReplace from "./python/StringReplace";
+import P_Subtract from "./python/Subtract";
+import P_Sum from "./python/Sum";
+import P_Switch from "./python/Switch";
+import P_TemplateInterpolate from "./python/TemplateInterpolate";
+import P_TrimStrings from "./python/TrimStrings";
+import P_UnflattenObject from "./python/UnflattenObject";
+import P_UniqueArray from "./python/UniqueArray";
+import P_ValidateJSON from "./python/ValidateJSON";
 // PHP
 import PH_FilterArray from "./php/FilterArray";
 import PH_Multiply from "./php/Multiply";
@@ -167,11 +211,68 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   DateDiff: J_DateDiff as unknown as TemplateFn,
   },
   python: {
-    FilterArray: P_FilterArray as unknown as TemplateFn,
+  // Collections
+  FilterArray: P_FilterArray as unknown as TemplateFn,
+  MapArray: P_MapArray as unknown as TemplateFn,
+  SortArray: P_SortArray as unknown as TemplateFn,
+  UniqueArray: P_UniqueArray as unknown as TemplateFn,
+  FlattenArray: P_FlattenArray as unknown as TemplateFn,
+  SliceArray: P_SliceArray as unknown as TemplateFn,
+  GroupBy: P_GroupBy as unknown as TemplateFn,
+  ReduceArray: P_ReduceArray as unknown as TemplateFn,
+  CountArray: P_CountArray as unknown as TemplateFn,
+  JoinArray: P_JoinArray as unknown as TemplateFn,
+
+  // Strings & Regex
+  StringReplace: P_StringReplace as unknown as TemplateFn,
+  RegexReplace: P_RegexReplace as unknown as TemplateFn,
+  TrimStrings: P_TrimStrings as unknown as TemplateFn,
+  TemplateInterpolate: P_TemplateInterpolate as unknown as TemplateFn,
+  StringCase: P_StringCase as unknown as TemplateFn,
+  NormalizeKeyCase: P_NormalizeKeyCase as unknown as TemplateFn,
+
+  // Paths & Objects
+  ExtractPath: P_ExtractPath as unknown as TemplateFn,
+  PickPaths: P_PickPaths as unknown as TemplateFn,
+  OmitPaths: P_OmitPaths as unknown as TemplateFn,
+  SetPath: P_SetPath as unknown as TemplateFn,
+  DeletePath: P_DeletePath as unknown as TemplateFn,
+  MergeAtPath: P_MergeAtPath as unknown as TemplateFn,
+  FlattenObject: P_FlattenObject as unknown as TemplateFn,
+  UnflattenObject: P_UnflattenObject as unknown as TemplateFn,
+  FilterByKey: P_FilterByKey as unknown as TemplateFn,
+  RenameKey: P_RenameKey as unknown as TemplateFn,
+  RenameKeysByPattern: P_RenameKeysByPattern as unknown as TemplateFn,
+
+  // Math & Numbers
   Multiply: P_Multiply as unknown as TemplateFn,
   Add: P_Add as unknown as TemplateFn,
   Subtract: P_Subtract as unknown as TemplateFn,
   Divide: P_Divide as unknown as TemplateFn,
+  Modulo: P_Modulo as unknown as TemplateFn,
+  Power: P_Power as unknown as TemplateFn,
+  Round: P_Round as unknown as TemplateFn,
+  Clamp: P_Clamp as unknown as TemplateFn,
+  Sum: P_Sum as unknown as TemplateFn,
+  Count: P_Count as unknown as TemplateFn,
+  Min: P_Min as unknown as TemplateFn,
+  Max: P_Max as unknown as TemplateFn,
+
+  // Control Flow & Vars
+  If: P_If as unknown as TemplateFn,
+  Switch: P_Switch as unknown as TemplateFn,
+  SetVariable: P_SetVariable as unknown as TemplateFn,
+
+  // Types & Misc
+  CoerceType: P_CoerceType as unknown as TemplateFn,
+  Base64: P_Base64 as unknown as TemplateFn,
+  ValidateJSON: P_ValidateJSON as unknown as TemplateFn,
+
+  // Dates
+  ParseDate: P_ParseDate as unknown as TemplateFn,
+  IsDateCompare: P_IsDateCompare as unknown as TemplateFn,
+  DateAdd: P_DateAdd as unknown as TemplateFn,
+  DateDiff: P_DateDiff as unknown as TemplateFn,
   },
   php: {
     FilterArray: PH_FilterArray as unknown as TemplateFn,

@@ -1,6 +1,6 @@
 type Cfg = { path: string; value: number };
+import { accessExpr } from "../utils/pathResolution";
 export default function Power(cfg: Cfg, varName: string): string {
-  const access = cfg.path.split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
-  return `// Power
-${varName}${access} = Math.pow(${varName}${access}, ${cfg.value});`;
+  const t = accessExpr("python", varName, cfg.path);
+  return `# Power\n${t} = (${t}) ** ${cfg.value}`;
 }

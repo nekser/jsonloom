@@ -1,13 +1,17 @@
 type Cfg = { path?: string };
+import { accessExpr } from "../utils/pathResolution";
 
 export default function TrimStrings(cfg: Cfg, varName: string): string {
-  const body = `const __ts = (v) => {
-  if (typeof v === 'string') return v.trim();
-  if (Array.isArray(v)) return v.map(__ts);
-  if (v && typeof v === 'object') { const out = {}; for (const [k,val] of Object.entries(v)) out[k]=__ts(val); return out; }
-  return v;
-};`;
-  if (!cfg.path) return `// TrimStrings globally\n${body}\n${varName} = __ts(${varName});`;
-  const path = cfg.path.split('.').map(s=>`[${JSON.stringify(s)}]`).join('');
-  return `// TrimStrings at path ${JSON.stringify(cfg.path)}\n${body}\n${varName}${path} = __ts(${varName}${path});`;
+  const tgt = cfg.path ? accessExpr("python", varName, cfg.path) : varName;
+  return `# TrimStrings${cfg.path ? ` at path ${cfg.path}` : " globally"}
+def __ts(v):
+  if isinstance(v, str):
+    return v.strip()
+  if isinstance(v, list):
+    return [__ts(x) for x in v]
+  if isinstance(v, dict):
+    return {k: __ts(val) for k, val in v.items()}
+  return v
+
+${tgt} = __ts(${tgt})`;
 }

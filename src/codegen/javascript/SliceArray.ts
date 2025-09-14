@@ -8,10 +8,10 @@ export default function SliceArray(cfg: Cfg, varName: string): string {
 ${varName}${access} = (${varName}${access}||[]).slice(${start}${cfg.end !== undefined ? ", "+cfg.end : ""});`;
   }
   return `// SliceArray with step
-{
+(function(){
   const __src = (${varName}${access}||[]);
-  const __out = [];
+  const __out: unknown[] = [];
   for (let i=${start}; i<${cfg.end ?? "__src.length"}; i+=${cfg.step}) __out.push(__src[i]);
   ${varName}${access} = __out;
-}`;
+})();`;
 }

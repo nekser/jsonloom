@@ -8,8 +8,8 @@ export default function If(cfg: Cfg, varName: string): string {
   const t = accessExpr("php", varName, cfg.when.path || "");
   const val = toPhp(cfg.when.value as unknown);
   const cond = buildCond(cfg.when.op, t, val);
-  const thenBody = (cfg.then || []).map(op => genNested("php", op, varName)).join("\n\n");
-  const elseBody = (cfg.else || []).map(op => genNested("php", op, varName)).join("\n\n");
+  const thenBody = (cfg.then || []).map((o) => genNested("php", o, varName)).join("\n\n");
+  const elseBody = (cfg.else || []).map((o) => genNested("php", o, varName)).join("\n\n");
   return `// If\nif (${cond}) {\n${thenBody}\n}${cfg.else && cfg.else.length ? ` else {\n${elseBody}\n}` : ''}`;
 }
 
@@ -34,14 +34,11 @@ function genNested(lang: "javascript"|"python"|"php", op: Operation, curVar: str
 
 function toPhp(v: unknown): string {
   if (v === null || v === undefined) return "null";
-  switch (typeof v) {
-    case "boolean": return v ? "true" : "false";
-    case "number": return String(v);
-    case "string": return JSON.stringify(v);
-    default: {
-      if (Array.isArray(v)) return `[${v.map(toPhp).join(', ')}]`;
-      const entries = Object.entries(v as Record<string, unknown>).map(([k,val])=> `${JSON.stringify(k)} => ${toPhp(val)}`);
-      return `[${entries.join(', ')}]`;
-    }
-  }
+  const t = typeof v;
+  if (t === "boolean") return (v as boolean) ? "true" : "false";
+  if (t === "number") return String(v);
+  if (t === "string") return JSON.stringify(v as string);
+  if (Array.isArray(v as unknown[])) return `[${(v as unknown[]).map(toPhp).join(', ')}]`;
+  const entries = Object.entries(v as Record<string, unknown>).map(([k,val])=> `${JSON.stringify(k)} => ${toPhp(val)}`);
+  return `[${entries.join(', ')}]`;
 }

@@ -5,17 +5,12 @@ export default function GroupBy(cfg: Cfg, varName: string): string {
   const by = JSON.stringify(cfg.by || "");
   const collect = cfg.collect || 'array';
   const sumPath = cfg.sumPath ? JSON.stringify(cfg.sumPath) : undefined;
-  return `// GroupBy
-{
-  const __groups = new Map();
-  for (const it of (${varName}${access}||[])) {
-    const key = it && typeof it==='object' ? it[${by}] : undefined;
-    const k = key === undefined ? '__undefined__' : String(key);
-    const arr = __groups.get(k) || [];
-    arr.push(it); __groups.set(k, arr);
-  }
-  let __out;
-  ${collect === 'count' ? `__out = Array.from(__groups, ([k, arr]) => ({ key: k, count: arr.length }));` : collect === 'sum' ? `__out = Array.from(__groups, ([k, arr]) => ({ key: k, sum: arr.reduce((a, it)=>a + (it && typeof it==='object' ? Number(it[${sumPath}])||0 : 0), 0) }));` : `__out = Array.from(__groups, ([k, arr]) => ({ key: k, items: arr }));`}
-  ${varName}${access} = __out;
-}`;
+  const keyExpr = `(it.get(${by}) if isinstance(it, dict) else None)`;
+  const sumVal = sumPath ? `(it.get(${sumPath!}) if isinstance(it, dict) else 0)` : `0`;
+  const outExpr = collect === 'count'
+    ? `[{ 'key': k, 'count': len(arr) } for k, arr in __groups.items()]`
+    : collect === 'sum'
+    ? `[{ 'key': k, 'sum': sum([ (v if isinstance(v,(int,float)) else 0) for v in [${sumVal} for it in arr] ]) } for k, arr in __groups.items()]`
+    : `[{ 'key': k, 'items': arr } for k, arr in __groups.items()]`;
+  return `# GroupBy\n__groups = {}\nfor it in (${varName}${access} or []):\n  k = ${keyExpr}\n  kk = '__undefined__' if k is None else str(k)\n  __groups.setdefault(kk, []).append(it)\n${varName}${access} = ${outExpr}`;
 }

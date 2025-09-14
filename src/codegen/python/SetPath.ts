@@ -5,7 +5,6 @@ type Cfg = { path: string; value: JSONValue };
 export default function SetPath(cfg: Cfg, varName: string): string {
   const segs = (cfg.path || "").split('.');
   const access = segs.map(s=>`[${JSON.stringify(s)}]`).join('');
-  const val = literal("javascript", cfg.value);
-  return `// SetPath ${JSON.stringify(cfg.path)}
-${varName}${access} = ${val};`;
+  const val = literal("python", cfg.value);
+  return `# SetPath ${JSON.stringify(cfg.path)}\n${varName}${access} = ${val}`;
 }
