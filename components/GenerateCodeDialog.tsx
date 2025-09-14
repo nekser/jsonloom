@@ -7,10 +7,15 @@ import { Button } from "@/components/ui/button";
 import { Copy, Download } from "lucide-react";
 import { useOpsStore, State } from "../src/store/operations";
 import { generatePipeline, type Lang } from "@/src/codegen/generate";
+import { importJSON } from "@/src/importers/json";
+import { importYAML } from "@/src/importers/yaml";
+import { importCSV } from "@/src/importers/csv";
 import { downloadText } from "../lib/io";
 
 export default function GenerateCodeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const ops = useOpsStore((s: State) => s.operations);
+  const sourceText = useOpsStore((s: State) => s.sourceText);
+  const sourceFormat = useOpsStore((s: State) => s.sourceFormat);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [lang, setLang] = useState<Lang>("javascript");
 
@@ -27,7 +32,18 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
     return () => mo.disconnect();
   }, []);
 
-  const code = useMemo(() => generatePipeline(lang, ops), [lang, ops]);
+  const code = useMemo(() => {
+    // Parse the current source text to a JSON value regardless of input format
+    let parsed: unknown = undefined;
+    try {
+      if (sourceFormat === "json") parsed = importJSON(sourceText).value;
+      else if (sourceFormat === "yaml") parsed = importYAML(sourceText).value;
+      else parsed = importCSV(sourceText).value;
+    } catch {
+      parsed = undefined;
+    }
+    return generatePipeline(lang, ops, "data", parsed);
+  }, [lang, ops, sourceText, sourceFormat]);
 
   const copy = async () => { await navigator.clipboard.writeText(code); };
   const exportFile = () => {
