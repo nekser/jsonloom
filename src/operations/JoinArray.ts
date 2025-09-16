@@ -5,7 +5,8 @@ import type { JSONValue } from "../types/json";
 
 export type JoinArrayConfig = {
   path: string;
-  delimiter?: string;
+  delimiter?: string; // original name
+  separator?: string; // alias used by tests/UI
 };
 
 const ajv = new Ajv();
@@ -14,6 +15,7 @@ const validateSchema = ajv.compile({
   properties: {
     path: { type: "string", minLength: 1 },
     delimiter: { type: "string" },
+    separator: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -22,7 +24,8 @@ const validateSchema = ajv.compile({
 function apply(input: JSONValue, cfg: JoinArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
-  const out = arr.map((v) => (v == null ? "" : String(v))).join(cfg.delimiter ?? ",");
+  const sep = (cfg.separator ?? cfg.delimiter ?? ",");
+  const out = arr.map((v) => (v == null ? "" : String(v))).join(sep);
   return setByPath(input, cfg.path, out as unknown as JSONValue);
 }
 

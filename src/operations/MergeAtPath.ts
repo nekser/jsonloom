@@ -26,10 +26,23 @@ const validateSchema = ajv.compile({
 
 function apply(input: JSONValue, cfg: MergeAtPathConfig): JSONValue {
   const target = getByPath(input, cfg.path);
-  const src = cfg.source === "root" ? input : getByPath(input, cfg.sourcePath || "");
+  let src = cfg.source === "root" ? input : getByPath(input, cfg.sourcePath || "");
   const strategy = cfg.strategy ?? "shallow";
   if (!(target && typeof target === "object" && !Array.isArray(target))) return input;
   if (!(src && typeof src === "object" && !Array.isArray(src))) return input;
+  // When merging from root into target, avoid self-reference causing nested 'target' key merged in
+  if (cfg.source === "root") {
+    // Create a shallow copy excluding the target path key if it exists directly on root
+    const isObj = (o: unknown) => o && typeof o === "object" && !Array.isArray(o);
+    if (isObj(src)) {
+      const rootObj = { ...(src as Record<string, unknown>) } as Record<string, unknown>;
+      const topKey = (cfg.path || "").split(".")[0];
+      if (topKey && Object.prototype.hasOwnProperty.call(rootObj, topKey)) {
+        delete rootObj[topKey];
+      }
+      src = rootObj as unknown as JSONValue;
+    }
+  }
   const merged = mergeObjects(target as Record<string, JSONValue>, src as Record<string, JSONValue>, strategy);
   return setByPath(input, cfg.path, merged);
 }

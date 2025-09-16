@@ -127,9 +127,17 @@ function resolveValue(value: unknown, scope: { root: JSONValue; current?: JSONVa
   }
   // String template interpolation: "... ${ ... } ..."
   if (typeof value === "string" && value.includes("${")) {
-    return value.replace(TEMPLATE_RE, (_, expr: string) => {
+    // If the entire value is exactly a single placeholder, preserve the native type
+    const single = value.match(/^\s*\$\{([^}]+)\}\s*$/);
+    if (single) {
+      const v = evalExpr(String(single[1]).trim(), scope);
+      return v;
+    }
+    // Otherwise, treat as string template and coerce interpolated values to string.
+    // IMPORTANT: If an expression resolves to undefined, keep the original placeholder literal.
+    return value.replace(TEMPLATE_RE, (match: string, expr: string) => {
       const v = evalExpr(String(expr).trim(), scope);
-      return String(v);
+      return v === undefined ? match : String(v);
     });
   }
   // Recurse into objects and arrays

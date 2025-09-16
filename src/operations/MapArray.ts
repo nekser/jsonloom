@@ -4,6 +4,7 @@ import { getByPath, setByPath } from "./utils";
 import { getOperationModule } from "./index";
 import type { JSONValue } from "../types/json";
 import { resolveConfig } from "./configResolver";
+import { applyFieldMap } from "./mapUtils";
 
 export type MapArrayConfig = {
   path: string;
@@ -13,6 +14,8 @@ export type MapArrayConfig = {
   onError?: "propagate" | "skip";
   // Safety guard for nested recursion
   maxDepth?: number;
+  // Optional: declarative field mapping (alternative to operations)
+  mapping?: Record<string, string>; // newKey -> sourceKey
 };
 
 const ajv = new Ajv();
@@ -70,7 +73,12 @@ function apply(input: JSONValue, cfg: MapArrayConfig): JSONValue {
 
   const out = target.reduce<JSONValue[]>((acc, el) => {
     try {
-  const mapped = runNested(el, cfg.operations, 1);
+      let mapped: JSONValue = el;
+      if (cfg.mapping && Object.keys(cfg.mapping).length > 0 && (el && typeof el === "object" && !Array.isArray(el))) {
+        const fieldMaps = Object.entries(cfg.mapping).map(([to, from]) => ({ from, to }));
+        mapped = applyFieldMap(el as Record<string, unknown>, fieldMaps) as unknown as JSONValue;
+      }
+      mapped = runNested(mapped, cfg.operations, 1);
       acc.push(mapped);
     } catch (e) {
       if (onError === "skip") {

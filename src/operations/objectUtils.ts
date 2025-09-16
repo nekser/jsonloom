@@ -47,39 +47,42 @@ export function normalizeKeyCase(input: JSONValue, mode: KeyCase): JSONValue {
 export function deleteByPath(obj: JSONValue, path: string): JSONValue {
   if (!path) return obj;
   if (path.includes("*")) {
-    // implement via setByPath: replace matched leaves with undefined and then prune
-  const replaced = setByPath(obj, path, undefined as unknown as JSONValue);
-    return pruneUndefined(replaced);
+    // For wildcards, setByPath sets to undefined, then pruneUndefinedRoot removes all undefineds
+    const replaced = setByPath(obj, path, undefined as unknown as JSONValue);
+    return pruneUndefinedRoot(replaced);
   }
   const parts = path.split(".");
+  // Deep clone root
   const root: JSONValue = Array.isArray(obj) ? [...obj] : obj && typeof obj === "object" ? { ...(obj as JSONObject) } : {};
-  let cur: Record<string, unknown> | Array<unknown> = (Array.isArray(root) ? [...root] : (root && typeof root === "object" ? { ...(root as JSONObject) } : {})) as Record<string, unknown> | Array<unknown>;
+  let cur: any = root;
   for (let i = 0; i < parts.length - 1; i++) {
     const p = parts[i];
-    const next = (cur as Record<string, unknown>)[p];
+    const next = cur[p];
     if (!(next && typeof next === "object")) {
       // path not found
       return root;
     }
-    (cur as Record<string, unknown>)[p] = Array.isArray(next) ? [...next] : { ...(next as Record<string, unknown>) };
-    cur = (cur as Record<string, unknown>)[p] as Record<string, unknown> | Array<unknown>;
+    cur[p] = Array.isArray(next) ? [...next] : { ...next };
+    cur = cur[p];
   }
-  if (cur && typeof cur === "object") {
-    if (Array.isArray(cur)) {
-      const idx = Number(parts[parts.length - 1]);
-      if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) cur.splice(idx, 1);
-    } else {
-      delete (cur as Record<string, unknown>)[parts[parts.length - 1]];
+  const last = parts[parts.length - 1];
+  if (Array.isArray(cur)) {
+    const idx = Number(last);
+    if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) cur.splice(idx, 1);
+  } else if (cur && typeof cur === "object") {
+    if (Object.prototype.hasOwnProperty.call(cur, last)) {
+      delete cur[last];
     }
   }
-  return root;
+  // Prune undefined values after deletion
+  return pruneUndefinedRoot(root);
 }
 
 function pruneUndefined(node: JSONValue): JSONValue {
   if (Array.isArray(node)) {
     // remove explicit undefineds in arrays
-    const arr = node.map((v) => pruneUndefined(v)).filter((v) => v !== undefined) as JSONValue[];
-    return arr as unknown as JSONValue;
+    const arr = node.map((v) => pruneUndefined(v)).filter((v) => v !== undefined);
+    return arr;
   }
   if (node && typeof node === "object") {
     const out: JSONObject = {};
@@ -87,9 +90,20 @@ function pruneUndefined(node: JSONValue): JSONValue {
       const nv = pruneUndefined(v);
       if (nv !== undefined) out[k] = nv;
     }
-    return out as JSONValue;
+    // If all properties were undefined, return undefined to allow parent to prune this object
+    if (Object.keys(out).length === 0) return undefined as unknown as JSONValue;
+    return out;
   }
   return node;
+}
+
+function pruneUndefinedRoot(node: JSONValue): JSONValue {
+  const pruned = pruneUndefined(node);
+  if (pruned === undefined) {
+    // preserve type: if input was array, return []; else return {}
+    return Array.isArray(node) ? [] : {};
+  }
+  return pruned;
 }
 
 // ----- merge utils -----
@@ -167,5 +181,6 @@ export function pickPaths(obj: JSONValue, paths: string[]): JSONValue {
 export function omitPaths(obj: JSONValue, paths: string[]): JSONValue {
   let out: JSONValue = obj;
   for (const p of paths) out = deleteByPath(out, p);
-  return out;
+  // Prune undefined values after all deletions
+  return pruneUndefinedRoot(out);
 }
