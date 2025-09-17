@@ -22,7 +22,8 @@ const validateSchema = ajv.compile({
   additionalProperties: true,
 });
 
-const PLACEHOLDER_RE = /\$\{([^}]+)\}/g;
+// Support both ${path} and {{path}} placeholders. Using {{}} avoids config pre-resolution.
+const PLACEHOLDER_RE = /\$\{([^}]+)\}|\{\{([^}]+)\}\}/g;
 
 function readPath(root: JSONValue, path: string): JSONValue {
   return path.split(".").reduce<JSONValue | undefined>((acc, seg) => {
@@ -34,12 +35,14 @@ function readPath(root: JSONValue, path: string): JSONValue {
 }
 
 function interpolate(template: string, root: JSONValue, onMissing: MissingMode = "literal"): string {
-  return template.replace(PLACEHOLDER_RE, (_, p: string) => {
-    const v = readPath(root, p.trim());
+  return template.replace(PLACEHOLDER_RE, (match: string, p1?: string, p2?: string) => {
+    const p = (p1 ?? p2 ?? "").trim();
+    const v = readPath(root, p);
     if (v === undefined) {
       if (onMissing === "ignore") return "";
       if (onMissing === "error") throw new Error(`Missing placeholder: ${p}`);
-      return `\${${p}}`;
+      // literal mode: keep original placeholder unchanged
+      return match;
     }
     return String(v);
   });
