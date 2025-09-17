@@ -10,7 +10,7 @@ describe('Combination 4: If → Math → String', () => {
         { id: 'sub', type: 'Subtract', config: { path: 'price', value: 10 } },
       ] } },
       { id: 'mul', type: 'Multiply', config: { path: 'price', value: 2 } },
-      { id: 'msg', type: 'TemplateInterpolate', config: { path: 'message', template: 'Final price: ${price}' } },
+      { id: 'msg', type: 'TemplateInterpolate', config: { path: 'message', template: 'Final price: {{price}}' } },
     ];
     const result = applyPipeline(input, ops as any);
     expect(result).toEqual({ price: 260, message: 'Final price: 260' });
