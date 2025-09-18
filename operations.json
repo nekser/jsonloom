@@ -9,7 +9,9 @@
           "path",
           "value"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -21,7 +23,9 @@
           "path",
           "mode"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -34,7 +38,9 @@
           "min",
           "max"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -46,7 +52,9 @@
           "path",
           "to"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -57,7 +65,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -68,7 +78,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -81,7 +93,9 @@
           "amount",
           "unit"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -94,7 +108,9 @@
           "endPath",
           "unit"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -105,7 +121,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -117,7 +135,9 @@
           "path",
           "value"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -128,7 +148,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -142,7 +164,8 @@
         ],
         "optional": [
           "value",
-          "mode"
+          "mode",
+          "writeResultTo"
         ]
       }
     },
@@ -155,7 +178,9 @@
           "mode",
           "keys"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -167,7 +192,8 @@
           "path"
         ],
         "optional": [
-          "depth"
+          "depth",
+          "writeResultTo"
         ]
       }
     },
@@ -180,7 +206,8 @@
           "path"
         ],
         "optional": [
-          "delimiter"
+          "delimiter",
+          "writeResultTo"
         ]
       }
     },
@@ -194,7 +221,8 @@
           "by"
         ],
         "optional": [
-          "collect"
+          "collect",
+          "writeResultTo"
         ]
       }
     },
@@ -235,7 +263,8 @@
           "path"
         ],
         "optional": [
-          "delimiter"
+          "delimiter",
+          "writeResultTo"
         ]
       }
     },
@@ -252,7 +281,8 @@
         "optional": [
           "path",
           "operations",
-          "onError"
+          "onError",
+          "writeResultTo"
         ]
       }
     },
@@ -264,7 +294,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -277,7 +309,8 @@
           "source"
         ],
         "optional": [
-          "strategy"
+          "strategy",
+          "writeResultTo"
         ]
       }
     },
@@ -289,7 +322,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -301,7 +336,9 @@
           "path",
           "value"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -313,7 +350,9 @@
           "path",
           "value"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -324,7 +363,9 @@
         "required": [
           "mode"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -335,7 +376,9 @@
         "required": [
           "paths"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -348,7 +391,8 @@
           "format"
         ],
         "optional": [
-          "timezone"
+          "timezone",
+          "writeResultTo"
         ]
       }
     },
@@ -360,7 +404,9 @@
         "required": [
           "paths"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -372,7 +418,9 @@
           "path",
           "value"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -384,7 +432,9 @@
           "path",
           "op"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -410,7 +460,9 @@
           "from",
           "to"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -422,7 +474,9 @@
           "pattern",
           "replace"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -434,7 +488,8 @@
           "path"
         ],
         "optional": [
-          "precision"
+          "precision",
+          "writeResultTo"
         ]
       }
     },
@@ -447,22 +502,8 @@
           "path",
           "value"
         ],
-        "optional": []
-      }
-    },
-    {
-      "type": "SetVariable",
-      "name": "SetVariable",
-      "description": "Compute a value via a nested operation and store it as a variable.",
-      "parameters": {
-        "required": [
-          "name",
-          "op"
-        ],
         "optional": [
-          "id",
-          "type",
-          "config"
+          "writeResultTo"
         ]
       }
     },
@@ -474,7 +515,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -488,7 +531,8 @@
         "optional": [
           "order",
           "nulls",
-          "caseInsensitive"
+          "caseInsensitive",
+          "writeResultTo"
         ]
       }
     },
@@ -502,7 +546,8 @@
           "mode"
         ],
         "optional": [
-          "coerceNonString"
+          "coerceNonString",
+          "writeResultTo"
         ]
       }
     },
@@ -516,7 +561,8 @@
           "replace"
         ],
         "optional": [
-          "path"
+          "path",
+          "writeResultTo"
         ]
       }
     },
@@ -529,7 +575,9 @@
           "path",
           "value"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -540,7 +588,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -569,7 +619,8 @@
           "template"
         ],
         "optional": [
-          "onMissing"
+          "onMissing",
+          "writeResultTo"
         ]
       }
     },
@@ -579,7 +630,9 @@
       "description": "Trim whitespace from strings.",
       "parameters": {
         "required": [],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {
@@ -591,7 +644,8 @@
           "path"
         ],
         "optional": [
-          "delimiter"
+          "delimiter",
+          "writeResultTo"
         ]
       }
     },
@@ -603,7 +657,9 @@
         "required": [
           "path"
         ],
-        "optional": []
+        "optional": [
+          "writeResultTo"
+        ]
       }
     },
     {

@@ -3,12 +3,14 @@ import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import { sliceWithStep } from "./sliceUtils";
 import type { JSONValue } from "../types/json";
+import { writeResult } from "./writeResult";
 
 export type SliceArrayConfig = {
   path: string;
   start?: number;
   end?: number;
   step?: number;
+  writeResultTo?: string;
 };
 
 const ajv = new Ajv();
@@ -19,6 +21,7 @@ const validateSchema = ajv.compile({
     start: { type: "number" },
     end: { type: "number" },
     step: { type: "number", minimum: 1 },
+    writeResultTo: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -27,8 +30,9 @@ const validateSchema = ajv.compile({
 function apply(input: JSONValue, cfg: SliceArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
-  const out = sliceWithStep(arr, cfg.start, cfg.end, cfg.step);
-  return setByPath(input, cfg.path, out);
+  const out = sliceWithStep(arr, cfg.start, cfg.end, cfg.step) as JSONValue;
+  const updated = setByPath(input, cfg.path, out);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
 }
 
 function validate(config: SliceArrayConfig, input: JSONValue): string | undefined {
@@ -42,7 +46,7 @@ const mod: OperationModule<SliceArrayConfig> = {
   type: "SliceArray",
   apply,
   validate,
-  defaultConfig: { path: "" },
+  defaultConfig: { path: "", writeResultTo: undefined },
 };
 
 export default mod;

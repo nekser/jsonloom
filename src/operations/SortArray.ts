@@ -3,6 +3,7 @@ import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { buildComparator, stableSort, type Order } from "./sortUtils";
+import { writeResult } from "./writeResult";
 
 export type SortArrayConfig = {
   path: string; // path to array
@@ -10,6 +11,7 @@ export type SortArrayConfig = {
   order?: Order;
   caseInsensitive?: boolean;
   nulls?: "first" | "last";
+  writeResultTo?: string;
 };
 
 const ajv = new Ajv();
@@ -21,6 +23,7 @@ const validateSchema = ajv.compile({
     order: { enum: ["asc", "desc"] },
     caseInsensitive: { type: "boolean" },
     nulls: { enum: ["first", "last"] },
+    writeResultTo: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -30,8 +33,9 @@ function apply(input: JSONValue, cfg: SortArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
   const cmp = buildComparator({ by: cfg.by, order: cfg.order, caseInsensitive: cfg.caseInsensitive, nulls: cfg.nulls });
-  const sorted = stableSort(arr.slice(), cmp);
-  return setByPath(input, cfg.path, sorted);
+  const sorted = stableSort(arr.slice(), cmp) as JSONValue;
+  const updated = setByPath(input, cfg.path, sorted);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => sorted });
 }
 
 function validate(config: SortArrayConfig, input: JSONValue): string | undefined {
@@ -45,7 +49,7 @@ const mod: OperationModule<SortArrayConfig> = {
   type: "SortArray",
   apply,
   validate,
-  defaultConfig: { path: "", order: "asc", nulls: "last", caseInsensitive: false },
+  defaultConfig: { path: "", order: "asc", nulls: "last", caseInsensitive: false, writeResultTo: undefined },
 };
 
 export default mod;

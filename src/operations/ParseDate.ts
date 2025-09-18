@@ -3,12 +3,9 @@ import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import type { JSONValue } from "../types/json";
 import { parseWithFormat, toISO } from "./dateUtils";
+import { writeResult } from "./writeResult";
 
-export type ParseDateConfig = {
-  path: string;
-  format: string;
-  timezone?: string; // default UTC
-};
+export type ParseDateConfig = { path: string; format: string; timezone?: string; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -17,6 +14,7 @@ const validateSchema = ajv.compile({
     path: { type: "string", minLength: 1 },
     format: { type: "string", minLength: 1 },
     timezone: { type: "string" },
+    writeResultTo: { type: "string" },
   },
   required: ["path", "format"],
   additionalProperties: true,
@@ -26,7 +24,9 @@ function apply(input: JSONValue, cfg: ParseDateConfig): JSONValue {
   const cur = getByPath(input, cfg.path);
   const dt = parseWithFormat(cur, cfg.format, cfg.timezone || "utc");
   if (!dt) throw new Error(`ParseDate: invalid or mismatched format at '${cfg.path}'`);
-  return setByPath(input, cfg.path, toISO(dt));
+  const iso = toISO(dt) as JSONValue;
+  const updated = setByPath(input, cfg.path, iso);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => iso });
 }
 
 function validate(config: ParseDateConfig, input: JSONValue): string | undefined {
@@ -40,7 +40,7 @@ const mod: OperationModule<ParseDateConfig> = {
   type: "ParseDate",
   apply,
   validate,
-  defaultConfig: { path: "", format: "YYYY-MM-DD", timezone: "utc" },
+  defaultConfig: { path: "", format: "YYYY-MM-DD", timezone: "utc", writeResultTo: undefined },
 };
 
 export default mod;

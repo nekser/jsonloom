@@ -2,13 +2,10 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import type { JSONValue, JSONObject } from "../types/json";
+import { writeResult } from "./writeResult";
 
 export type MissingMode = "ignore" | "literal" | "error";
-export type TemplateInterpolateConfig = {
-  path: string;
-  template: string;
-  onMissing?: MissingMode; // default: literal
-};
+export type TemplateInterpolateConfig = { path: string; template: string; onMissing?: MissingMode; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -17,6 +14,7 @@ const validateSchema = ajv.compile({
     path: { type: "string", minLength: 1 },
     template: { type: "string", minLength: 1 },
     onMissing: { enum: ["ignore", "literal", "error"] },
+    writeResultTo: { type: "string" },
   },
   required: ["path", "template"],
   additionalProperties: true,
@@ -53,7 +51,8 @@ function apply(input: JSONValue, cfg: TemplateInterpolateConfig): JSONValue {
   const target = getByPath(root, cfg.path);
   const out = interpolate(cfg.template, root, cfg.onMissing ?? "literal");
   const result = typeof target === "string" ? target.replace(/^[\s\S]*$/, out) : out;
-  return setByPath(input, cfg.path, result);
+  const updated = setByPath(input, cfg.path, result as unknown as JSONValue);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => result as unknown as JSONValue });
 }
 
 function validate(config: TemplateInterpolateConfig, input: JSONValue): string | undefined {
@@ -71,7 +70,7 @@ const mod: OperationModule<TemplateInterpolateConfig> = {
   type: "TemplateInterpolate",
   apply,
   validate,
-  defaultConfig: { path: "", template: "", onMissing: "literal" },
+  defaultConfig: { path: "", template: "", onMissing: "literal", writeResultTo: undefined },
 };
 
 export default mod;

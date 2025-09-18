@@ -3,11 +3,9 @@ import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { applyFieldMap } from "./mapUtils";
+import { writeResult } from "./writeResult";
 
-export type MapFieldsConfig = {
-  path: string; // path to array of objects
-  mapping: Record<string, string>; // newKey -> sourceKey
-};
+export type MapFieldsConfig = { path: string; mapping: Record<string, string>; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -15,6 +13,7 @@ const validateSchema = ajv.compile({
   properties: {
     path: { type: "string", minLength: 1 },
     mapping: { type: "object", additionalProperties: { type: "string" } },
+    writeResultTo: { type: "string" },
   },
   required: ["path", "mapping"],
   additionalProperties: true,
@@ -25,8 +24,9 @@ function apply(input: JSONValue, cfg: MapFieldsConfig): JSONValue {
   if (!Array.isArray(arr)) return input;
   // Convert Record<string, string> to FieldMap[]
   const fieldMaps = Object.entries(cfg.mapping).map(([to, from]) => ({ from, to }));
-  const out = arr.map((it) => applyFieldMap(it as Record<string, unknown>, fieldMaps));
-  return setByPath(input, cfg.path, out as JSONValue);
+  const out = arr.map((it) => applyFieldMap(it as Record<string, unknown>, fieldMaps)) as JSONValue;
+  const updated = setByPath(input, cfg.path, out);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
 }
 
 function validate(config: MapFieldsConfig, input: JSONValue): string | undefined {
@@ -40,7 +40,7 @@ const mod: OperationModule<MapFieldsConfig> = {
   type: "MapArray", // Reuse "MapArray" type? No: create a distinct label in registry later if needed.
   apply,
   validate,
-  defaultConfig: { path: "", mapping: {} },
+  defaultConfig: { path: "", mapping: {}, writeResultTo: undefined },
 };
 
 export default mod;

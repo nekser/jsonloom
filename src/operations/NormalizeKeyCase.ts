@@ -2,24 +2,24 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { normalizeKeyCase, type KeyCase } from "./objectUtils";
+import { writeResult } from "./writeResult";
 
-export type NormalizeKeyCaseConfig = {
-  mode: KeyCase; // camel | snake | kebab | pascal
-};
+export type NormalizeKeyCaseConfig = { mode: KeyCase; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
   type: "object",
   properties: {
     mode: { enum: ["camel", "snake", "kebab", "pascal"] },
+    writeResultTo: { type: "string" },
   },
   required: ["mode"],
   additionalProperties: true,
 });
 
 function apply(input: JSONValue, cfg: NormalizeKeyCaseConfig): JSONValue {
-  // normalizeKeyCase already walks recursively; objectUtils.walkKeys writes last occurrence wins
-  return normalizeKeyCase(input, cfg.mode);
+  const out = normalizeKeyCase(input, cfg.mode) as JSONValue;
+  return writeResult(input, out, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
 }
 
 function validate(config: NormalizeKeyCaseConfig, _input: JSONValue): string | undefined {
@@ -31,7 +31,7 @@ const mod: OperationModule<NormalizeKeyCaseConfig> = {
   type: "NormalizeKeyCase",
   apply,
   validate,
-  defaultConfig: { mode: "camel" },
+  defaultConfig: { mode: "camel", writeResultTo: undefined },
 };
 
 export default mod;

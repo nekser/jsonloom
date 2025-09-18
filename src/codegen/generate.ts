@@ -35,7 +35,6 @@ import J_Base64 from "./javascript/Base64";
 import J_StringCase from "./javascript/StringCase";
 import J_If from "./javascript/If";
 import J_Switch from "./javascript/Switch";
-import J_SetVariable from "./javascript/SetVariable";
 import J_Modulo from "./javascript/Modulo";
 import J_Power from "./javascript/Power";
 import J_Round from "./javascript/Round";
@@ -86,7 +85,6 @@ import P_RenameKey from "./python/RenameKey";
 import P_RenameKeysByPattern from "./python/RenameKeysByPattern";
 import P_Round from "./python/Round";
 import P_SetPath from "./python/SetPath";
-import P_SetVariable from "./python/SetVariable";
 import P_SliceArray from "./python/SliceArray";
 import P_SortArray from "./python/SortArray";
 import P_StringCase from "./python/StringCase";
@@ -147,7 +145,6 @@ import PH_ReduceArray from "./php/ReduceArray";
 import PH_TemplateInterpolate from "./php/TemplateInterpolate";
 import PH_If from "./php/If";
 import PH_Switch from "./php/Switch";
-import PH_SetVariable from "./php/SetVariable";
 import PH_ValidateJSON from "./php/ValidateJSON";
 
 export type Lang = "javascript" | "python" | "php";
@@ -195,7 +192,6 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   StringCase: J_StringCase as unknown as TemplateFn,
   If: J_If as unknown as TemplateFn,
   Switch: J_Switch as unknown as TemplateFn,
-  SetVariable: J_SetVariable as unknown as TemplateFn,
   Modulo: J_Modulo as unknown as TemplateFn,
   Power: J_Power as unknown as TemplateFn,
   Round: J_Round as unknown as TemplateFn,
@@ -261,7 +257,6 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   // Control Flow & Vars
   If: P_If as unknown as TemplateFn,
   Switch: P_Switch as unknown as TemplateFn,
-  SetVariable: P_SetVariable as unknown as TemplateFn,
 
   // Types & Misc
   CoerceType: P_CoerceType as unknown as TemplateFn,
@@ -322,7 +317,6 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   TemplateInterpolate: PH_TemplateInterpolate as unknown as TemplateFn,
   If: PH_If as unknown as TemplateFn,
   Switch: PH_Switch as unknown as TemplateFn,
-  SetVariable: PH_SetVariable as unknown as TemplateFn,
   ValidateJSON: PH_ValidateJSON as unknown as TemplateFn,
   },
 };
@@ -333,7 +327,7 @@ const ALL_TYPES = [
   "FilterArray","SortArray","UniqueArray","FlattenArray","SliceArray","GroupBy","ReduceArray","CountArray","JoinArray",
   "RegexReplace","TrimStrings","CoerceType","TemplateInterpolate","Base64","StringCase",
   "Add","Subtract","Multiply","Divide","Modulo","Power","Round","Clamp","Sum","Count","Min","Max",
-  "If","Switch","SetVariable","ValidateJSON","ParseDate","IsDateCompare","DateAdd","DateDiff"
+  "If","Switch","ValidateJSON","ParseDate","IsDateCompare","DateAdd","DateDiff"
 ];
 
 for (const t of ALL_TYPES) {

@@ -2,12 +2,10 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import { unflattenObject } from "./objectUtils";
+import { writeResult } from "./writeResult";
 import type { JSONValue } from "../types/json";
 
-export type UnflattenObjectConfig = {
-  path: string;
-  delimiter?: string;
-};
+export type UnflattenObjectConfig = { path: string; delimiter?: string; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -15,6 +13,7 @@ const validateSchema = ajv.compile({
   properties: {
     path: { type: "string", minLength: 1 },
     delimiter: { type: "string" },
+    writeResultTo: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -23,8 +22,9 @@ const validateSchema = ajv.compile({
 function apply(input: JSONValue, cfg: UnflattenObjectConfig): JSONValue {
   const cur = getByPath(input, cfg.path);
   if (!(cur && typeof cur === "object" && !Array.isArray(cur))) return input;
-  const expanded = unflattenObject(cur as Record<string, JSONValue>, cfg.delimiter ?? ".");
-  return setByPath(input, cfg.path, expanded);
+  const expanded = unflattenObject(cur as Record<string, JSONValue>, cfg.delimiter ?? ".") as JSONValue;
+  const updated = setByPath(input, cfg.path, expanded);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => expanded });
 }
 
 function validate(config: UnflattenObjectConfig, input: JSONValue): string | undefined {
@@ -38,7 +38,7 @@ const mod: OperationModule<UnflattenObjectConfig> = {
   type: "UnflattenObject",
   apply,
   validate,
-  defaultConfig: { path: "", delimiter: "." },
+  defaultConfig: { path: "", delimiter: ".", writeResultTo: undefined },
 };
 
 export default mod;

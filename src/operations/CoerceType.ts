@@ -2,13 +2,10 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import type { JSONValue } from "../types/json";
+import { writeResult } from "./writeResult";
 
 export type TargetType = "string" | "number" | "boolean" | "object" | "array";
-export type CoerceTypeConfig = {
-  path: string;
-  to: TargetType;
-  fallback?: JSONValue;
-};
+export type CoerceTypeConfig = { path: string; to: TargetType; fallback?: JSONValue; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -17,6 +14,7 @@ const validateSchema = ajv.compile({
     path: { type: "string", minLength: 1 },
     to: { enum: ["string", "number", "boolean", "object", "array"] },
     fallback: {},
+    writeResultTo: { type: "string" },
   },
   required: ["path", "to"],
   additionalProperties: true,
@@ -68,10 +66,14 @@ function apply(input: JSONValue, cfg: CoerceTypeConfig): JSONValue {
   const current = getByPath(input, cfg.path);
   const res = tryCoerce(current, cfg.to);
   if (!res || !res.ok) {
-    if (cfg.fallback !== undefined) return setByPath(input, cfg.path, cfg.fallback);
-    return input; // validation stage will flag error if needed
+    if (cfg.fallback !== undefined) {
+      const updated = setByPath(input, cfg.path, cfg.fallback as JSONValue);
+      return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => cfg.fallback as JSONValue });
+    }
+    return input;
   }
-  return setByPath(input, cfg.path, res.value);
+  const updated = setByPath(input, cfg.path, res.value as JSONValue);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => res.value as JSONValue });
 }
 
 function validate(config: CoerceTypeConfig, input: JSONValue): string | undefined {
@@ -88,7 +90,7 @@ const mod: OperationModule<CoerceTypeConfig> = {
   type: "CoerceType",
   apply,
   validate,
-  defaultConfig: { path: "", to: "string" },
+  defaultConfig: { path: "", to: "string", writeResultTo: undefined },
 };
 
 export default mod;

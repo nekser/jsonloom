@@ -75,7 +75,6 @@ const DESCRIPTIONS: Record<string, string> = {
   // Control flow
   If: "Conditionally apply different operation branches.",
   Switch: "Apply operations based on a matching case value.",
-  SetVariable: "Compute a value via a nested operation and store it as a variable.",
 
   // Validation / Dates
   ValidateJSON: "Validate JSON against a schema or checks.",

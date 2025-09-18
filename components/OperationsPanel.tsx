@@ -70,6 +70,17 @@ function OperationCard({ id, index }: { id: string; index: number }) {
   const pathIndex: PathIndex = (opIndexes[index] as PathIndex) ?? fallbackIndex;
 
   if (!op) return null;
+  const supportsWriteResultTo = useMemo(() => {
+    // Heuristic: if current config already has the key or the module defaultConfig has it.
+    try {
+      const mod = getOperationModule(op.type as OperationType);
+      const cfgObj = (op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {};
+      const defObj = (mod?.defaultConfig && typeof mod.defaultConfig === "object" && !Array.isArray(mod.defaultConfig)) ? (mod.defaultConfig as Record<string, unknown>) : {};
+      return "writeResultTo" in cfgObj || "writeResultTo" in defObj;
+    } catch {
+      return false;
+    }
+  }, [op]);
   return (
   <div ref={setNodeRef} style={style} className={`border rounded-md p-3 op-surface ${!isEnabled ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
@@ -147,6 +158,24 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           );
         })()}
       </div>
+      {supportsWriteResultTo && (
+        <div className="mt-3 flex flex-col gap-1">
+          <label className="text-[10px] uppercase tracking-wide text-neutral-500">Write Result To (path)</label>
+          <AutocompleteInput
+            className="w-full"
+            placeholder="Leave empty to apply in-place"
+            value={(() => { const v = (op.config as any)?.writeResultTo; return typeof v === 'string' ? v : ''; })()}
+            getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+            onChange={(v) => {
+              const base = (op.config && typeof op.config === 'object' && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {};
+              const next = { ...base } as Record<string, unknown>;
+              if (v) next.writeResultTo = v; else delete next.writeResultTo; // remove when empty
+              update(op.id, { config: next as unknown as JSONValue });
+            }}
+          />
+          <div className="text-[10px] text-neutral-500">If set, the computed value is written to this path instead of its original location.</div>
+        </div>
+      )}
       {!isMobile && op.debugOpen && (
   <div className="mt-2 border rounded p-2 op-surface">
           {hasErr ? (

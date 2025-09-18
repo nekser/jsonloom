@@ -47,7 +47,6 @@ export type OperationType =
   // Control Flow
   | "If"
   | "Switch"
-  | "SetVariable"
   // Validation
   | "ValidateJSON"
   // Date operations

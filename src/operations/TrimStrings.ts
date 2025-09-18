@@ -2,16 +2,16 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import type { JSONValue, JSONObject } from "../types/json";
+import { writeResult } from "./writeResult";
 
-export type TrimStringsConfig = {
-  path?: string; // if omitted, trim all strings recursively
-};
+export type TrimStringsConfig = { path?: string; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
   type: "object",
   properties: {
     path: { type: "string" },
+    writeResultTo: { type: "string" },
   },
   additionalProperties: true,
 });
@@ -28,11 +28,26 @@ function trimTree(input: JSONValue): JSONValue {
 }
 
 function apply(input: JSONValue, cfg: TrimStringsConfig): JSONValue {
-  if (!cfg.path) return trimTree(input);
+  if (!cfg.path) {
+    const outAll = trimTree(input);
+    return writeResult(input, outAll, { writeResultTo: cfg.writeResultTo, valueExtractor: () => outAll });
+  }
   const target = getByPath(input, cfg.path);
-  if (typeof target === "string") return setByPath(input, cfg.path, target.trim());
-  if (Array.isArray(target)) return setByPath(input, cfg.path, target.map((v) => (typeof v === "string" ? v.trim() : (v as JSONValue))));
-  if (target && typeof target === "object") return setByPath(input, cfg.path, trimTree(target as JSONValue));
+  if (typeof target === "string") {
+    const out = target.trim() as JSONValue;
+    const updated = setByPath(input, cfg.path, out);
+    return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
+  }
+  if (Array.isArray(target)) {
+    const out = target.map((v) => (typeof v === "string" ? v.trim() : (v as JSONValue))) as JSONValue;
+    const updated = setByPath(input, cfg.path, out);
+    return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
+  }
+  if (target && typeof target === "object") {
+    const out = trimTree(target as JSONValue);
+    const updated = setByPath(input, cfg.path, out);
+    return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
+  }
   return input;
 }
 
@@ -45,7 +60,7 @@ const mod: OperationModule<TrimStringsConfig> = {
   type: "TrimStrings",
   apply,
   validate,
-  defaultConfig: {},
+  defaultConfig: { writeResultTo: undefined },
 };
 
 export default mod;

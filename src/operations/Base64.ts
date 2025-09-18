@@ -2,12 +2,10 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
+import { writeResult } from "./writeResult";
 
 export type Base64Mode = "encode" | "decode";
-export type Base64Config = {
-  path: string;
-  mode: Base64Mode;
-};
+export type Base64Config = { path: string; mode: Base64Mode; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -15,6 +13,7 @@ const validateSchema = ajv.compile({
   properties: {
     path: { type: "string", minLength: 1 },
     mode: { enum: ["encode", "decode"] },
+    writeResultTo: { type: "string" },
   },
   required: ["path", "mode"],
   additionalProperties: true,
@@ -24,13 +23,15 @@ function apply(input: JSONValue, cfg: Base64Config): JSONValue {
   const cur = getByPath(input, cfg.path);
   if (cfg.mode === "encode") {
     const s = cur == null ? "" : String(cur);
-    const out = typeof Buffer !== "undefined" ? Buffer.from(s, "utf8").toString("base64") : btoa(unescape(encodeURIComponent(s)));
-    return setByPath(input, cfg.path, out);
+    const out = (typeof Buffer !== "undefined" ? Buffer.from(s, "utf8").toString("base64") : btoa(unescape(encodeURIComponent(s)))) as JSONValue;
+    const updated = setByPath(input, cfg.path, out);
+    return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
   } else {
     try {
       const s = cur == null ? "" : String(cur);
-      const out = typeof Buffer !== "undefined" ? Buffer.from(s, "base64").toString("utf8") : decodeURIComponent(escape(atob(s)));
-      return setByPath(input, cfg.path, out);
+      const out = (typeof Buffer !== "undefined" ? Buffer.from(s, "base64").toString("utf8") : decodeURIComponent(escape(atob(s)))) as JSONValue;
+      const updated = setByPath(input, cfg.path, out);
+      return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
     } catch {
       return input;
     }
@@ -56,7 +57,7 @@ const mod: OperationModule<Base64Config> = {
   type: "Base64",
   apply,
   validate,
-  defaultConfig: { path: "", mode: "encode" },
+  defaultConfig: { path: "", mode: "encode", writeResultTo: undefined },
 };
 
 export default mod;

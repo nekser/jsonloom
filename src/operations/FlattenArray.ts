@@ -3,10 +3,12 @@ import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { flattenDepth } from "./arrayUtils";
+import { writeResult } from "./writeResult";
 
 export type FlattenArrayConfig = {
   path: string;
   depth?: number | "infinity";
+  writeResultTo?: string;
 };
 
 const ajv = new Ajv();
@@ -15,6 +17,7 @@ const validateSchema = ajv.compile({
   properties: {
     path: { type: "string", minLength: 1 },
     depth: { anyOf: [{ type: "number", minimum: 0 }, { const: "infinity" }] },
+    writeResultTo: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -24,8 +27,9 @@ function apply(input: JSONValue, cfg: FlattenArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
   const depth = cfg.depth === "infinity" ? Infinity : (cfg.depth ?? 1);
-  const out = flattenDepth(arr, depth);
-  return setByPath(input, cfg.path, out);
+  const out = flattenDepth(arr, depth) as JSONValue;
+  const updated = setByPath(input, cfg.path, out);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
 }
 
 function validate(config: FlattenArrayConfig, input: JSONValue): string | undefined {
@@ -39,7 +43,7 @@ const mod: OperationModule<FlattenArrayConfig> = {
   type: "FlattenArray",
   apply,
   validate,
-  defaultConfig: { path: "", depth: 1 },
+  defaultConfig: { path: "", depth: 1, writeResultTo: undefined },
 };
 
 export default mod;

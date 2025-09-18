@@ -2,9 +2,11 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
+import { writeResult } from "./writeResult";
 
 export type CountArrayConfig = {
   path: string;
+  writeResultTo?: string;
 };
 
 const ajv = new Ajv();
@@ -12,6 +14,7 @@ const validateSchema = ajv.compile({
   type: "object",
   properties: {
     path: { type: "string", minLength: 1 },
+    writeResultTo: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -20,7 +23,9 @@ const validateSchema = ajv.compile({
 function apply(input: JSONValue, cfg: CountArrayConfig): JSONValue {
   const arr = getByPath(input, cfg.path);
   if (!Array.isArray(arr)) return input;
-  return setByPath(input, cfg.path, arr.length);
+  const val = arr.length as unknown as JSONValue;
+  const updated = setByPath(input, cfg.path, val);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => val });
 }
 
 function validate(config: CountArrayConfig, input: JSONValue): string | undefined {
@@ -34,7 +39,7 @@ const mod: OperationModule<CountArrayConfig> = {
   type: "CountArray",
   apply,
   validate,
-  defaultConfig: { path: "" },
+  defaultConfig: { path: "", writeResultTo: undefined },
 };
 
 export default mod;

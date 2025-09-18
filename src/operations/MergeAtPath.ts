@@ -3,13 +3,9 @@ import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
 import { mergeObjects, type MergeStrategy } from "./objectUtils";
+import { writeResult } from "./writeResult";
 
-export type MergeAtPathConfig = {
-  path: string;
-  source: "root" | "path";
-  sourcePath?: string; // required if source = path
-  strategy?: MergeStrategy; // shallow | deep | overwrite
-};
+export type MergeAtPathConfig = { path: string; source: "root" | "path"; sourcePath?: string; strategy?: MergeStrategy; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -19,6 +15,7 @@ const validateSchema = ajv.compile({
     source: { enum: ["root", "path"] },
     sourcePath: { type: "string" },
     strategy: { enum: ["shallow", "deep", "overwrite"] },
+    writeResultTo: { type: "string" },
   },
   required: ["path", "source"],
   additionalProperties: true,
@@ -43,8 +40,9 @@ function apply(input: JSONValue, cfg: MergeAtPathConfig): JSONValue {
       src = rootObj as unknown as JSONValue;
     }
   }
-  const merged = mergeObjects(target as Record<string, JSONValue>, src as Record<string, JSONValue>, strategy);
-  return setByPath(input, cfg.path, merged);
+  const merged = mergeObjects(target as Record<string, JSONValue>, src as Record<string, JSONValue>, strategy) as JSONValue;
+  const updated = setByPath(input, cfg.path, merged);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => merged });
 }
 
 function validate(config: MergeAtPathConfig, input: JSONValue): string | undefined {
@@ -61,7 +59,7 @@ const mod: OperationModule<MergeAtPathConfig> = {
   type: "MergeAtPath",
   apply,
   validate,
-  defaultConfig: { path: "", source: "root", strategy: "shallow" },
+  defaultConfig: { path: "", source: "root", strategy: "shallow", writeResultTo: undefined },
 };
 
 export default mod;

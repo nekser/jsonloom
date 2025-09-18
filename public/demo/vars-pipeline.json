@@ -2,16 +2,9 @@
   "v": 1,
   "ops": [
     {
-      "id": "set-avg-price",
-      "type": "SetVariable",
-      "config": {
-        "name": "avgPrice",
-        "op": {
-          "id": "avg-op",
-          "type": "ReduceArray",
-          "config": { "path": "orders", "op": "avg", "by": "price" }
-        }
-      }
+      "id": "compute-avg-price",
+      "type": "ReduceArray",
+      "config": { "path": "orders", "op": "avg", "by": "price", "writeResultTo": "_metrics.avgPrice" }
     },
     {
       "id": "map-orders",
@@ -24,7 +17,7 @@
             "type": "SetPath",
             "config": {
               "path": "deviation",
-              "value": "${current.price - $vars.avgPrice}"
+              "value": "${current.price - _metrics.avgPrice}"
             }
           }
         ]

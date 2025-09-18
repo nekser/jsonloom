@@ -2,13 +2,10 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { getByPath, setByPath } from "./utils";
 import type { JSONValue, JSONObject } from "../types/json";
+import { writeResult } from "./writeResult";
 
 export type CaseMode = "lowercase" | "uppercase";
-export type StringCaseConfig = {
-  path: string;
-  mode: CaseMode;
-  coerceNonString?: boolean; // if true, toString() then apply; else leave unchanged
-};
+export type StringCaseConfig = { path: string; mode: CaseMode; coerceNonString?: boolean; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -17,6 +14,7 @@ const validateSchema = ajv.compile({
     path: { type: "string", minLength: 1 },
     mode: { enum: ["lowercase", "uppercase"] },
     coerceNonString: { type: "boolean" },
+    writeResultTo: { type: "string" },
   },
   required: ["path", "mode"],
   additionalProperties: true,
@@ -43,9 +41,19 @@ function mapTree(input: JSONValue, mode: CaseMode, coerce: boolean): JSONValue {
 function apply(input: JSONValue, cfg: StringCaseConfig): JSONValue {
   const cur = getByPath(input, cfg.path);
   const coerce = !!cfg.coerceNonString;
-  if (typeof cur === "string") return setByPath(input, cfg.path, convert(cur, cfg.mode, coerce));
-  if (Array.isArray(cur) || (cur && typeof cur === "object")) return setByPath(input, cfg.path, mapTree(cur as JSONValue, cfg.mode, coerce));
-  return setByPath(input, cfg.path, convert(cur as JSONValue, cfg.mode, coerce));
+  if (typeof cur === "string") {
+    const out = convert(cur, cfg.mode, coerce) as JSONValue;
+    const updated = setByPath(input, cfg.path, out);
+    return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
+  }
+  if (Array.isArray(cur) || (cur && typeof cur === "object")) {
+    const out = mapTree(cur as JSONValue, cfg.mode, coerce);
+    const updated = setByPath(input, cfg.path, out);
+    return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
+  }
+  const out = convert(cur as JSONValue, cfg.mode, coerce) as JSONValue;
+  const updated = setByPath(input, cfg.path, out);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
 }
 
 function validate(config: StringCaseConfig, _input: JSONValue): string | undefined {
@@ -57,7 +65,7 @@ const mod: OperationModule<StringCaseConfig> = {
   type: "StringCase",
   apply,
   validate,
-  defaultConfig: { path: "", mode: "lowercase", coerceNonString: false },
+  defaultConfig: { path: "", mode: "lowercase", coerceNonString: false, writeResultTo: undefined },
 };
 
 export default mod;

@@ -5,6 +5,7 @@ import { getOperationModule } from "./index";
 import type { JSONValue } from "../types/json";
 import { resolveConfig } from "./configResolver";
 import { applyFieldMap } from "./mapUtils";
+import { writeResult } from "./writeResult";
 
 export type MapArrayConfig = {
   path: string;
@@ -16,6 +17,7 @@ export type MapArrayConfig = {
   maxDepth?: number;
   // Optional: declarative field mapping (alternative to operations)
   mapping?: Record<string, string>; // newKey -> sourceKey
+  writeResultTo?: string;
 };
 
 const ajv = new Ajv();
@@ -38,6 +40,7 @@ const validateSchema = ajv.compile({
     },
     onError: { enum: ["propagate", "skip"] },
     maxDepth: { type: "integer", minimum: 1 },
+    writeResultTo: { type: "string" },
   },
   required: ["path"],
   additionalProperties: true,
@@ -91,7 +94,8 @@ function apply(input: JSONValue, cfg: MapArrayConfig): JSONValue {
     return acc;
   }, []);
 
-  return setByPath(input, cfg.path, out);
+  const updated = setByPath(input, cfg.path, out);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out as JSONValue });
 }
 
 function validate(config: MapArrayConfig, input: JSONValue): string | undefined {
@@ -123,7 +127,7 @@ const mod: OperationModule<MapArrayConfig> = {
   type: "MapArray",
   apply,
   validate,
-  defaultConfig: { path: "", operations: [], onError: "propagate" },
+  defaultConfig: { path: "", operations: [], onError: "propagate", writeResultTo: undefined },
 };
 
 export default mod;

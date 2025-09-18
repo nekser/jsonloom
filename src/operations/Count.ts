@@ -2,15 +2,17 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
+import { writeResult } from "./writeResult";
 
-export type CountConfig = { path: string };
+export type CountConfig = { path: string; writeResultTo?: string };
 const ajv = new Ajv();
-const schema = ajv.compile({ type: "object", properties: { path: { type: "string", minLength: 1 } }, required: ["path"], additionalProperties: false });
+const schema = ajv.compile({ type: "object", properties: { path: { type: "string", minLength: 1 }, writeResultTo: { type: "string" } }, required: ["path"], additionalProperties: false });
 
 function apply(input: JSONValue, cfg: CountConfig): JSONValue {
   const v = getByPath(input, cfg.path);
   const count = Array.isArray(v) ? v.length : 0;
-  return setByPath(input, cfg.path, count);
+  const mutated = setByPath(input, cfg.path, count);
+  return writeResult(input, mutated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => count as unknown as JSONValue });
 }
 function validate(cfg: CountConfig, input: JSONValue): string | undefined {
   const ok = schema(cfg);
@@ -19,5 +21,5 @@ function validate(cfg: CountConfig, input: JSONValue): string | undefined {
   if (!Array.isArray(v)) return `Path '${cfg.path}' must be an array`;
 }
 
-const mod: OperationModule<CountConfig> = { type: "Count", apply, validate, defaultConfig: { path: "" } };
+const mod: OperationModule<CountConfig> = { type: "Count", apply, validate, defaultConfig: { path: "", writeResultTo: undefined } };
 export default mod;

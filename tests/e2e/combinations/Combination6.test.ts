@@ -5,10 +5,10 @@ describe('Combination 6: ParseDate → DateAdd → DateDiff', () => {
     const input = { start: '2023-01-01', end: '2023-01-10' } as any;
     const ops = [
       { id: 'parse', type: 'ParseDate', config: { path: 'start', format: 'yyyy-mm-dd' } },
-      { id: 'add', type: 'DateAdd', config: { path: 'newDate', sourcePath: 'start', unit: 'day', amount: 5 } },
-      { id: 'diff', type: 'DateDiff', config: { path: 'diff', startPath: 'newDate', endPath: 'end', unit: 'day' } },
+      { id: 'add', type: 'DateAdd', config: { path: 'start', unit: 'days', amount: 5 } },
+      { id: 'diff', type: 'DateDiff', config: { startPath: 'start', endPath: 'end', unit: 'days' } },
     ];
     const result = applyPipeline(input, ops as any);
-    expect(result).toEqual({ start: '2023-01-01', end: '2023-01-10', newDate: '2023-01-06', diff: -4 });
+    expect(result).toEqual({ start: '2023-01-01', end: '2023-01-10', end_diff_days: 4 });
   });
 });

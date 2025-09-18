@@ -2,12 +2,9 @@ import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { renameKeysByRegex } from "./objectUtils";
+import { writeResult } from "./writeResult";
 
-export type RenameKeysByPatternConfig = {
-  pattern: string;
-  replace: string;
-  flags?: string;
-};
+export type RenameKeysByPatternConfig = { pattern: string; replace: string; flags?: string; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -16,6 +13,7 @@ const validateSchema = ajv.compile({
     pattern: { type: "string", minLength: 1 },
     replace: { type: "string" },
     flags: { type: "string" },
+    writeResultTo: { type: "string" },
   },
   required: ["pattern", "replace"],
   additionalProperties: true,
@@ -32,7 +30,8 @@ function tryRegex(pattern: string, flags?: string): RegExp | string {
 function apply(input: JSONValue, cfg: RenameKeysByPatternConfig): JSONValue {
   const built = tryRegex(cfg.pattern, cfg.flags);
   if (!(built instanceof RegExp)) return input;
-  return renameKeysByRegex(input, built, cfg.replace);
+  const out = renameKeysByRegex(input, built, cfg.replace) as JSONValue;
+  return writeResult(input, out, { writeResultTo: cfg.writeResultTo, valueExtractor: () => out });
 }
 
 function validate(config: RenameKeysByPatternConfig, _input: JSONValue): string | undefined {
@@ -47,7 +46,7 @@ const mod: OperationModule<RenameKeysByPatternConfig> = {
   type: "RenameKeysByPattern" as const,
   apply,
   validate,
-  defaultConfig: { pattern: "", replace: "" },
+  defaultConfig: { pattern: "", replace: "", writeResultTo: undefined },
 };
 
 export default mod;

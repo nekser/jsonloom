@@ -1,12 +1,10 @@
 import Ajv from "ajv";
 import type { OperationModule } from "./types";
 import { setByPath } from "./utils";
+import { writeResult } from "./writeResult";
 import type { JSONValue } from "../types/json";
 
-export type SetPathConfig = {
-  path: string;
-  value: JSONValue;
-};
+export type SetPathConfig = { path: string; value: JSONValue; writeResultTo?: string };
 
 const ajv = new Ajv();
 const validateSchema = ajv.compile({
@@ -14,13 +12,15 @@ const validateSchema = ajv.compile({
   properties: {
     path: { type: "string", minLength: 1 },
     value: {},
+    writeResultTo: { type: "string" },
   },
   required: ["path", "value"],
   additionalProperties: true,
 });
 
 function apply(input: JSONValue, cfg: SetPathConfig): JSONValue {
-  return setByPath(input, cfg.path, cfg.value);
+  const updated = setByPath(input, cfg.path, cfg.value);
+  return writeResult(input, updated, { writeResultTo: cfg.writeResultTo, valueExtractor: () => cfg.value as JSONValue });
 }
 
 function validate(config: SetPathConfig, _input: JSONValue): string | undefined {
@@ -32,7 +32,7 @@ const mod: OperationModule<SetPathConfig> = {
   type: "SetPath",
   apply,
   validate,
-  defaultConfig: { path: "", value: null },
+  defaultConfig: { path: "", value: null, writeResultTo: undefined },
 };
 
 export default mod;
