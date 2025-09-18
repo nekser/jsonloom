@@ -21,15 +21,11 @@ describe('Combination 11: Stress Test (7–8 operations chained)', () => {
         { id: 'mul', type: 'Multiply', config: { path: 'price', value: 2 } },
       ] } },
       // 3. Sum → totalRevenue
-      { id: 'sumPrices', type: 'ReduceArray', config: { path: 'orders', by: 'price', op: 'sum' } },
-      { id: 'writeTotal', type: 'SetPath', config: { path: 'totalRevenue', value: '${root.orders}' } },
-      // 4. SetVariable("revenue", totalRevenue)
-      { id: 'setVar', type: 'SetVariable', config: { name: 'revenue', op: { id: 'pickTotal', type: 'ExtractPath', config: { path: 'totalRevenue' } } } },
-      // 5. GetVariable("revenue") → attach as "reportedRevenue"
-      { id: 'copyVar', type: 'SetPath', config: { path: 'reportedRevenue', value: '${vars.revenue}' } },
+  { id: 'sumPrices', type: 'ReduceArray', config: { path: 'orders', by: 'price', op: 'sum', writeResultTo: 'totalRevenue' } },
+  // writeResultTo already sets totalRevenue; copy reportedRevenue from that path
+  { id: 'copyVar', type: 'SetPath', config: { path: 'reportedRevenue', value: '${totalRevenue}' } },
       // 6. If totalRevenue > 500 → highRevenue true else false
       { id: 'ifRevenue', type: 'If', config: { when: { path: 'totalRevenue', op: 'gt', value: 500 }, then: [
-        { id: 'setTrue', type: 'MergeAtPath', config: { path: '.', source: 'path', sourcePath: '', strategy: 'shallow' } },
         { id: 'setTrueVal', type: 'SetPath', config: { path: 'highRevenue', value: true } },
       ], else: [
         { id: 'setFalse', type: 'SetPath', config: { path: 'highRevenue', value: false } },

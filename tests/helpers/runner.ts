@@ -16,7 +16,7 @@ export function applyPipeline(input: JSONValue, ops: Operation[]): JSONValue {
   let cur = input;
   for (const op of ops) {
     const mod = getOperationModule(op.type as OperationType);
-    const resolved = resolveConfig(op.config as unknown, { root: input });
+    const resolved = resolveConfig(op.config as unknown, { root: cur });
     const err = mod.validate(resolved as unknown, cur);
     if (err) throw new Error(err);
     cur = mod.apply(cur, resolved as unknown);
