@@ -161,18 +161,40 @@ function OperationCard({ id, index }: { id: string; index: number }) {
       {supportsWriteResultTo && (
         <div className="mt-3 flex flex-col gap-1">
           <label className="text-[10px] uppercase tracking-wide text-neutral-500">Write Result To (path)</label>
+          <div className="relative w-full group">
           <AutocompleteInput
-            className="w-full"
+            className="w-full pr-6"
             placeholder="Leave empty to apply in-place"
-            value={(() => { const v = (op.config as any)?.writeResultTo; return typeof v === 'string' ? v : ''; })()}
+            // Explicitly coerce undefined/null to "" but preserve true empty when user clears field.
+            value={(() => {
+              const cfgVal = (op.config as any)?.writeResultTo;
+              return typeof cfgVal === 'string' ? cfgVal : '';
+            })()}
             getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
             onChange={(v) => {
               const base = (op.config && typeof op.config === 'object' && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {};
               const next = { ...base } as Record<string, unknown>;
-              if (v) next.writeResultTo = v; else delete next.writeResultTo; // remove when empty
+              // Allow full clearing of the field:
+              // Previously an empty value could re-hydrate with a stale character because we only wrote when truthy.
+              // Here we treat whitespace-only input as removal and delete the key so the controlled input shows blank.
+              if (v.trim() === '') next.writeResultTo = undefined; else next.writeResultTo = v;
               update(op.id, { config: next as unknown as JSONValue });
             }}
           />
+          {(() => { const val = (op.config as any)?.writeResultTo; return val ? (
+            <button
+              type="button"
+              aria-label="Clear writeResultTo"
+              className="absolute right-1 top-1.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 text-xs px-1"
+              onClick={() => {
+                const base = (op.config && typeof op.config === 'object' && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {};
+                const next = { ...base } as Record<string, unknown>;
+                next.writeResultTo = undefined;
+                update(op.id, { config: next as unknown as JSONValue });
+              }}
+            >✕</button>
+          ) : null })()}
+          </div>
           <div className="text-[10px] text-neutral-500">If set, the computed value is written to this path instead of its original location.</div>
         </div>
       )}

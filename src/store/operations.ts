@@ -121,16 +121,21 @@ export const useOpsStore = create<State>()((set, get) => ({
     get().runPipeline();
   },
   updateOperation: (id: string, patch: Partial<Operation>) => {
-  set((s) => ({
+    set((s) => ({
       past: [...s.past, s.operations],
       future: [],
       operations: s.operations.map((op) => {
         if (op.id !== id) return op;
         const base = { ...op, ...patch } as Operation;
         if (patch.config !== undefined) {
-          base.config = isObject(op.config) && isObject(patch.config)
-            ? ({ ...(op.config as Record<string, unknown>), ...(patch.config as Record<string, unknown>) } as unknown as JSONValue)
-            : (patch.config as JSONValue);
+          const merged = isObject(op.config) && isObject(patch.config)
+            ? ({ ...(op.config as Record<string, unknown>), ...(patch.config as Record<string, unknown>) } as Record<string, unknown>)
+            : (patch.config as unknown as Record<string, unknown>);
+          // Remove keys explicitly set to undefined so UI can clear fields reliably.
+          for (const [k, v] of Object.entries(merged)) {
+            if (v === undefined) delete (merged as Record<string, unknown>)[k];
+          }
+          base.config = merged as unknown as JSONValue;
         }
         return base;
       }),
