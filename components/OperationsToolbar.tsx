@@ -2,18 +2,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import { useOpsStore, State } from "../src/store/operations";
 import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
-import { MoreVertical, Share2, Download, Copy, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2, Plus } from "lucide-react";
+import { MoreVertical, Share2, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2, Plus } from "lucide-react";
 import { downloadText } from "../lib/io";
 import GenerateCodeDialog from "./GenerateCodeDialog";
-import { Share } from "next/dist/compiled/@next/font/dist/google";
+import SharePipelineDialog from "./SharePipelineDialog";
+import ImportPipelineDialog from "./ImportPipelineDialog";
+import ClearConfirmDialog from "./ClearConfirmDialog";
 
 export default function OperationsToolbar() {
   useIsMobile();
@@ -162,64 +161,31 @@ export default function OperationsToolbar() {
         </DropdownMenu>
       </div>
       {/* Share dialog */}
-      <Dialog open={shareOpen} onOpenChange={setShareOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share Pipeline</DialogTitle>
-            <DialogDescription>Copy the link or JSON for your current pipeline.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input value={shareUrl} readOnly />
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>
-                <Share2 className="h-4 w-4 mr-2"/>Copy link
-              </Button>
-               <Button variant="outline" onClick={doCopyJson}>
-                  <Copy className="h-4 w-4 mr-2"/>Copy JSON
-                </Button>
-              <Button variant="outline" onClick={doExportJson}>
-                <Download className="h-4 w-4 mr-2"/>Download JSON
-              </Button>
-            </div>
-            <div>
-              <Textarea className="h-36" value={shareJson} readOnly />
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <SharePipelineDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        shareUrl={shareUrl}
+        shareJson={shareJson}
+        onCopyJson={doCopyJson}
+        onDownloadJson={doExportJson}
+      />
 
       {/* Import dialog */}
-      <Dialog open={importOpen} onOpenChange={setImportOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Import Pipeline</DialogTitle>
-            <DialogDescription>
-              Paste one of: encoded &#39;pipeline&#39; value, a full URL containing it, or JSON (either the serialized object with v/ops or a raw ops array).
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Textarea className="h-36" placeholder="Paste encoded string, full URL, or JSON (serialized { v, ops } or just [ ...ops ])" value={importText} onChange={(e) => setImportText(e.target.value)} />
-            {importError && <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">{importError}</div>}
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={doImport}>Import</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ImportPipelineDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        importText={importText}
+        setImportText={setImportText}
+        importError={importError}
+        onImport={doImport}
+      />
 
       {/* Clear confirmation (Dialog) */}
-      <Dialog open={confirmClearOpen} onOpenChange={setConfirmClearOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Clear all operations?</DialogTitle>
-            <DialogDescription>This will remove all operations from the pipeline. You can undo this action.</DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setConfirmClearOpen(false)}>Cancel</Button>
-            <Button className="bg-red-600 text-white hover:bg-red-700" onClick={doClearAll}>Clear</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ClearConfirmDialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        onConfirm={doClearAll}
+      />
 
   <GenerateCodeDialog open={codeOpen} onOpenChange={setCodeOpen} />
     </div>
