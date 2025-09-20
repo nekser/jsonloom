@@ -58,7 +58,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
         <DialogHeader>
           <DialogTitle>Generate Code</DialogTitle>
         </DialogHeader>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex justify-between">
           <Tabs value={lang} onValueChange={(v) => setLang(v as Lang)}>
             <TabsList>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
@@ -68,8 +68,12 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
             </TabsList>
           </Tabs>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={copy}><Copy className="h-4 w-4 mr-2" />Copy</Button>
-            <Button variant="outline" size="sm" onClick={exportFile}><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline" size="icon" onClick={copy} aria-label="Copy code" title="Copy code">
+              <Copy className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" onClick={exportFile} aria-label="Download code" title="Download code">
+              <Download className="h-4 w-4" />
+            </Button>
           </div>
         </div>
         <div className="h-[60vh]">
