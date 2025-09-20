@@ -46,4 +46,15 @@ module.exports = [
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
   },
+
+  // Loosen some rules in test and script files
+  {
+    files: [
+      "tests/**/*.{ts,tsx}",
+      "scripts/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ];

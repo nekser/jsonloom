@@ -1,11 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Copy, Download, MoreHorizontal } from "lucide-react";
-import { useOpsStore, State } from "../src/store/operations";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { exportYAML } from "../src/exporters/yaml";
-import { copyToClipboard, downloadText } from "../lib/io";
+import { Copy, Download } from "lucide-react";
+import { downloadText } from "../lib/io";
+import { State, useOpsStore } from "../src/store/operations";
 
 export default function ResultPanelToolbar() {
   const resultText = useOpsStore((s: State) => s.resultText);

@@ -1,7 +1,7 @@
 import Ajv from "ajv";
-import type { OperationModule } from "./types";
 import type { JSONValue } from "../types/json";
 import { applyNumberAtPath, validateNumberPath } from "./numericUtils";
+import type { OperationModule } from "./types";
 import { getByPath } from "./utils";
 import { writeResult } from "./writeResult";
 
@@ -15,7 +15,6 @@ const schema = ajv.compile({
 });
 
 function apply(input: JSONValue, cfg: AddConfig): JSONValue {
-  const before = getByPath(input, cfg.path);
   const updatedRoot = applyNumberAtPath(input, cfg.path, (n) => n + cfg.value);
   // If redirecting, extract the new numeric value at original path from updatedRoot and write to target path on ORIGINAL input
   return writeResult(input, updatedRoot, {

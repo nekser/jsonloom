@@ -1,8 +1,7 @@
-import MapArrayMod from "../src/operations/MapArray";
-import TemplateInterpolateMod from "../src/operations/TemplateInterpolate";
-import type { Operation } from "../src/operations/types";
 import { getOperationModule } from "../src/operations";
 import { resolveConfig } from "../src/operations/configResolver";
+import TemplateInterpolateMod from "../src/operations/TemplateInterpolate";
+import type { Operation } from "../src/operations/types";
 
 const input = {
   users: [

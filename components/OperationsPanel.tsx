@@ -69,8 +69,9 @@ function OperationCard({ id, index }: { id: string; index: number }) {
   const fallbackIndex = useMemo(() => buildPathIndex(sourceObj), [sourceObj]);
   const pathIndex: PathIndex = (opIndexes[index] as PathIndex) ?? fallbackIndex;
 
-  if (!op) return null;
+  // Hooks must not be conditional: compute support flag defensively even when op is undefined.
   const supportsWriteResultTo = useMemo(() => {
+    if (!op) return false;
     // Heuristic: if current config already has the key or the module defaultConfig has it.
     try {
       const mod = getOperationModule(op.type as OperationType);
@@ -81,6 +82,8 @@ function OperationCard({ id, index }: { id: string; index: number }) {
       return false;
     }
   }, [op]);
+
+  if (!op) return null;
   return (
   <div ref={setNodeRef} style={style} className={`border rounded-md p-3 op-surface ${!isEnabled ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between">
@@ -167,8 +170,10 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             placeholder="Leave empty to apply in-place"
             // Explicitly coerce undefined/null to "" but preserve true empty when user clears field.
             value={(() => {
-              const cfgVal = (op.config as any)?.writeResultTo;
-              return typeof cfgVal === 'string' ? cfgVal : '';
+              const cfgVal = (op.config && typeof op.config === "object" && !Array.isArray(op.config))
+                ? (op.config as Record<string, unknown>).writeResultTo
+                : undefined;
+              return typeof cfgVal === "string" ? cfgVal : "";
             })()}
             getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
             onChange={(v) => {
@@ -181,7 +186,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
               update(op.id, { config: next as unknown as JSONValue });
             }}
           />
-          {(() => { const val = (op.config as any)?.writeResultTo; return val ? (
+          {(() => { const val = (op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>).writeResultTo : undefined; return typeof val === "string" && val ? (
             <button
               type="button"
               aria-label="Clear writeResultTo"

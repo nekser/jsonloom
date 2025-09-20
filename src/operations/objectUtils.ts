@@ -54,24 +54,31 @@ export function deleteByPath(obj: JSONValue, path: string): JSONValue {
   const parts = path.split(".");
   // Deep clone root
   const root: JSONValue = Array.isArray(obj) ? [...obj] : obj && typeof obj === "object" ? { ...(obj as JSONObject) } : {};
-  let cur: any = root;
+  let cur: JSONValue = root;
   for (let i = 0; i < parts.length - 1; i++) {
     const p = parts[i];
-    const next = cur[p];
+    // Ensure cur is indexable
+    if (!(cur && typeof cur === "object")) {
+      // path not found
+      return root;
+    }
+    const objCur = cur as JSONObject;
+    const next = objCur[p as keyof JSONObject] as unknown as JSONValue;
     if (!(next && typeof next === "object")) {
       // path not found
       return root;
     }
-    cur[p] = Array.isArray(next) ? [...next] : { ...next };
-    cur = cur[p];
+    (objCur as JSONObject)[p] = (Array.isArray(next) ? [...next] : { ...(next as JSONObject) }) as unknown as JSONValue;
+    cur = (objCur as JSONObject)[p] as unknown as JSONValue;
   }
   const last = parts[parts.length - 1];
   if (Array.isArray(cur)) {
     const idx = Number(last);
     if (Number.isInteger(idx) && idx >= 0 && idx < cur.length) cur.splice(idx, 1);
   } else if (cur && typeof cur === "object") {
-    if (Object.prototype.hasOwnProperty.call(cur, last)) {
-      delete cur[last];
+    const objCur = cur as JSONObject;
+    if (Object.prototype.hasOwnProperty.call(objCur, last)) {
+      delete (objCur as Record<string, unknown>)[last];
     }
   }
   // Prune undefined values after deletion
