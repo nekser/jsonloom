@@ -1,102 +1,103 @@
 import type { Operation } from "../operations/types";
+import { accessExpr, assignExpr } from "./utils/pathResolution";
 // JS
-import J_FilterArray from "./javascript/FilterArray";
-import J_MapArray from "./javascript/MapArray";
-import J_Multiply from "./javascript/Multiply";
 import J_Add from "./javascript/Add";
-import J_Subtract from "./javascript/Subtract";
-import J_Divide from "./javascript/Divide";
-import J_FilterByKey from "./javascript/FilterByKey";
-import J_RenameKey from "./javascript/RenameKey";
-import J_ExtractPath from "./javascript/ExtractPath";
-import J_StringReplace from "./javascript/StringReplace";
-import J_RenameKeysByPattern from "./javascript/RenameKeysByPattern";
-import J_NormalizeKeyCase from "./javascript/NormalizeKeyCase";
-import J_PickPaths from "./javascript/PickPaths";
-import J_OmitPaths from "./javascript/OmitPaths";
-import J_SetPath from "./javascript/SetPath";
-import J_DeletePath from "./javascript/DeletePath";
-import J_MergeAtPath from "./javascript/MergeAtPath";
-import J_FlattenObject from "./javascript/FlattenObject";
-import J_UnflattenObject from "./javascript/UnflattenObject";
-import J_SortArray from "./javascript/SortArray";
-import J_UniqueArray from "./javascript/UniqueArray";
-import J_FlattenArray from "./javascript/FlattenArray";
-import J_SliceArray from "./javascript/SliceArray";
-import J_GroupBy from "./javascript/GroupBy";
-import J_ReduceArray from "./javascript/ReduceArray";
-import J_CountArray from "./javascript/CountArray";
-import J_JoinArray from "./javascript/JoinArray";
-import J_RegexReplace from "./javascript/RegexReplace";
-import J_TrimStrings from "./javascript/TrimStrings";
-import J_CoerceType from "./javascript/CoerceType";
-import J_TemplateInterpolate from "./javascript/TemplateInterpolate";
 import J_Base64 from "./javascript/Base64";
-import J_StringCase from "./javascript/StringCase";
-import J_If from "./javascript/If";
-import J_Switch from "./javascript/Switch";
-import J_Modulo from "./javascript/Modulo";
-import J_Power from "./javascript/Power";
-import J_Round from "./javascript/Round";
 import J_Clamp from "./javascript/Clamp";
-import J_Sum from "./javascript/Sum";
+import J_CoerceType from "./javascript/CoerceType";
 import J_Count from "./javascript/Count";
-import J_Min from "./javascript/Min";
-import J_Max from "./javascript/Max";
-import J_ValidateJSON from "./javascript/ValidateJSON";
-import J_ParseDate from "./javascript/ParseDate";
-import J_IsDateCompare from "./javascript/IsDateCompare";
+import J_CountArray from "./javascript/CountArray";
 import J_DateAdd from "./javascript/DateAdd";
 import J_DateDiff from "./javascript/DateDiff";
+import J_DeletePath from "./javascript/DeletePath";
+import J_Divide from "./javascript/Divide";
+import J_ExtractPath from "./javascript/ExtractPath";
+import J_FilterArray from "./javascript/FilterArray";
+import J_FilterByKey from "./javascript/FilterByKey";
+import J_FlattenArray from "./javascript/FlattenArray";
+import J_FlattenObject from "./javascript/FlattenObject";
+import J_GroupBy from "./javascript/GroupBy";
+import J_If from "./javascript/If";
+import J_IsDateCompare from "./javascript/IsDateCompare";
+import J_JoinArray from "./javascript/JoinArray";
+import J_MapArray from "./javascript/MapArray";
+import J_Max from "./javascript/Max";
+import J_MergeAtPath from "./javascript/MergeAtPath";
+import J_Min from "./javascript/Min";
+import J_Modulo from "./javascript/Modulo";
+import J_Multiply from "./javascript/Multiply";
+import J_NormalizeKeyCase from "./javascript/NormalizeKeyCase";
+import J_OmitPaths from "./javascript/OmitPaths";
+import J_ParseDate from "./javascript/ParseDate";
+import J_PickPaths from "./javascript/PickPaths";
+import J_Power from "./javascript/Power";
+import J_ReduceArray from "./javascript/ReduceArray";
+import J_RegexReplace from "./javascript/RegexReplace";
+import J_RenameKey from "./javascript/RenameKey";
+import J_RenameKeysByPattern from "./javascript/RenameKeysByPattern";
+import J_Round from "./javascript/Round";
+import J_SetPath from "./javascript/SetPath";
+import J_SliceArray from "./javascript/SliceArray";
+import J_SortArray from "./javascript/SortArray";
+import J_StringCase from "./javascript/StringCase";
+import J_StringReplace from "./javascript/StringReplace";
+import J_Subtract from "./javascript/Subtract";
+import J_Sum from "./javascript/Sum";
+import J_Switch from "./javascript/Switch";
+import J_TemplateInterpolate from "./javascript/TemplateInterpolate";
+import J_TrimStrings from "./javascript/TrimStrings";
+import J_UnflattenObject from "./javascript/UnflattenObject";
+import J_UniqueArray from "./javascript/UniqueArray";
+import J_ValidateJSON from "./javascript/ValidateJSON";
 // TypeScript (mirrors JS)
-import T_FilterArray from "./typescript/FilterArray";
-import T_MapArray from "./typescript/MapArray";
-import T_Multiply from "./typescript/Multiply";
 import T_Add from "./typescript/Add";
-import T_Subtract from "./typescript/Subtract";
-import T_Divide from "./typescript/Divide";
-import T_FilterByKey from "./typescript/FilterByKey";
-import T_RenameKey from "./typescript/RenameKey";
-import T_ExtractPath from "./typescript/ExtractPath";
-import T_StringReplace from "./typescript/StringReplace";
-import T_RenameKeysByPattern from "./typescript/RenameKeysByPattern";
-import T_NormalizeKeyCase from "./typescript/NormalizeKeyCase";
-import T_PickPaths from "./typescript/PickPaths";
-import T_OmitPaths from "./typescript/OmitPaths";
-import T_SetPath from "./typescript/SetPath";
-import T_DeletePath from "./typescript/DeletePath";
-import T_MergeAtPath from "./typescript/MergeAtPath";
-import T_FlattenObject from "./typescript/FlattenObject";
-import T_UnflattenObject from "./typescript/UnflattenObject";
-import T_SortArray from "./typescript/SortArray";
-import T_UniqueArray from "./typescript/UniqueArray";
-import T_FlattenArray from "./typescript/FlattenArray";
-import T_SliceArray from "./typescript/SliceArray";
-import T_GroupBy from "./typescript/GroupBy";
-import T_ReduceArray from "./typescript/ReduceArray";
-import T_CountArray from "./typescript/CountArray";
-import T_JoinArray from "./typescript/JoinArray";
-import T_RegexReplace from "./typescript/RegexReplace";
-import T_TrimStrings from "./typescript/TrimStrings";
-import T_CoerceType from "./typescript/CoerceType";
-import T_TemplateInterpolate from "./typescript/TemplateInterpolate";
 import T_Base64 from "./typescript/Base64";
-import T_StringCase from "./typescript/StringCase";
-import T_If from "./typescript/If";
-import T_Switch from "./typescript/Switch";
-import T_Modulo from "./typescript/Modulo";
-import T_Power from "./typescript/Power";
-import T_Round from "./typescript/Round";
 import T_Clamp from "./typescript/Clamp";
-import T_Sum from "./typescript/Sum";
+import T_CoerceType from "./typescript/CoerceType";
 import T_Count from "./typescript/Count";
-import T_Min from "./typescript/Min";
-import T_Max from "./typescript/Max";
-import T_ValidateJSON from "./typescript/ValidateJSON";
-import T_ParseDate from "./typescript/ParseDate";
-import T_IsDateCompare from "./typescript/IsDateCompare";
+import T_CountArray from "./typescript/CountArray";
 import T_DateAdd from "./typescript/DateAdd";
 import T_DateDiff from "./typescript/DateDiff";
+import T_DeletePath from "./typescript/DeletePath";
+import T_Divide from "./typescript/Divide";
+import T_ExtractPath from "./typescript/ExtractPath";
+import T_FilterArray from "./typescript/FilterArray";
+import T_FilterByKey from "./typescript/FilterByKey";
+import T_FlattenArray from "./typescript/FlattenArray";
+import T_FlattenObject from "./typescript/FlattenObject";
+import T_GroupBy from "./typescript/GroupBy";
+import T_If from "./typescript/If";
+import T_IsDateCompare from "./typescript/IsDateCompare";
+import T_JoinArray from "./typescript/JoinArray";
+import T_MapArray from "./typescript/MapArray";
+import T_Max from "./typescript/Max";
+import T_MergeAtPath from "./typescript/MergeAtPath";
+import T_Min from "./typescript/Min";
+import T_Modulo from "./typescript/Modulo";
+import T_Multiply from "./typescript/Multiply";
+import T_NormalizeKeyCase from "./typescript/NormalizeKeyCase";
+import T_OmitPaths from "./typescript/OmitPaths";
+import T_ParseDate from "./typescript/ParseDate";
+import T_PickPaths from "./typescript/PickPaths";
+import T_Power from "./typescript/Power";
+import T_ReduceArray from "./typescript/ReduceArray";
+import T_RegexReplace from "./typescript/RegexReplace";
+import T_RenameKey from "./typescript/RenameKey";
+import T_RenameKeysByPattern from "./typescript/RenameKeysByPattern";
+import T_Round from "./typescript/Round";
+import T_SetPath from "./typescript/SetPath";
+import T_SliceArray from "./typescript/SliceArray";
+import T_SortArray from "./typescript/SortArray";
+import T_StringCase from "./typescript/StringCase";
+import T_StringReplace from "./typescript/StringReplace";
+import T_Subtract from "./typescript/Subtract";
+import T_Sum from "./typescript/Sum";
+import T_Switch from "./typescript/Switch";
+import T_TemplateInterpolate from "./typescript/TemplateInterpolate";
+import T_TrimStrings from "./typescript/TrimStrings";
+import T_UnflattenObject from "./typescript/UnflattenObject";
+import T_UniqueArray from "./typescript/UniqueArray";
+import T_ValidateJSON from "./typescript/ValidateJSON";
 // Python
 import P_Add from "./python/Add";
 import P_Base64 from "./python/Base64";
@@ -147,53 +148,53 @@ import P_UnflattenObject from "./python/UnflattenObject";
 import P_UniqueArray from "./python/UniqueArray";
 import P_ValidateJSON from "./python/ValidateJSON";
 // PHP
-import PH_FilterArray from "./php/FilterArray";
-import PH_Multiply from "./php/Multiply";
 import PH_Add from "./php/Add";
-import PH_Subtract from "./php/Subtract";
-import PH_Divide from "./php/Divide";
-import PH_MapArray from "./php/MapArray";
-import PH_Modulo from "./php/Modulo";
-import PH_Power from "./php/Power";
-import PH_Round from "./php/Round";
-import PH_Clamp from "./php/Clamp";
-import PH_Sum from "./php/Sum";
-import PH_Count from "./php/Count";
-import PH_Min from "./php/Min";
-import PH_Max from "./php/Max";
-import PH_StringReplace from "./php/StringReplace";
-import PH_SetPath from "./php/SetPath";
-import PH_DeletePath from "./php/DeletePath";
-import PH_ExtractPath from "./php/ExtractPath";
-import PH_FilterByKey from "./php/FilterByKey";
-import PH_RenameKey from "./php/RenameKey";
-import PH_RegexReplace from "./php/RegexReplace";
-import PH_TrimStrings from "./php/TrimStrings";
-import PH_CoerceType from "./php/CoerceType";
 import PH_Base64 from "./php/Base64";
-import PH_StringCase from "./php/StringCase";
-import PH_ParseDate from "./php/ParseDate";
+import PH_Clamp from "./php/Clamp";
+import PH_CoerceType from "./php/CoerceType";
+import PH_Count from "./php/Count";
+import PH_CountArray from "./php/CountArray";
 import PH_DateAdd from "./php/DateAdd";
 import PH_DateDiff from "./php/DateDiff";
-import PH_IsDateCompare from "./php/IsDateCompare";
-import PH_SortArray from "./php/SortArray";
-import PH_UniqueArray from "./php/UniqueArray";
+import PH_DeletePath from "./php/DeletePath";
+import PH_Divide from "./php/Divide";
+import PH_ExtractPath from "./php/ExtractPath";
+import PH_FilterArray from "./php/FilterArray";
+import PH_FilterByKey from "./php/FilterByKey";
 import PH_FlattenArray from "./php/FlattenArray";
-import PH_SliceArray from "./php/SliceArray";
-import PH_RenameKeysByPattern from "./php/RenameKeysByPattern";
-import PH_PickPaths from "./php/PickPaths";
-import PH_OmitPaths from "./php/OmitPaths";
-import PH_CountArray from "./php/CountArray";
-import PH_JoinArray from "./php/JoinArray";
 import PH_FlattenObject from "./php/FlattenObject";
-import PH_UnflattenObject from "./php/UnflattenObject";
-import PH_MergeAtPath from "./php/MergeAtPath";
-import PH_NormalizeKeyCase from "./php/NormalizeKeyCase";
 import PH_GroupBy from "./php/GroupBy";
-import PH_ReduceArray from "./php/ReduceArray";
-import PH_TemplateInterpolate from "./php/TemplateInterpolate";
 import PH_If from "./php/If";
+import PH_IsDateCompare from "./php/IsDateCompare";
+import PH_JoinArray from "./php/JoinArray";
+import PH_MapArray from "./php/MapArray";
+import PH_Max from "./php/Max";
+import PH_MergeAtPath from "./php/MergeAtPath";
+import PH_Min from "./php/Min";
+import PH_Modulo from "./php/Modulo";
+import PH_Multiply from "./php/Multiply";
+import PH_NormalizeKeyCase from "./php/NormalizeKeyCase";
+import PH_OmitPaths from "./php/OmitPaths";
+import PH_ParseDate from "./php/ParseDate";
+import PH_PickPaths from "./php/PickPaths";
+import PH_Power from "./php/Power";
+import PH_ReduceArray from "./php/ReduceArray";
+import PH_RegexReplace from "./php/RegexReplace";
+import PH_RenameKey from "./php/RenameKey";
+import PH_RenameKeysByPattern from "./php/RenameKeysByPattern";
+import PH_Round from "./php/Round";
+import PH_SetPath from "./php/SetPath";
+import PH_SliceArray from "./php/SliceArray";
+import PH_SortArray from "./php/SortArray";
+import PH_StringCase from "./php/StringCase";
+import PH_StringReplace from "./php/StringReplace";
+import PH_Subtract from "./php/Subtract";
+import PH_Sum from "./php/Sum";
 import PH_Switch from "./php/Switch";
+import PH_TemplateInterpolate from "./php/TemplateInterpolate";
+import PH_TrimStrings from "./php/TrimStrings";
+import PH_UnflattenObject from "./php/UnflattenObject";
+import PH_UniqueArray from "./php/UniqueArray";
 import PH_ValidateJSON from "./php/ValidateJSON";
 
 export type Lang = "javascript" | "typescript" | "python" | "php";
@@ -442,7 +443,30 @@ export function generateOperation(lang: Lang, op: Operation, varName: string): s
   const type = op.type.split(".").pop() as string;
   const t = registry[lang][type];
   if (!t) return `# TODO: ${op.type} not supported yet`;
-  return t(op.config, varName);
+  const body = t(op.config, varName);
+
+  // Unified result routing (writeResultTo): if present, write the meaningful value to the target path.
+  // Heuristic:
+  // - If config has a string `path` and the op is not ExtractPath, we treat the meaningful value as the value at that path after mutation.
+  // - Otherwise, we treat the meaningful value as the current root variable.
+  try {
+    const cfg = (op.config ?? {}) as Record<string, unknown>;
+    const writeTo = typeof cfg.writeResultTo === "string" ? cfg.writeResultTo.trim() : "";
+    if (writeTo) {
+      const hasPath = typeof cfg.path === "string" && (cfg.path as string).trim().length > 0;
+      const isExtract = type === "ExtractPath";
+      const sourceExpr = hasPath && !isExtract
+        ? accessExpr(lang as Lang, varName, (cfg.path as string))
+        : varName;
+  const rootAlias = lang === "php" ? "__root" : "__root"; // same name across langs; PHP variables have $ added by assignExpr
+  let line = assignExpr(lang as Lang, rootAlias, writeTo, sourceExpr);
+      if (lang === "php") line += ";";
+      return body ? `${body}\n${line}` : line;
+    }
+  } catch {
+    // best-effort only; ignore routing if config shape is unexpected
+  }
+  return body;
 }
 
 export function generatePipeline(lang: Lang, ops: Operation[], rootVar = "data", source?: unknown): string {
@@ -459,21 +483,21 @@ export function generatePipeline(lang: Lang, ops: Operation[], rootVar = "data",
       const jsSafe = jsonText
         .replace(/`/g, "\\`")
         .replace(/\$\{/g, "${'${'}");
-      lines.push(`// Generated by JSON Tool UI\nconst jsonString = \`\n${jsSafe}\n\`;\nlet ${rootVar} = JSON.parse(jsonString);`);
+      lines.push(`// Generated by JSON Tool UI\nconst jsonString = \`\n${jsSafe}\n\`;\nlet ${rootVar} = JSON.parse(jsonString);\nconst __root = ${rootVar};`);
     }
     // Python: use triple-quoted string (HEREDOC analogue)
     if (lang === "python") {
-      lines.push(`# Generated by JSON Tool UI\nimport json\njson_string = '''\n${jsonText}\n'''\n${rootVar} = json.loads(json_string)`);
+      lines.push(`# Generated by JSON Tool UI\nimport json\njson_string = '''\n${jsonText}\n'''\n${rootVar} = json.loads(json_string)\n__root = ${rootVar}`);
     }
     if (lang === "php") {
       // Use NOWDOC (HEREDOC-style) to embed JSON without escaping
-      lines.push(`// Generated by JSON Tool UI\n$json_string = <<<'JSON_PAYLOAD'\n${jsonText}\nJSON_PAYLOAD;\n$${rootVar} = json_decode($json_string, true);`);
+      lines.push(`// Generated by JSON Tool UI\n$json_string = <<<'JSON_PAYLOAD'\n${jsonText}\nJSON_PAYLOAD;\n$${rootVar} = json_decode($json_string, true);\n$__root = $${rootVar};`);
     }
   } else {
     // Fallback to previous behavior if no source provided
-    if (lang === "javascript" || lang === "typescript") lines.push(`// Generated by JSON Tool UI\nlet ${rootVar} = ${rootVar};`);
-    if (lang === "python") lines.push(`# Generated by JSON Tool UI\n${rootVar} = ${rootVar}`);
-    if (lang === "php") lines.push("// Generated by JSON Tool UI\n$" + rootVar + " = $" + rootVar + ";");
+    if (lang === "javascript" || lang === "typescript") lines.push(`// Generated by JSON Tool UI\nlet ${rootVar} = ${rootVar};\nconst __root = ${rootVar};`);
+    if (lang === "python") lines.push(`# Generated by JSON Tool UI\n${rootVar} = ${rootVar}\n__root = ${rootVar}`);
+    if (lang === "php") lines.push("// Generated by JSON Tool UI\n$" + rootVar + " = $" + rootVar + ";\n$__root = $" + rootVar + ";");
   }
   for (const op of ops) lines.push(generateOperation(lang, op, rootVar));
   return lines.join("\n\n");
