@@ -48,7 +48,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
   const copy = async () => { await navigator.clipboard.writeText(code); };
   const exportFile = () => {
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const ext = lang === "javascript" ? "js" : lang === "python" ? "py" : "php";
+  const ext = lang === "javascript" ? "js" : lang === "typescript" ? "ts" : lang === "python" ? "py" : "php";
     downloadText(`pipeline-${ts}.${ext}`, code, "text/plain");
   };
 
@@ -62,6 +62,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
           <Tabs value={lang} onValueChange={(v) => setLang(v as Lang)}>
             <TabsList>
               <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+              <TabsTrigger value="typescript">TypeScript</TabsTrigger>
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="php">PHP</TabsTrigger>
             </TabsList>
@@ -74,7 +75,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
         <div className="h-[60vh]">
           <Editor
             height="100%"
-            language={lang === "javascript" ? "javascript" : lang === "python" ? "python" : "php"}
+            language={lang === "javascript" ? "javascript" : lang === "typescript" ? "typescript" : lang === "python" ? "python" : "php"}
             theme={theme === "dark" ? "vs-dark" : "light"}
             value={code}
             options={{ readOnly: true, minimap: { enabled: false }, wordWrap: "on" }}

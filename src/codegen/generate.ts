@@ -48,6 +48,55 @@ import J_ParseDate from "./javascript/ParseDate";
 import J_IsDateCompare from "./javascript/IsDateCompare";
 import J_DateAdd from "./javascript/DateAdd";
 import J_DateDiff from "./javascript/DateDiff";
+// TypeScript (mirrors JS)
+import T_FilterArray from "./typescript/FilterArray";
+import T_MapArray from "./typescript/MapArray";
+import T_Multiply from "./typescript/Multiply";
+import T_Add from "./typescript/Add";
+import T_Subtract from "./typescript/Subtract";
+import T_Divide from "./typescript/Divide";
+import T_FilterByKey from "./typescript/FilterByKey";
+import T_RenameKey from "./typescript/RenameKey";
+import T_ExtractPath from "./typescript/ExtractPath";
+import T_StringReplace from "./typescript/StringReplace";
+import T_RenameKeysByPattern from "./typescript/RenameKeysByPattern";
+import T_NormalizeKeyCase from "./typescript/NormalizeKeyCase";
+import T_PickPaths from "./typescript/PickPaths";
+import T_OmitPaths from "./typescript/OmitPaths";
+import T_SetPath from "./typescript/SetPath";
+import T_DeletePath from "./typescript/DeletePath";
+import T_MergeAtPath from "./typescript/MergeAtPath";
+import T_FlattenObject from "./typescript/FlattenObject";
+import T_UnflattenObject from "./typescript/UnflattenObject";
+import T_SortArray from "./typescript/SortArray";
+import T_UniqueArray from "./typescript/UniqueArray";
+import T_FlattenArray from "./typescript/FlattenArray";
+import T_SliceArray from "./typescript/SliceArray";
+import T_GroupBy from "./typescript/GroupBy";
+import T_ReduceArray from "./typescript/ReduceArray";
+import T_CountArray from "./typescript/CountArray";
+import T_JoinArray from "./typescript/JoinArray";
+import T_RegexReplace from "./typescript/RegexReplace";
+import T_TrimStrings from "./typescript/TrimStrings";
+import T_CoerceType from "./typescript/CoerceType";
+import T_TemplateInterpolate from "./typescript/TemplateInterpolate";
+import T_Base64 from "./typescript/Base64";
+import T_StringCase from "./typescript/StringCase";
+import T_If from "./typescript/If";
+import T_Switch from "./typescript/Switch";
+import T_Modulo from "./typescript/Modulo";
+import T_Power from "./typescript/Power";
+import T_Round from "./typescript/Round";
+import T_Clamp from "./typescript/Clamp";
+import T_Sum from "./typescript/Sum";
+import T_Count from "./typescript/Count";
+import T_Min from "./typescript/Min";
+import T_Max from "./typescript/Max";
+import T_ValidateJSON from "./typescript/ValidateJSON";
+import T_ParseDate from "./typescript/ParseDate";
+import T_IsDateCompare from "./typescript/IsDateCompare";
+import T_DateAdd from "./typescript/DateAdd";
+import T_DateDiff from "./typescript/DateDiff";
 // Python
 import P_Add from "./python/Add";
 import P_Base64 from "./python/Base64";
@@ -147,11 +196,12 @@ import PH_If from "./php/If";
 import PH_Switch from "./php/Switch";
 import PH_ValidateJSON from "./php/ValidateJSON";
 
-export type Lang = "javascript" | "python" | "php";
+export type Lang = "javascript" | "typescript" | "python" | "php";
 
 type TemplateFn = (config: unknown, varName: string) => string;
 
 const JS_TODO: TemplateFn = (cfg) => `// TODO: not implemented\n// config: ${safeJson(cfg)}`;
+const TS_TODO: TemplateFn = (cfg) => `// TODO: not implemented\n// config: ${safeJson(cfg)}`;
 const PY_TODO: TemplateFn = (cfg) => `# TODO: not implemented\n# config: ${safeJson(cfg)}`;
 const PHP_TODO: TemplateFn = (cfg) => `// TODO: not implemented\n// config: ${safeJson(cfg)}`;
 
@@ -205,6 +255,56 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   IsDateCompare: J_IsDateCompare as unknown as TemplateFn,
   DateAdd: J_DateAdd as unknown as TemplateFn,
   DateDiff: J_DateDiff as unknown as TemplateFn,
+  },
+  typescript: {
+  FilterArray: T_FilterArray as unknown as TemplateFn,
+  MapArray: T_MapArray as unknown as TemplateFn,
+  Multiply: T_Multiply as unknown as TemplateFn,
+  Add: T_Add as unknown as TemplateFn,
+  Subtract: T_Subtract as unknown as TemplateFn,
+  Divide: T_Divide as unknown as TemplateFn,
+  FilterByKey: T_FilterByKey as unknown as TemplateFn,
+  RenameKey: T_RenameKey as unknown as TemplateFn,
+  ExtractPath: T_ExtractPath as unknown as TemplateFn,
+  StringReplace: T_StringReplace as unknown as TemplateFn,
+  RenameKeysByPattern: T_RenameKeysByPattern as unknown as TemplateFn,
+  NormalizeKeyCase: T_NormalizeKeyCase as unknown as TemplateFn,
+  PickPaths: T_PickPaths as unknown as TemplateFn,
+  OmitPaths: T_OmitPaths as unknown as TemplateFn,
+  SetPath: T_SetPath as unknown as TemplateFn,
+  DeletePath: T_DeletePath as unknown as TemplateFn,
+  MergeAtPath: T_MergeAtPath as unknown as TemplateFn,
+  FlattenObject: T_FlattenObject as unknown as TemplateFn,
+  UnflattenObject: T_UnflattenObject as unknown as TemplateFn,
+  SortArray: T_SortArray as unknown as TemplateFn,
+  UniqueArray: T_UniqueArray as unknown as TemplateFn,
+  FlattenArray: T_FlattenArray as unknown as TemplateFn,
+  SliceArray: T_SliceArray as unknown as TemplateFn,
+  GroupBy: T_GroupBy as unknown as TemplateFn,
+  ReduceArray: T_ReduceArray as unknown as TemplateFn,
+  CountArray: T_CountArray as unknown as TemplateFn,
+  JoinArray: T_JoinArray as unknown as TemplateFn,
+  RegexReplace: T_RegexReplace as unknown as TemplateFn,
+  TrimStrings: T_TrimStrings as unknown as TemplateFn,
+  CoerceType: T_CoerceType as unknown as TemplateFn,
+  TemplateInterpolate: T_TemplateInterpolate as unknown as TemplateFn,
+  Base64: T_Base64 as unknown as TemplateFn,
+  StringCase: T_StringCase as unknown as TemplateFn,
+  If: T_If as unknown as TemplateFn,
+  Switch: T_Switch as unknown as TemplateFn,
+  Modulo: T_Modulo as unknown as TemplateFn,
+  Power: T_Power as unknown as TemplateFn,
+  Round: T_Round as unknown as TemplateFn,
+  Clamp: T_Clamp as unknown as TemplateFn,
+  Sum: T_Sum as unknown as TemplateFn,
+  Count: T_Count as unknown as TemplateFn,
+  Min: T_Min as unknown as TemplateFn,
+  Max: T_Max as unknown as TemplateFn,
+  ValidateJSON: T_ValidateJSON as unknown as TemplateFn,
+  ParseDate: T_ParseDate as unknown as TemplateFn,
+  IsDateCompare: T_IsDateCompare as unknown as TemplateFn,
+  DateAdd: T_DateAdd as unknown as TemplateFn,
+  DateDiff: T_DateDiff as unknown as TemplateFn,
   },
   python: {
   // Collections
@@ -332,6 +432,7 @@ const ALL_TYPES = [
 
 for (const t of ALL_TYPES) {
   if (!registry.javascript[t]) registry.javascript[t] = JS_TODO;
+  if (!registry.typescript[t]) registry.typescript[t] = TS_TODO;
   if (!registry.python[t]) registry.python[t] = PY_TODO;
   if (!registry.php[t]) registry.php[t] = PHP_TODO;
 }
@@ -354,7 +455,7 @@ export function generatePipeline(lang: Lang, ops: Operation[], rootVar = "data",
     let jsonText = "";
     try { jsonText = JSON.stringify(source, null, 2) ?? ""; } catch { jsonText = ""; }
     // JavaScript: use template literal (HEREDOC analogue). Escape backticks and `${` to prevent interpolation.
-    if (lang === "javascript") {
+    if (lang === "javascript" || lang === "typescript") {
       const jsSafe = jsonText
         .replace(/`/g, "\\`")
         .replace(/\$\{/g, "${'${'}");
@@ -370,7 +471,7 @@ export function generatePipeline(lang: Lang, ops: Operation[], rootVar = "data",
     }
   } else {
     // Fallback to previous behavior if no source provided
-    if (lang === "javascript") lines.push(`// Generated by JSON Tool UI\nlet ${rootVar} = ${rootVar};`);
+    if (lang === "javascript" || lang === "typescript") lines.push(`// Generated by JSON Tool UI\nlet ${rootVar} = ${rootVar};`);
     if (lang === "python") lines.push(`# Generated by JSON Tool UI\n${rootVar} = ${rootVar}`);
     if (lang === "php") lines.push("// Generated by JSON Tool UI\n$" + rootVar + " = $" + rootVar + ";");
   }

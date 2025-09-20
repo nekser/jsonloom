@@ -21,7 +21,7 @@ function tokenize(path: string): Segment[] {
 export function accessExpr(lang: Language, base: string, path: string): string {
   if (!path || path === ".") return base;
   const segs = tokenize(path);
-  if (lang === "javascript") {
+  if (lang === "javascript" || lang === "typescript") {
     return segs.reduce((acc, s) => s.kind === "index" ? `${acc}[${s.index}]` : (isIdent(s.key) ? `${acc}.${s.key}` : `${acc}[${JSON.stringify(s.key)}]`), base);
   }
   if (lang === "python") {

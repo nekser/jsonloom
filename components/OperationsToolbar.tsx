@@ -13,6 +13,7 @@ import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
 import { MoreVertical, Share2, Download, Copy, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2, Plus } from "lucide-react";
 import { downloadText } from "../lib/io";
 import GenerateCodeDialog from "./GenerateCodeDialog";
+import { Share } from "next/dist/compiled/@next/font/dist/google";
 
 export default function OperationsToolbar() {
   useIsMobile();
@@ -171,19 +172,17 @@ export default function OperationsToolbar() {
             <Input value={shareUrl} readOnly />
             <div className="flex gap-2">
               <Button variant="outline" onClick={async () => { await navigator.clipboard.writeText(shareUrl); }}>
-                <Copy className="h-4 w-4 mr-2"/>Copy link
+                <Share2 className="h-4 w-4 mr-2"/>Copy link
               </Button>
+               <Button variant="outline" onClick={doCopyJson}>
+                  <Copy className="h-4 w-4 mr-2"/>Copy JSON
+                </Button>
               <Button variant="outline" onClick={doExportJson}>
-                <Download className="h-4 w-4 mr-2"/>Export JSON
+                <Download className="h-4 w-4 mr-2"/>Download JSON
               </Button>
             </div>
             <div>
               <Textarea className="h-36" value={shareJson} readOnly />
-              <div className="mt-2 flex gap-2">
-                <Button variant="outline" onClick={doCopyJson}>
-                  <Copy className="h-4 w-4 mr-2"/>Copy JSON
-                </Button>
-              </div>
             </div>
           </div>
         </DialogContent>
