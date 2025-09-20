@@ -1,5 +1,5 @@
+import type { JSONObject, JSONValue } from "../types/json";
 import { getByPath, setByPath } from "./utils";
-import type { JSONValue, JSONObject } from "../types/json";
 
 export function walkKeys(input: JSONValue, transformKey: (k: string) => string): JSONValue {
   if (Array.isArray(input)) return input.map((v) => walkKeys(v, transformKey));

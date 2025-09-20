@@ -1,45 +1,45 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import clsx from "clsx";
-import { useOpsStore, OperationType, State } from "../src/store/operations";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import AutocompleteInput from "./AutocompleteInput";
-import { buildPathIndex, suggestPathTokens } from "../src/utils/pathSuggest";
-import OperationPicker from "./OperationPicker";
-import { editors } from "./opEditors/registry";
-import { getOperationModule, type Operation } from "../src/operations/index";
-import { nanoid } from "nanoid";
-import { getByPath } from "../src/operations/utils";
-import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
-import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
-import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
-import OperationsToolbar from "./OperationsToolbar";
-import { useIsMobile } from "./hooks/useMediaQuery";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Eye, EyeOff, GripVertical, Menu, Trash2, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import clsx from "clsx";
+import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, Menu, Plus, Trash2 } from "lucide-react";
+import { nanoid } from "nanoid";
 import type { CSSProperties } from "react";
-import type { JSONValue, JSONObject } from "../src/types/json";
+import { useEffect, useMemo, useState } from "react";
+import { getOperationModule, type Operation } from "../src/operations/index";
+import { getByPath } from "../src/operations/utils";
+import { OperationType, State, useOpsStore } from "../src/store/operations";
+import type { JSONObject, JSONValue } from "../src/types/json";
 import type { PathIndex } from "../src/utils/pathSuggest";
+import { buildPathIndex, suggestPathTokens } from "../src/utils/pathSuggest";
+import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
+import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
+import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
+import AutocompleteInput from "./AutocompleteInput";
+import OperationPicker from "./OperationPicker";
+import OperationsToolbar from "./OperationsToolbar";
+import { useIsMobile } from "./hooks/useMediaQuery";
+import { editors } from "./opEditors/registry";
 
 function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
