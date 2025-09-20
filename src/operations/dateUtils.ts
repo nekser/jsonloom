@@ -16,28 +16,28 @@ export function parseDateString(value: JSONValue): DateTime | null {
   return null;
 }
 
-function normalizeFormat(fmt: string): string {
-  // Map common Moment-like tokens to Luxon tokens
-  return fmt
-    .replace(/YYYY/g, "yyyy")
-    .replace(/YY/g, "yy")
-    .replace(/DD/g, "dd")
-    .replace(/D(?![a-zA-Z])/g, "d")
-    .replace(/HH/g, "HH")
-    .replace(/hh/g, "hh")
-    .replace(/mm/g, "mm")
-    .replace(/ss/g, "ss");
-}
-
 export function parseWithFormat(value: JSONValue, format: string, timezone?: string): DateTime | null {
   if (typeof value !== "string" || !value) return null;
-  const zone = timezone || "utc";
-  const f = normalizeFormat(format || "");
-  const dt = f ? DateTime.fromFormat(value, f, { zone }) : DateTime.invalid("missing format");
+  const zone = timezone ?? "utc";
+
+  if (!format) {
+    const iso = DateTime.fromISO(value, { zone });
+    if (iso.isValid) return iso;
+    const rfc = DateTime.fromRFC2822(value, { zone });
+    if (rfc.isValid) return rfc;
+    const sql = DateTime.fromSQL(value, { zone });
+    return sql.isValid ? sql : null;
+  }
+
+  const dt = DateTime.fromFormat(value, format, { zone });
   if (dt.isValid) return dt;
-  // Fallback to ISO parser for robustness
+
   const iso = DateTime.fromISO(value, { zone });
-  return iso.isValid ? iso : null;
+  if (iso.isValid) return iso;
+  const rfc = DateTime.fromRFC2822(value, { zone });
+  if (rfc.isValid) return rfc;
+  const sql = DateTime.fromSQL(value, { zone });
+  return sql.isValid ? sql : null;
 }
 
 export function toISO(dt: DateTime): string {
