@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Upload } from "lucide-react";
-import { useOpsStore, State } from "../src/store/operations";
+import { State, useOpsStore } from "../src/store/operations";
 
 export default function SourcePanelToolbar() {
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
@@ -24,7 +24,7 @@ export default function SourcePanelToolbar() {
     <div className="flex items-center gap-1">
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label="Upload" onClick={upload}>
+          <Button variant="ghost" size="icon" aria-label="Upload" className="cursor-pointer" onClick={upload}>
             <Upload className="h-4 w-4" />
           </Button>
         </TooltipTrigger>

@@ -97,15 +97,30 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             <div className="flex items-center gap-2 text-xs">
               <Switch id={`op-enable-${op.id}`} checked={isEnabled} onCheckedChange={(v) => update(op.id, { enabled: v })} />
             </div>
-            <Button variant="outline" size="icon" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
-              {op.debugOpen ? <EyeOff /> : <Eye />}
-            </Button>
-            <Button variant="outline" size="icon" aria-label="Drag operation" {...attributes} {...listeners}>
-              <GripVertical />
-            </Button>
-            <Button variant="outline" size="icon" aria-label="Delete operation" onClick={() => remove(op.id)}>
-              <Trash2 />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" aria-label={op.debugOpen ? "Hide result" : "Show result"} className="cursor-pointer" onClick={() => update(op.id, { debugOpen: !op.debugOpen })}>
+                  {op.debugOpen ? <EyeOff /> : <Eye />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{op.debugOpen ? "Hide result" : "Show result"}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="Reorder" className="cursor-move" {...attributes} {...listeners}>
+                  <GripVertical />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Reorder</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="Delete" className="cursor-pointer" onClick={() => remove(op.id)}>
+                  <Trash2 />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Delete</TooltipContent>
+            </Tooltip>
           </div>
         ) : (
           <Button variant="outline" size="icon" onClick={() => setMobileActionsOpen(true)}>
@@ -803,8 +818,8 @@ function NestedOperationCard({ op, sampleIndex, onUpdate, onDelete, initialColla
           {collapsed ? "▶" : "▽"} {op.type}
         </button>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" {...attributes} {...listeners}>
-             <GripVertical />
+       <Button variant="outline" size="icon" className="cursor-move" {...attributes} {...listeners}>
+         <GripVertical />
           </Button>
           <Tooltip>
             <TooltipTrigger asChild>

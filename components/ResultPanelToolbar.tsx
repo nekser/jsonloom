@@ -22,7 +22,7 @@ export default function ResultPanelToolbar() {
       <div className="flex items-center gap-1">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Copy result" onClick={copy}>
+            <Button variant="ghost" size="icon" aria-label="Copy result" className="cursor-pointer" onClick={copy}>
               <Copy className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
@@ -30,11 +30,11 @@ export default function ResultPanelToolbar() {
         </Tooltip>
          <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Copy result" onClick={download}>
+            <Button variant="ghost" size="icon" aria-label="Download result" className="cursor-pointer" onClick={download}>
               <Download className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Export resuilt</TooltipContent>
+          <TooltipContent>Download</TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>

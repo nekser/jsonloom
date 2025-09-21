@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { generatePipeline, type Lang } from "@/src/codegen/generate";
 import { importCSV } from "@/src/importers/csv";
 import { importJSON } from "@/src/importers/json";
@@ -78,12 +79,22 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
             </TabsList>
           </Tabs>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={copy} aria-label="Copy code" title="Copy code">
-              <Copy className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" onClick={exportFile} aria-label="Download code" title="Download code">
-              <Download className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={copy} aria-label="Copy code" className="cursor-pointer">
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copy code</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={exportFile} aria-label="Download code" className="cursor-pointer">
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Download</TooltipContent>
+            </Tooltip>
           </div>
         </div>
         <div className="h-[60vh]">

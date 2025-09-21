@@ -1,18 +1,19 @@
 "use client";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useIsMobile } from "./hooks/useMediaQuery";
-import { useOpsStore, State } from "../src/store/operations";
-import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
-import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
-import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
-import { MoreVertical, Share2, Undo2, Redo2, ToggleRight, Upload, ToggleLeft, Trash2, Code2, Plus } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Code2, MoreVertical, Plus, Redo2, Share2, ToggleLeft, ToggleRight, Trash2, Undo2, Upload } from "lucide-react";
+import { useState } from "react";
 import { downloadText } from "../lib/io";
-import GenerateCodeDialog from "./GenerateCodeDialog";
-import SharePipelineDialog from "./SharePipelineDialog";
-import ImportPipelineDialog from "./ImportPipelineDialog";
+import { State, useOpsStore } from "../src/store/operations";
+import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
+import { PipelineSerializer } from "../src/utils/sharing/PipelineSerializer";
+import { PipelineValidator } from "../src/utils/sharing/PipelineValidator";
 import ClearConfirmDialog from "./ClearConfirmDialog";
+import GenerateCodeDialog from "./GenerateCodeDialog";
+import { useIsMobile } from "./hooks/useMediaQuery";
+import ImportPipelineDialog from "./ImportPipelineDialog";
+import SharePipelineDialog from "./SharePipelineDialog";
 
 export default function OperationsToolbar() {
   useIsMobile();
@@ -115,26 +116,41 @@ export default function OperationsToolbar() {
     <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
      <div className="font-medium flex items-center gap-2">Operations</div>
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          aria-label="Add step"
-          onClick={() => {
-            // Open the OperationPicker in OperationsPanel via a custom event
-            window.dispatchEvent(new Event("open-catalog" as unknown as keyof WindowEventMap));
-          }}
-        >
-          <Plus className="h-4 w-4 mr-2" />Add step
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Undo" disabled={!canUndo} onClick={undo}>
-          <Undo2 className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" aria-label="Redo" disabled={!canRedo} onClick={redo}>
-          <Redo2 className="h-4 w-4" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              aria-label="Add step"
+              className="cursor-pointer"
+              onClick={() => {
+                window.dispatchEvent(new Event("open-catalog" as unknown as keyof WindowEventMap));
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />Add step
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Add step</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Undo" className="cursor-pointer" disabled={!canUndo} onClick={undo}>
+              <Undo2 className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Undo</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Redo" className="cursor-pointer" disabled={!canRedo} onClick={redo}>
+              <Redo2 className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Redo</TooltipContent>
+        </Tooltip>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="More actions">
+            <Button variant="ghost" size="icon" aria-label="More actions" className="cursor-pointer">
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
