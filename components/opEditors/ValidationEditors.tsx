@@ -44,7 +44,7 @@ export function ValidateJSONEditor({ config, onChange, pathIndex, rootBefore }: 
         return;
       }
       const samples = Array.isArray(sample) ? sample : [sample];
-      const schemas = samples.map((s) => gen(s as unknown));
+      const schemas = samples.map((s) => stripDollarSchema(gen(s as unknown) as AnySchema));
       const combined: AnySchema = schemas.length === 1 ? (schemas[0] as AnySchema) : ({ anyOf: schemas } as unknown as AnySchema);
       const pretty = JSON.stringify(combined, null, 2);
       setText(pretty);
@@ -91,4 +91,17 @@ export function ValidateJSONEditor({ config, onChange, pathIndex, rootBefore }: 
 
 function toPretty(obj: unknown): string {
   try { return JSON.stringify(obj ?? {}, null, 2); } catch { return "{}"; }
+}
+
+function stripDollarSchema<T>(schema: T): T {
+  if (schema && typeof schema === "object" && !Array.isArray(schema)) {
+    const copy: Record<string, unknown> = { ...(schema as unknown as Record<string, unknown>) };
+    if ("$schema" in copy) delete copy["$schema"];
+    // If anyOf present from previous combine, ensure items also don't contain $schema
+    if (Array.isArray(copy.anyOf)) {
+      copy.anyOf = (copy.anyOf as unknown[]).map((s) => stripDollarSchema(s)) as unknown;
+    }
+    return copy as unknown as T;
+  }
+  return schema;
 }

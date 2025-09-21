@@ -54,6 +54,19 @@ function mergeSchemas(schemas: AnySchema[]): AnySchema {
   return { anyOf: uniq } as unknown as AnySchema;
 }
 
+function stripDollarSchema(schema: AnySchema): AnySchema {
+  if (typeof schema === "boolean") return schema;
+  if (!schema || typeof schema !== "object") return schema as AnySchema;
+  const out: Record<string, unknown> = { ...(schema as unknown as Record<string, unknown>) };
+  if ("$schema" in out) delete out["$schema"];
+  if (Array.isArray(out.anyOf)) {
+    out.anyOf = (out.anyOf as unknown[]).map((s) =>
+      typeof s === "boolean" ? s : stripDollarSchema(s as AnySchema)
+    ) as unknown;
+  }
+  return out as unknown as AnySchema;
+}
+
 function apply(input: JSONValue, cfg: ValidateJSONConfig): JSONValue {
   const target = cfg.path ? getByPath(input, cfg.path) : input;
   // 1) Manual schema present -> validate with it
@@ -76,10 +89,10 @@ function apply(input: JSONValue, cfg: ValidateJSONConfig): JSONValue {
     const inferred = matches.map((m) => {
       // If the match itself is an array (e.g., path points to an array), infer from its items
       if (Array.isArray(m)) {
-        const itemSchemas = (m as JSONValue[]).map((x) => generateSchema(x as unknown) as AnySchema);
+        const itemSchemas = (m as JSONValue[]).map((x) => stripDollarSchema(generateSchema(x as unknown) as AnySchema));
         return mergeSchemas(itemSchemas);
       }
-      return generateSchema(m as unknown) as AnySchema;
+      return stripDollarSchema(generateSchema(m as unknown) as AnySchema);
     });
     const combined = mergeSchemas(inferred);
 
