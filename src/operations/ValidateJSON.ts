@@ -1,12 +1,14 @@
-import Ajv, { type ErrorObject, type ValidateFunction, type AnySchema } from "ajv";
-import type { OperationModule } from "./types";
+import Ajv, { type AnySchema, type ErrorObject, type ValidateFunction } from "ajv";
+import generateSchema from "json-schema-generator";
 import type { JSONValue } from "../types/json";
+import type { OperationModule } from "./types";
 import { getByPath } from "./utils";
 
 export type ValidateJSONConfig = {
   path?: string;
   schema?: AnySchema;
   failOnError?: boolean; // default true
+  generateSchema?: boolean; // default false, set by UI button
 };
 
 const ajv = new Ajv({ allErrors: true, strict: false });
@@ -33,17 +35,66 @@ function formatErrors(errors: ErrorObject[] | null | undefined): string {
     .join("; ");
 }
 
+function toArray<T>(v: T | T[]): T[] {
+  return Array.isArray(v) ? v : [v];
+}
+
+function mergeSchemas(schemas: AnySchema[]): AnySchema {
+  const seen = new Set<string>();
+  const uniq: AnySchema[] = [];
+  for (const s of schemas) {
+    const key = JSON.stringify(s);
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniq.push(s);
+    }
+  }
+  if (uniq.length === 0) return {} as AnySchema;
+  if (uniq.length === 1) return uniq[0] as AnySchema;
+  return { anyOf: uniq } as unknown as AnySchema;
+}
+
 function apply(input: JSONValue, cfg: ValidateJSONConfig): JSONValue {
   const target = cfg.path ? getByPath(input, cfg.path) : input;
-  const { validate, error } = compileSchema(cfg.schema);
-  if (error) throw new Error(error);
-  if (!validate) return input; // empty schema
-  const ok = validate(target as unknown);
-  if (ok) return input;
-  const message = formatErrors(validate.errors);
-  if (cfg.failOnError ?? true) throw new Error(message || "JSON Schema validation failed");
-  // Non-fatal: pass through unchanged
-  return input;
+  // 1) Manual schema present -> validate with it
+  const hasManualSchema = !!(cfg.schema && (typeof cfg.schema !== "object" || Object.keys(cfg.schema as Record<string, unknown>).length > 0));
+  if (hasManualSchema) {
+    const { validate, error } = compileSchema(cfg.schema);
+    if (error) throw new Error(error);
+    if (!validate) return input; // empty
+    const ok = validate(target as unknown);
+    if (ok) return input;
+    const message = formatErrors(validate.errors);
+    if (cfg.failOnError ?? true) throw new Error(message || "JSON Schema validation failed");
+    return input;
+  }
+
+  // 2) No manual schema: if generateSchema flagged, infer from data and validate
+  if (cfg.generateSchema) {
+    // getByPath may return a single value or an array of matches (wildcards)
+    const matches = toArray(target as JSONValue | JSONValue[]);
+    const inferred = matches.map((m) => {
+      // If the match itself is an array (e.g., path points to an array), infer from its items
+      if (Array.isArray(m)) {
+        const itemSchemas = (m as JSONValue[]).map((x) => generateSchema(x as unknown) as AnySchema);
+        return mergeSchemas(itemSchemas);
+      }
+      return generateSchema(m as unknown) as AnySchema;
+    });
+    const combined = mergeSchemas(inferred);
+
+    const { validate, error } = compileSchema(combined);
+    if (error) throw new Error(error);
+    if (!validate) return input;
+    const ok = validate(target as unknown);
+    if (ok) return input;
+    const message = formatErrors(validate.errors);
+    if (cfg.failOnError ?? true) throw new Error(message || "JSON Schema validation failed");
+    return input;
+  }
+
+  // 3) Neither manual schema nor generation requested -> surface a helpful message
+  throw new Error("No schema provided. Paste a schema or click Generate Schema.");
 }
 
 function validate(config: ValidateJSONConfig, _input: JSONValue): string | undefined {
@@ -56,7 +107,7 @@ const mod: OperationModule<ValidateJSONConfig> = {
   type: "ValidateJSON",
   apply,
   validate,
-  defaultConfig: { path: "", schema: {}, failOnError: true },
+  defaultConfig: { path: "", schema: {}, failOnError: true, generateSchema: false },
 };
 
 export default mod;

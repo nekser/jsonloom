@@ -1,12 +1,25 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import Editor from "@monaco-editor/react";
+import type { AnySchema } from "ajv";
+import { useCallback, useMemo, useState } from "react";
+import { getByPath } from "../../src/operations/utils";
+import type { JSONValue } from "../../src/types/json";
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
-import type { JSONValue } from "../../src/types/json";
 
-export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<{ path?: string; schema?: JSONValue; failOnError?: boolean }>) {
+export function ValidateJSONEditor({ config, onChange, pathIndex, rootBefore }: EditorProps<{ path?: string; schema?: JSONValue; failOnError?: boolean; generateSchema?: boolean }>) {
   const [text, setText] = useState<string>(() => toPretty(config.schema));
   const [error, setError] = useState<string | undefined>(undefined);
+  const targetSample = useMemo<JSONValue | JSONValue[] | undefined>(() => {
+    if (!rootBefore) return undefined;
+    try {
+      const p = (config.path ?? "").trim();
+      const t = p ? (getByPath(rootBefore as JSONValue, p) as JSONValue | JSONValue[]) : (rootBefore as JSONValue);
+      return t as JSONValue | JSONValue[];
+    } catch {
+      return undefined;
+    }
+  }, [rootBefore, config.path]);
 
   const onSchemaChange = (val?: string) => {
     const t = val ?? "";
@@ -20,6 +33,28 @@ export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<
       setError(msg);
     }
   };
+
+  const handleGenerate = useCallback(async () => {
+    try {
+      const mod = await import("json-schema-generator");
+      const gen = (mod as unknown as { default?: (x: unknown) => AnySchema }).default || (mod as unknown as (x: unknown) => AnySchema);
+      const sample = targetSample;
+      if (sample === undefined) {
+        setError("No data available to infer schema at this step.")
+        return;
+      }
+      const samples = Array.isArray(sample) ? sample : [sample];
+      const schemas = samples.map((s) => gen(s as unknown));
+      const combined: AnySchema = schemas.length === 1 ? (schemas[0] as AnySchema) : ({ anyOf: schemas } as unknown as AnySchema);
+      const pretty = JSON.stringify(combined, null, 2);
+      setText(pretty);
+      setError(undefined);
+      onChange({ schema: combined as unknown as JSONValue, generateSchema: true });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to generate schema";
+      setError(msg);
+    }
+  }, [targetSample, onChange]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -35,6 +70,9 @@ export function ValidateJSONEditor({ config, onChange, pathIndex }: EditorProps<
           <input type="checkbox" checked={config.failOnError ?? true} onChange={(e) => onChange({ failOnError: e.target.checked })} />
           Fail on error
         </label>
+        <Button type="button" variant="outline" size="sm" onClick={handleGenerate} className="cursor-pointer">
+          Generate Schema
+        </Button>
       </div>
       <div className="border rounded">
         <Editor

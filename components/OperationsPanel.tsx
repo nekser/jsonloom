@@ -50,6 +50,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const opIndexes = useOpsStore((s: State) => s.opIndexes);
   const interText = useOpsStore((s: State) => s.intermediate?.[op?.id ?? ""]);
+  const allIntermediate = useOpsStore((s: State) => s.intermediate);
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style: CSSProperties = { transform: CSS.Transform.toString(transform), transition };
   const err = useOpsStore((s: State) => s.pipelineError);
@@ -163,6 +164,15 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           const t = op.type as keyof typeof editors;
           const Editor = editors[t];
           if (!Editor) return <div className="text-xs text-neutral-500">No editor available for type &#39;{op.type}&#39;.</div>;
+          // Compute JSON root before this operation executes
+          const rootBefore = (() => {
+            if (index === 0) return sourceObj;
+            const prev = opsAll[index - 1];
+            if (!prev) return sourceObj;
+            const prevText = allIntermediate?.[prev.id];
+            if (!prevText) return sourceObj;
+            try { return JSON.parse(prevText) as JSONValue; } catch { return sourceObj; }
+          })();
           return (
             <Editor
               config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
@@ -172,6 +182,7 @@ function OperationCard({ id, index }: { id: string; index: number }) {
                 update(op.id, { config: merged });
               }}
               pathIndex={pathIndex}
+              rootBefore={rootBefore as JSONValue}
             />
           );
         })()}
@@ -183,7 +194,6 @@ function OperationCard({ id, index }: { id: string; index: number }) {
           <AutocompleteInput
             className="w-full pr-6"
             placeholder="Leave empty to apply in-place"
-            // Explicitly coerce undefined/null to "" but preserve true empty when user clears field.
             value={(() => {
               const cfgVal = (op.config && typeof op.config === "object" && !Array.isArray(op.config))
                 ? (op.config as Record<string, unknown>).writeResultTo
@@ -194,9 +204,6 @@ function OperationCard({ id, index }: { id: string; index: number }) {
             onChange={(v) => {
               const base = (op.config && typeof op.config === 'object' && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {};
               const next = { ...base } as Record<string, unknown>;
-              // Allow full clearing of the field:
-              // Previously an empty value could re-hydrate with a stale character because we only wrote when truthy.
-              // Here we treat whitespace-only input as removal and delete the key so the controlled input shows blank.
               if (v.trim() === '') next.writeResultTo = undefined; else next.writeResultTo = v;
               update(op.id, { config: next as unknown as JSONValue });
             }}
