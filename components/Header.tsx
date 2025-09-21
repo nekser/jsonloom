@@ -1,11 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import ThemeToggle from "./ThemeToggle";
-import { useIsMobile } from "./hooks/useMediaQuery";
-import { useOpsStore, State } from "../src/store/operations";
-// removed dropdown for Demo button; use a direct button
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BookOpenText, ExternalLink, Info, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
+import { useIsMobile } from "./hooks/useMediaQuery";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   const isMobile = useIsMobile();
@@ -13,31 +14,24 @@ export default function Header() {
   const pathname = usePathname();
   const isLanding = pathname === "/";
 
-  const setSourceText = useOpsStore((s: State) => s.setSourceText);
-  const setOperations = useOpsStore((s: State) => s.setOperations);
-
-  async function loadDemo(kind: "json" | "yaml" | "csv") {
+  // Helper to open a demo in a new tab by encoding both pipeline and data
+  async function openDemoInNewTab(opts: { dataPath: string; pipelinePath: string }) {
     try {
-      const dataUrl = kind === "json" ? "/demo/demo.json" : kind === "yaml" ? "/demo/demo.yaml" : "/demo/demo.csv";
-      const res = await fetch(dataUrl, { cache: "no-cache" });
-      if (!res.ok) throw new Error(`Failed to load ${kind} demo (${res.status})`);
-      const text = await res.text();
-      setSourceText(text);
-  // Load pipeline; CSV uses a dedicated pipeline since its shape differs
-  const pipelineUrl = kind === "csv" ? "/demo/pipeline-csv.json" : "/demo/pipeline.json";
-  const pRes = await fetch(pipelineUrl, { cache: "no-cache" });
-      if (pRes.ok) {
-        const pipelineDoc = await pRes.json();
-        const { PipelineSerializer } = await import("../src/utils/sharing/PipelineSerializer");
-        const { PipelineValidator } = await import("../src/utils/sharing/PipelineValidator");
-        const ops = PipelineSerializer.deserialize(pipelineDoc);
-        if (ops) {
-          const v = PipelineValidator.validate(ops);
-          if (v.ok) setOperations(ops);
-        }
-      }
-  } catch {
-      // silent fail; optionally hook toasts
+      const [dataRes, pipeRes] = await Promise.all([
+        fetch(opts.dataPath, { cache: "no-cache" }),
+        fetch(opts.pipelinePath, { cache: "no-cache" }),
+      ]);
+      if (!dataRes.ok || !pipeRes.ok) return;
+      const dataJson = await dataRes.json();
+      const pipelineJson = await pipeRes.json(); // already serialized { v, ops }
+      const encPipeline = PipelineEncoder.encode(pipelineJson);
+      const encData = PipelineEncoder.encode(dataJson);
+      const url = new URL(window.location.origin + "/free");
+      url.searchParams.set("pipeline", encPipeline);
+      url.searchParams.set("data", encData);
+      window.open(url.toString(), "_blank", "noopener,noreferrer");
+    } catch {
+      // no-op; could add toast
     }
   }
 
@@ -52,7 +46,31 @@ export default function Header() {
         </nav>
         <div className="ml-auto flex items-center gap-2">
           <Button asChild size="sm"><Link href="/free">Try Free Transformer</Link></Button>
-          <ThemeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Menu">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <a href="/docs" target="_blank" rel="noopener noreferrer"><BookOpenText className="h-4 w-4 mr-2" /> Docs <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href="/about" target="_blank" rel="noopener noreferrer"><Info className="h-4 w-4 mr-2" /> About <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Demo pipelines</DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>User Data Demo</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/vars-data.json", pipelinePath: "/demo/vars-pipeline.json" })}>E-commerce Demo</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>Date Functions Demo</DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <ThemeToggle />
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
     );
@@ -61,17 +79,39 @@ export default function Header() {
   return (
     <header className="h-12 px-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
       <div className="font-semibold mr-auto">JSON Transformation Tool</div>
-      {!isMobile ? (
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => loadDemo("json")}>Demo</Button>
-          <ThemeToggle />
-        </div>
-      ) : (
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => loadDemo("json")}>Demo</Button>
-          <ThemeToggle />
-        </div>
-      )}
+      <div className="flex items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Menu">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <a href="/docs" target="_blank" rel="noopener noreferrer"><BookOpenText className="h-4 w-4 mr-2" /> Docs <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a href="/about" target="_blank" rel="noopener noreferrer"><Info className="h-4 w-4 mr-2" /> About <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Demo pipelines</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>User Data Demo</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/vars-data.json", pipelinePath: "/demo/vars-pipeline.json" })}>E-commerce Demo</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>Date Functions Demo</DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex items-center justify-end gap-2"
+              onSelect={(e) => e.preventDefault()}
+            >
+              <span className="text-sm text-muted-foreground">Theme</span>
+              <ThemeToggle />
+            </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }
