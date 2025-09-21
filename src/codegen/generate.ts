@@ -1,4 +1,5 @@
 import type { Operation } from "../operations/types";
+import { indent } from "./utils/helpers";
 import { accessExpr, assignExpr } from "./utils/pathResolution";
 // JS
 import J_Add from "./javascript/Add";
@@ -196,8 +197,29 @@ import PH_TrimStrings from "./php/TrimStrings";
 import PH_UnflattenObject from "./php/UnflattenObject";
 import PH_UniqueArray from "./php/UniqueArray";
 import PH_ValidateJSON from "./php/ValidateJSON";
+// Go
+import GO_Add from "./go/Add";
+import GO_Clamp from "./go/Clamp";
+import GO_CountArray from "./go/CountArray";
+import GO_DeletePath from "./go/DeletePath";
+import GO_Divide from "./go/Divide";
+import GO_ExtractPath from "./go/ExtractPath";
+import GO_FilterArray from "./go/FilterArray";
+import GO_JoinArray from "./go/JoinArray";
+import GO_MapArray from "./go/MapArray";
+import GO_Max from "./go/Max";
+import GO_Min from "./go/Min";
+import GO_Modulo from "./go/Modulo";
+import GO_Multiply from "./go/Multiply";
+import GO_Power from "./go/Power";
+import GO_Round from "./go/Round";
+import GO_SetPath from "./go/SetPath";
+import GO_StringReplace from "./go/StringReplace";
+import GO_Subtract from "./go/Subtract";
+import GO_Sum from "./go/Sum";
+import goHeader from "./go/_header";
 
-export type Lang = "javascript" | "typescript" | "python" | "php";
+export type Lang = "javascript" | "typescript" | "python" | "php" | "go";
 
 type TemplateFn = (config: unknown, varName: string) => string;
 
@@ -420,6 +442,34 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
   Switch: PH_Switch as unknown as TemplateFn,
   ValidateJSON: PH_ValidateJSON as unknown as TemplateFn,
   },
+  go: {
+    // Collections
+    FilterArray: GO_FilterArray as unknown as TemplateFn,
+    MapArray: GO_MapArray as unknown as TemplateFn,
+    CountArray: GO_CountArray as unknown as TemplateFn,
+    JoinArray: GO_JoinArray as unknown as TemplateFn,
+
+    // Math & Numbers
+    Add: GO_Add as unknown as TemplateFn,
+    Subtract: GO_Subtract as unknown as TemplateFn,
+    Multiply: GO_Multiply as unknown as TemplateFn,
+    Divide: GO_Divide as unknown as TemplateFn,
+    Modulo: GO_Modulo as unknown as TemplateFn,
+    Power: GO_Power as unknown as TemplateFn,
+    Round: GO_Round as unknown as TemplateFn,
+    Clamp: GO_Clamp as unknown as TemplateFn,
+    Sum: GO_Sum as unknown as TemplateFn,
+    Min: GO_Min as unknown as TemplateFn,
+    Max: GO_Max as unknown as TemplateFn,
+
+    // Paths & Objects
+    SetPath: GO_SetPath as unknown as TemplateFn,
+    DeletePath: GO_DeletePath as unknown as TemplateFn,
+    ExtractPath: GO_ExtractPath as unknown as TemplateFn,
+
+    // Strings
+    StringReplace: GO_StringReplace as unknown as TemplateFn,
+  },
 };
 
 const ALL_TYPES = [
@@ -436,6 +486,7 @@ for (const t of ALL_TYPES) {
   if (!registry.typescript[t]) registry.typescript[t] = TS_TODO;
   if (!registry.python[t]) registry.python[t] = PY_TODO;
   if (!registry.php[t]) registry.php[t] = PHP_TODO;
+  if (!registry.go[t]) registry.go[t] = JS_TODO;
 }
 
 export function generateOperation(lang: Lang, op: Operation, varName: string): string {
@@ -474,6 +525,28 @@ export function generatePipeline(lang: Lang, ops: Operation[], rootVar = "data",
   // @ts-expect-error attach global for runtime
   globalThis.__codegen_generateOp = (l: Lang, op: Operation, v: string) => generateOperation(l, op, v);
   const lines: string[] = [];
+  // Special case: Go emits a full program with helpers
+  if (lang === "go") {
+    const parts: string[] = [];
+    parts.push(goHeader(rootVar, source));
+    parts.push("func main() {");
+    parts.push(`  var ${rootVar} any`);
+    parts.push("  var __root any");
+    if (source !== undefined) {
+      let jsonText = "";
+      try { jsonText = JSON.stringify(source, null, 2) ?? ""; } catch { jsonText = ""; }
+      const goSafe = jsonText.replace(/`/g, "\\`");
+      parts.push("  // Parse embedded JSON source");
+      parts.push("  jsonString := `\n" + goSafe + "\n`");
+      parts.push("  _ = json.Unmarshal([]byte(jsonString), &" + rootVar + ")");
+    } else {
+      parts.push(`  ${rootVar} = map[string]any{}`);
+    }
+    parts.push(`  __root = ${rootVar}`);
+    for (const op of ops) parts.push(indent(generateOperation(lang, op, rootVar), 2));
+    parts.push("}");
+    return parts.join("\n");
+  }
   // Header with source JSON as string + parse when provided
   if (source !== undefined) {
     let jsonText = "";

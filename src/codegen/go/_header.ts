@@ -1,0 +1,118 @@
+// Go codegen header and helpers
+export default function goHeader(_rootVar: string, _source?: unknown): string {
+  const lines: string[] = [];
+  lines.push("package main\n");
+  lines.push("import (\n  \"encoding/json\"\n  \"fmt\"\n  \"strings\"\n)\n");
+  // helpers for dynamic JSON path access/mutation
+  lines.push(`// getPath reads a dynamic path like "a.b[0].c" from map[string]any/[]any safely
+func getPath(root any, path string) any {
+  if path == "" || path == "." { return root }
+  cur := root
+  segs := tokenize(path)
+  for _, s := range segs {
+    switch seg := s.(type) {
+    case keySeg:
+      m, ok := cur.(map[string]any); if !ok { return nil }
+      cur = m[string(seg)]
+    case idxSeg:
+      arr, ok := cur.([]any); if !ok { return nil }
+      i := int(seg)
+      if i < 0 || i >= len(arr) { return nil }
+      cur = arr[i]
+    }
+  }
+  return cur
+}
+
+// setPath writes rhs to a dynamic path on *map[string]any/[]any, creating maps as needed
+func setPath(root *any, path string, rhs any) {
+  if path == "" || path == "." { *root = rhs; return }
+  segs := tokenize(path)
+  // ensure root is a map for top-level writes
+  if *root == nil {
+    *root = map[string]any{}
+  }
+  var cur any = *root
+  for i, raw := range segs {
+    isLast := i == len(segs)-1
+    switch s := raw.(type) {
+    case keySeg:
+      m, ok := cur.(map[string]any); if !ok { m = map[string]any{}; assignInto(root, segs[:i], m); cur = m }
+      if isLast { m[string(s)] = rhs } else {
+        if _, ok := m[string(s)]; !ok { m[string(s)] = map[string]any{} }
+        cur = m[string(s)]
+      }
+    case idxSeg:
+      // for arrays we only set when exists; creation is omitted for simplicity
+      arr, ok := cur.([]any); if !ok { return }
+      ii := int(s)
+      if ii < 0 || ii >= len(arr) { return }
+      if isLast { arr[ii] = rhs } else { cur = arr[ii] }
+    }
+  }
+}
+
+// Minimal tokenizer compatible with JS paths
+type seg interface{}
+type keySeg string
+type idxSeg int
+
+func tokenize(path string) []seg {
+  out := []seg{}
+  for i := 0; i < len(path); {
+    if path[i] == '.' { i++; continue }
+    if path[i] == '[' { // [123] or ["key"]
+      j := i+1
+  if j < len(path) && (path[j] == '"' || path[j] == 39 ) {
+        quote := path[j]; j++
+        k := j
+        for k < len(path) && path[k] != quote { k++ }
+        key := path[j:k]
+        out = append(out, keySeg(key))
+        // skip to ]
+        i = k+2
+      } else { // number
+        k := j
+        for k < len(path) && path[k] >= '0' && path[k] <= '9' { k++ }
+        // parse int
+        num := 0
+        for t := j; t < k; t++ { num = num*10 + int(path[t]-'0') }
+        out = append(out, idxSeg(num))
+        i = k+1
+      }
+      continue
+    }
+    // read ident until dot or bracket
+    j := i
+    for j < len(path) && path[j] != '.' && path[j] != '[' { j++ }
+    out = append(out, keySeg(path[i:j]))
+    i = j
+  }
+  return out
+}
+
+// assignInto writes v at segs path on *root
+func assignInto(root *any, segs []seg, v any) {
+  if len(segs) == 0 { *root = v; return }
+  // build nested maps shallowly
+  if *root == nil { *root = map[string]any{} }
+  cur := *root
+  for i, raw := range segs {
+    isLast := i == len(segs)-1
+    switch s := raw.(type) {
+    case keySeg:
+      m, _ := cur.(map[string]any)
+      if isLast { m[string(s)] = v } else {
+        if _, ok := m[string(s)]; !ok { m[string(s)] = map[string]any{} }
+        cur = m[string(s)]
+      }
+    case idxSeg:
+      // not supporting creation of array indices in assignInto
+      return
+    }
+  }
+}
+`);
+  // main function scaffold and JSON parse when source present is added by central generator
+  return lines.join("\n");
+}

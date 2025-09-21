@@ -1,16 +1,16 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import Editor from "@monaco-editor/react";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Copy, Download } from "lucide-react";
-import { useOpsStore, State } from "../src/store/operations";
 import { generatePipeline, type Lang } from "@/src/codegen/generate";
+import { importCSV } from "@/src/importers/csv";
 import { importJSON } from "@/src/importers/json";
 import { importYAML } from "@/src/importers/yaml";
-import { importCSV } from "@/src/importers/csv";
+import Editor from "@monaco-editor/react";
+import { Copy, Download } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { downloadText } from "../lib/io";
+import { State, useOpsStore } from "../src/store/operations";
 
 export default function GenerateCodeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const ops = useOpsStore((s: State) => s.operations);
@@ -48,7 +48,16 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
   const copy = async () => { await navigator.clipboard.writeText(code); };
   const exportFile = () => {
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  const ext = lang === "javascript" ? "js" : lang === "typescript" ? "ts" : lang === "python" ? "py" : "php";
+    const ext =
+      lang === "javascript"
+        ? "js"
+        : lang === "typescript"
+        ? "ts"
+        : lang === "python"
+        ? "py"
+        : lang === "php"
+        ? "php"
+        : "go";
     downloadText(`pipeline-${ts}.${ext}`, code, "text/plain");
   };
 
@@ -65,6 +74,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
               <TabsTrigger value="typescript">TypeScript</TabsTrigger>
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="php">PHP</TabsTrigger>
+              <TabsTrigger value="go">Go</TabsTrigger>
             </TabsList>
           </Tabs>
           <div className="flex gap-2">
@@ -79,7 +89,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
         <div className="h-[60vh]">
           <Editor
             height="100%"
-            language={lang === "javascript" ? "javascript" : lang === "typescript" ? "typescript" : lang === "python" ? "python" : "php"}
+            language={lang === "javascript" ? "javascript" : lang === "typescript" ? "typescript" : lang === "python" ? "python" : lang === "php" ? "php" : "go"}
             theme={theme === "dark" ? "vs-dark" : "light"}
             value={code}
             options={{ readOnly: true, minimap: { enabled: false }, wordWrap: "on" }}
