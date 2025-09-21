@@ -52,7 +52,11 @@ export default function Header() {
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              sideOffset={isMobile ? 0 : 4}
+              className={isMobile ? "w-screen max-w-none rounded-none" : undefined}
+            >
               <DropdownMenuItem asChild>
                 <a href="/docs" target="_blank" rel="noopener noreferrer"><BookOpenText className="h-4 w-4 mr-2" /> Docs <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
               </DropdownMenuItem>
@@ -61,7 +65,7 @@ export default function Header() {
               </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Demo pipelines</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
+                <DropdownMenuSubContent className={isMobile ? "w-screen max-w-none rounded-none" : undefined}>
                   <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>User Data Demo</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/vars-data.json", pipelinePath: "/demo/vars-pipeline.json" })}>E-commerce Demo</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>Date Functions Demo</DropdownMenuItem>
@@ -86,7 +90,11 @@ export default function Header() {
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent
+              align="end"
+              sideOffset={isMobile ? 0 : 4}
+              className={isMobile ? "w-screen max-w-none rounded-none" : undefined}
+            >
             <DropdownMenuItem asChild>
               <a href="/docs" target="_blank" rel="noopener noreferrer"><BookOpenText className="h-4 w-4 mr-2" /> Docs <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
             </DropdownMenuItem>
@@ -95,7 +103,7 @@ export default function Header() {
             </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Demo pipelines</DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
+              <DropdownMenuSubContent className={isMobile ? "w-screen max-w-none rounded-none" : undefined}>
               <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>User Data Demo</DropdownMenuItem>
               <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/vars-data.json", pipelinePath: "/demo/vars-pipeline.json" })}>E-commerce Demo</DropdownMenuItem>
               <DropdownMenuItem onClick={() => openDemoInNewTab({ dataPath: "/demo/demo.json", pipelinePath: "/demo/pipeline.json" })}>Date Functions Demo</DropdownMenuItem>
