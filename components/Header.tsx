@@ -1,12 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpenText, ExternalLink, Info, MoreVertical } from "lucide-react";
+import { BookOpenText, Info, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import ThemeToggle from "./ThemeToggle";
+import { APP_ROUTES, LANDING_NAV_LINKS } from "@/src/navigation/routes";
 
 export default function Header() {
   const isMobile = useIsMobile();
@@ -38,14 +39,18 @@ export default function Header() {
   if (isLanding) {
     return (
       <header className="h-14 px-4 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-4">
-        <Link href="/" className="font-semibold">YourApp</Link>
+        <Link href={APP_ROUTES.home} className="font-semibold">JSON Transformation Tool</Link>
         <nav className="hidden md:flex items-center gap-4 text-sm text-muted-foreground">
-          <a href="#features">Features</a>
-          <Link href="/pricing">Pricing</Link>
-          <Link href="/blog">Blog</Link>
+          {LANDING_NAV_LINKS.map((item) =>
+            item.href.startsWith("#") ? (
+              <a key={item.href} href={item.href}>{item.label}</a>
+            ) : (
+              <Link key={item.href} href={item.href}>{item.label}</Link>
+            )
+          )}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <Button asChild size="sm"><Link href="/free">Try Free Transformer</Link></Button>
+          <Button asChild size="sm"><Link href={APP_ROUTES.free}>Try Free Transformer</Link></Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Menu">
@@ -58,10 +63,10 @@ export default function Header() {
               className={isMobile ? "w-screen max-w-none rounded-none" : undefined}
             >
               <DropdownMenuItem asChild>
-                <a href="/docs" target="_blank" rel="noopener noreferrer"><BookOpenText className="h-4 w-4 mr-2" /> Docs <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+                <Link href={APP_ROUTES.docs}><BookOpenText className="h-4 w-4 mr-2" /> Docs</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <a href="/about" target="_blank" rel="noopener noreferrer"><Info className="h-4 w-4 mr-2" /> About <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+                <Link href={APP_ROUTES.about}><Info className="h-4 w-4 mr-2" /> About</Link>
               </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Demo pipelines</DropdownMenuSubTrigger>
@@ -96,10 +101,10 @@ export default function Header() {
               className={isMobile ? "w-screen max-w-none rounded-none" : undefined}
             >
             <DropdownMenuItem asChild>
-              <a href="/docs" target="_blank" rel="noopener noreferrer"><BookOpenText className="h-4 w-4 mr-2" /> Docs <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+              <Link href={APP_ROUTES.docs}><BookOpenText className="h-4 w-4 mr-2" /> Docs</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/about" target="_blank" rel="noopener noreferrer"><Info className="h-4 w-4 mr-2" /> About <ExternalLink className="h-3 w-3 ml-auto opacity-70" /></a>
+              <Link href={APP_ROUTES.about}><Info className="h-4 w-4 mr-2" /> About</Link>
             </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Demo pipelines</DropdownMenuSubTrigger>
