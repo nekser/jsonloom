@@ -23,6 +23,8 @@ module.exports = [
       "dist",
       "build",
       "coverage",
+      ".coverage-e2e",
+      "**/.coverage-e2e/**",
       "next-env.d.ts",
       "eslint.config.js",
       "tailwind.config.js"

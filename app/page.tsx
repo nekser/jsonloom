@@ -13,7 +13,7 @@ export default function LandingPage() {
         </p>
         <div className="mt-8 flex gap-3 justify-center">
           <Button asChild size="lg"><Link href="/free">Try Free Transformer</Link></Button>
-          <Button asChild size="lg" variant="outline"><Link href="/app">Get Started</Link></Button>
+          <Button asChild size="lg" variant="outline"><Link href="/free">Get Started</Link></Button>
         </div>
       </section>
 
