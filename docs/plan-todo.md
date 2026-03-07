@@ -102,6 +102,75 @@ This document breaks down the identified improvements into actionable tasks. We 
   - add agent implementation notes in `AGENTS.md`;
   - ship behind feature flag, run staged rollout, then enable by default.
 
+## 14) Prioritized product feature roadmap (based on current shipped state audit)
+
+Current state baseline:
+- Strong client-side transformer runtime with 48 operations, nested pipelines, URL sharing, import/export, and multi-language codegen.
+- No user persistence/auth backend, no API execution mode, and limited guided debugging UX for intermediate state.
+
+### P0) Workspace persistence and pipeline library
+- Add local project model (`name`, `source`, `operations`, `updatedAt`, `tags`) with versioned schema.
+- Build project CRUD UI: create, duplicate, rename, delete, pin.
+- Add auto-save and recover-last-session behavior with clear conflict strategy.
+- Add import/export at project level (not only operation list).
+- Add tests for persistence migrations and project load/save flows.
+
+### P0) Pipeline debugger (step-by-step + diffs)
+- Add “debug run” mode that executes operation-by-operation.
+- Show per-step input/output JSON diff and validation/error context.
+- Add fast controls: run all, next, previous, jump to failed step.
+- Surface operation timings and highlight slow operations.
+- Add unit/integration tests for step navigation and error propagation.
+
+### P0) Path intelligence and schema-aware authoring
+- Infer source schema/tree from current input and keep it updated incrementally.
+- Add path autocomplete in operation configs (`path`, `startPath`, `endPath`, etc.).
+- Add path existence validation with actionable fixes.
+- Add quick path picker UI for complex nested fields.
+- Add tests for path suggestions, wildcard handling, and stale-path detection.
+
+### P1) API execution mode and integration surface
+- Add backend service to execute pipelines via HTTP (`POST /transform`).
+- Define request/response contract compatible with current pipeline format.
+- Add API keys/usage limits and basic request logging.
+- Add UI action to copy API request snippet from current project.
+- Add contract tests to ensure client/runtime parity between browser and API.
+
+### P1) Batch transformation and dataset mode
+- Add batch input mode for arrays/record sets with per-record status.
+- Add sampling controls and preview-first execution for large data.
+- Add batch export outputs (JSON/CSV) and failure report download.
+- Add optional concurrency controls for worker/API execution.
+- Add performance tests for large payload and high record counts.
+
+### P1) Reusable templates and starter packs
+- Add curated pipeline templates by use case (e-commerce, CRM, analytics, logs).
+- Add template metadata (`description`, `sample input`, `expected output`, `difficulty`).
+- Add “apply template” and “merge into existing pipeline” actions.
+- Add docs/demo deep links for each template.
+- Add tests to validate template compatibility with operation registry changes.
+
+### P2) Collaboration and share-link upgrades
+- Add optional short-link service (instead of long encoded URLs only).
+- Add share metadata (`title`, `notes`, `createdBy`, `expiresAt`).
+- Add immutable snapshot IDs and “fork from shared” flow.
+- Add link safety checks and malformed payload diagnostics.
+- Add E2E tests for share/open/fork lifecycle.
+
+### P2) Codegen parity hardening
+- Track per-language support matrix by operation and config options.
+- Add missing templates for unsupported operations and TODO placeholders with reasons.
+- Add generated-code fixture tests per language for representative pipelines.
+- Add “copy runnable example” snippets with dependency hints.
+- Add docs page section for known language-specific caveats.
+
+### P2) Rules quality advisor
+- Add static checks for risky/fragile pipeline patterns (dead steps, conflicting writes, expensive chains).
+- Suggest simplifications (merge ops, move filters earlier, remove redundant transforms).
+- Add optional autofix for safe refactors.
+- Add scorecard UI (correctness, maintainability, performance).
+- Add unit tests for advisor rules and false-positive guardrails.
+
 ## Execution Notes
 - Execute sections sequentially to reduce risk.
 - Keep each section as a small PR-sized change set.
