@@ -13,9 +13,12 @@ import { buildPathIndex } from "@/src/utils/pathSuggest";
 import { useIsMobile } from "@/components/hooks/useMediaQuery";
 import { editors } from "@/components/opEditors/registry";
 import { IfEditorCard, MapArrayEditor, SwitchEditorCard } from "./NestedPipelineEditors";
+import { createNestedContentRenderer } from "./nested/renderNestedContent";
 import WriteResultToField from "./WriteResultToField";
 import MobileOperationActions from "./MobileOperationActions";
 import { mergeConfig } from "./config";
+
+const renderNestedContent = createNestedContentRenderer();
 
 export default function OperationCard({ id, index }: { id: string; index: number }) {
   const op = useOpsStore((s: State) => s.operations[index]);
@@ -124,11 +127,11 @@ export default function OperationCard({ id, index }: { id: string; index: number
 
       <div className="mt-2">
         {op.type === "MapArray" ? (
-          <MapArrayEditor op={op} pathIndex={pathIndex} onUpdate={onConfigPatch} />
+          <MapArrayEditor op={op} pathIndex={pathIndex} onUpdate={onConfigPatch} renderNestedContent={renderNestedContent} />
         ) : op.type === "If" ? (
-          <IfEditorCard op={op} pathIndex={pathIndex} onUpdate={onConfigPatch} />
+          <IfEditorCard op={op} pathIndex={pathIndex} onUpdate={onConfigPatch} renderNestedContent={renderNestedContent} />
         ) : op.type === "Switch" ? (
-          <SwitchEditorCard op={op} pathIndex={pathIndex} onUpdate={onConfigPatch} />
+          <SwitchEditorCard op={op} pathIndex={pathIndex} onUpdate={onConfigPatch} renderNestedContent={renderNestedContent} />
         ) : (() => {
           const t = op.type as keyof typeof editors;
           const Editor = editors[t];

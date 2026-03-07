@@ -1,0 +1,131 @@
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { OperationType, State } from "@/src/store/operations";
+import { useOpsStore } from "@/src/store/operations";
+import { getOperationModule, type Operation } from "@/src/operations";
+import { getByPath } from "@/src/operations/utils";
+import type { JSONObject, JSONValue } from "@/src/types/json";
+import type { PathIndex } from "@/src/utils/pathSuggest";
+import { buildPathIndex, suggestPathTokens } from "@/src/utils/pathSuggest";
+import { nanoid } from "nanoid";
+import OperationPicker from "@/components/OperationPicker";
+import AutocompleteInput from "@/components/AutocompleteInput";
+import SortableNestedList from "./nested/SortableNestedList";
+import type { RenderNestedContent } from "./nested/types";
+import { mergeConfig } from "./config";
+
+type Props = {
+  op: Operation;
+  pathIndex: PathIndex;
+  onUpdate: (patch: Record<string, unknown>) => void;
+  renderNestedContent: RenderNestedContent;
+};
+
+export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedContent }: Props) {
+  const [open, setOpen] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  const sourceText = useOpsStore((s: State) => s.sourceText);
+
+  const sourceObj = useMemo(() => {
+    try {
+      return JSON.parse(sourceText);
+    } catch {
+      return null;
+    }
+  }, [sourceText]);
+
+  const cfgPath = useMemo(() => {
+    const cfg = (op.config as Record<string, unknown>) || {};
+    return typeof cfg.path === "string" ? cfg.path : "";
+  }, [op.config]);
+
+  const sampleIndex: PathIndex = useMemo(() => {
+    if (!sourceObj) return pathIndex;
+    try {
+      const arr = getByPath(sourceObj as JSONValue, cfgPath);
+      if (Array.isArray(arr) && arr.length > 0) return buildPathIndex(arr[0]);
+    } catch {
+      // ignore JSON path errors for sample index lookup
+    }
+    return pathIndex;
+  }, [sourceObj, pathIndex, cfgPath]);
+
+  const nestedOps: Operation[] = ((op.config as Record<string, unknown>)?.operations as Operation[]) ?? [];
+
+  const onAddNested = (type: OperationType) => {
+    const mod = getOperationModule(type);
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
+    onUpdate({ operations: [...nestedOps, newOp] });
+    setPickerOpen(false);
+    setLastAddedId(newOp.id);
+  };
+
+  const onUpdateNested = (id: string, patch: Partial<Operation>) => {
+    const next = nestedOps.map((n) => {
+      if (n.id !== id) return n;
+      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config)) ? (patch.config as Record<string, unknown>) : {};
+      return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
+    });
+    onUpdate({ operations: next });
+  };
+
+  const onDeleteNested = (id: string) => {
+    onUpdate({ operations: nestedOps.filter((n) => n.id !== id) });
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <AutocompleteInput
+          className="w-full"
+          placeholder="path e.g. items"
+          value={typeof (op.config as Record<string, unknown>)?.path === "string" ? ((op.config as Record<string, unknown>).path as string) : ""}
+          getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
+          onChange={(v) => onUpdate({ path: v })}
+        />
+      </div>
+      <div className="flex items-center gap-2 text-sm">
+        <Button variant="outline" size="sm" onClick={() => setOpen((v) => !v)}>
+          {open ? "Hide" : "Show"} operations
+        </Button>
+        <div className="flex items-center gap-2 text-xs">
+          <span>onError</span>
+          <Select value={(op.config as Record<string, unknown>)?.onError as string ?? "propagate"} onValueChange={(v) => onUpdate({ onError: v })}>
+            <SelectTrigger className="h-7 px-2 py-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="propagate">propagate</SelectItem>
+              <SelectItem value="skip">skip element</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      {open && (
+        <div className="mt-1 border rounded-md p-2 op-surface">
+          <div className="flex items-center justify-between mb-2">
+            <div className="font-medium text-sm">Operations</div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" /> Add step
+              </Button>
+            </div>
+          </div>
+          <SortableNestedList
+            ops={nestedOps}
+            sampleIndex={sampleIndex}
+            onUpdate={onUpdateNested}
+            onDelete={onDeleteNested}
+            onReorder={(arr) => onUpdate({ operations: arr })}
+            renderContent={renderNestedContent}
+            lastAddedId={lastAddedId}
+          />
+          <OperationPicker open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(t) => onAddNested(t)} />
+        </div>
+      )}
+    </div>
+  );
+}
