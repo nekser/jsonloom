@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" fill="none">
+  <rect width="1200" height="700" fill="#0A0A0A"/>
+  <rect x="40" y="40" width="1120" height="620" rx="16" fill="#171717" stroke="#3F3F46"/>
+  <text x="80" y="96" fill="#FAFAFA" font-family="sans-serif" font-size="22" font-weight="700">Pipeline</text>
+  <rect x="80" y="130" width="1040" height="96" rx="12" fill="#1F2937"/>
+  <text x="104" y="182" fill="#E5E7EB" font-family="monospace" font-size="18">1. ExtractPath(path: "users")</text>
+  <rect x="80" y="246" width="1040" height="96" rx="12" fill="#1F2937"/>
+  <text x="104" y="298" fill="#E5E7EB" font-family="monospace" font-size="18">2. FilterArray(key: "status", value: "active")</text>
+  <rect x="80" y="362" width="1040" height="96" rx="12" fill="#1F2937"/>
+  <text x="104" y="414" fill="#E5E7EB" font-family="monospace" font-size="18">3. MapArray(nested: [TrimStrings, TemplateInterpolate])</text>
+</svg>

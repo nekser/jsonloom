@@ -18,6 +18,7 @@ This repository is a client-side JSON transformation web tool built with Next.js
 - Integration tests: `pnpm test:integration`
 - Full tests: `pnpm test`
 - Coverage: `pnpm test:coverage`
+- Dev smoke (boot app + route checks): `pnpm check:dev`
 - Quality gate (lint + unit + integration): `pnpm check`
 - Export operation metadata: `pnpm run export:ops`
 
@@ -29,6 +30,7 @@ This repository is a client-side JSON transformation web tool built with Next.js
 
 ## Agent Guardrails
 - Validate behavior with tests after code changes.
+- After UI/route/docs changes, run `pnpm check:dev` and verify changed routes are not `500`.
 - For UI refactors, preserve existing interaction behavior and keyboard/mouse drag flows.
 - For runtime changes, add/adjust unit tests in `tests/unit` and keep relevant integration tests green.
 - Keep path handling and `writeResultTo` semantics consistent across operations.
@@ -36,7 +38,8 @@ This repository is a client-side JSON transformation web tool built with Next.js
 ## Testing Workflow
 1. Run targeted unit tests first for changed runtime modules.
 2. Run integration tests covering affected operations.
-3. Run coverage command for regression check when touching shared runtime utilities.
+3. Run `pnpm check:dev` for changed pages/routes.
+4. Run coverage command for regression check when touching shared runtime utilities.
 
 ## Where to Add New Work
 - New operation implementation: `src/operations/<Operation>.ts`
