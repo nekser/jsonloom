@@ -4,23 +4,23 @@ import OperationPicker from "@/components/OperationPicker";
 import { editors } from "@/components/opEditors/registry";
 import { getOperationModule, type Operation } from "@/src/operations";
 import type { OperationType } from "@/src/store/operations";
-import type { JSONObject, JSONValue } from "@/src/types/json";
+import type { JSONValue } from "@/src/types/json";
 import type { PathIndex } from "@/src/utils/pathSuggest";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import SortableNestedList from "./nested/SortableNestedList";
 import type { RenderNestedContent } from "./nested/types";
-import { mergeConfig } from "./config";
+import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
 
 type Props = {
   op: Operation;
   pathIndex: PathIndex;
-  onUpdate: (patch: Record<string, unknown>) => void;
+  onUpdate: (patch: ConfigPatch) => void;
   renderNestedContent: RenderNestedContent;
 };
 
 export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNestedContent }: Props) {
-  const config = (op.config as Record<string, unknown>) || {};
+  const config = asConfigObject(op.config);
   const cases: Array<{ value: string; ops: Operation[] }> = (config.cases as Array<{ value: string; ops: Operation[] }>) ?? [];
   const defOps: Operation[] | undefined = (config.default as Operation[]) ?? [];
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
@@ -39,7 +39,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
 
   const addOpToCase = (i: number, type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
     const next = cases.map((c, idx) => (idx === i ? { ...c, ops: [...c.ops, newOp] } : c));
     onUpdate({ cases: next });
     setPickerIndex(null);
@@ -51,7 +51,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
       ...c,
       ops: c.ops.map((n) => {
         if (n.id !== id) return n;
-        const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config)) ? (patch.config as Record<string, unknown>) : {};
+        const patchCfg = asConfigObject(patch.config);
         return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
       }),
     } : c));
@@ -64,7 +64,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
 
   const addDefaultOp = (type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
     onUpdate({ default: [...(defOps ?? []), newOp] });
     setDefaultPickerOpen(false);
     setLastAddedDefaultOpId(newOp.id);
@@ -73,7 +73,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
   const updateDefaultNested = (id: string, patch: Partial<Operation>) => {
     const next = (defOps ?? []).map((n) => {
       if (n.id !== id) return n;
-      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config)) ? (patch.config as Record<string, unknown>) : {};
+      const patchCfg = asConfigObject(patch.config);
       return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
     });
     onUpdate({ default: next });
@@ -89,7 +89,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
         const t = op.type as keyof typeof editors;
         const Editor = editors[t];
         return Editor ? (
-          <Editor config={config as Record<string, unknown>} onChange={(patch: Record<string, unknown>) => onUpdate(patch)} pathIndex={pathIndex} />
+          <Editor config={config} onChange={(patch: ConfigPatch) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
       <div className="flex items-center gap-2">

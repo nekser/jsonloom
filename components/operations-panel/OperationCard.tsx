@@ -16,7 +16,7 @@ import { IfEditorCard, MapArrayEditor, SwitchEditorCard } from "./NestedPipeline
 import { createNestedContentRenderer } from "./nested/renderNestedContent";
 import WriteResultToField from "./WriteResultToField";
 import MobileOperationActions from "./MobileOperationActions";
-import { mergeConfig } from "./config";
+import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
 
 const renderNestedContent = createNestedContentRenderer();
 
@@ -52,8 +52,8 @@ export default function OperationCard({ id, index, opCount, prevOpId, sourceObj,
     if (!op) return false;
     try {
       const mod = getOperationModule(op.type as OperationType);
-      const cfgObj = (op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {};
-      const defObj = (mod?.defaultConfig && typeof mod.defaultConfig === "object" && !Array.isArray(mod.defaultConfig)) ? (mod.defaultConfig as Record<string, unknown>) : {};
+      const cfgObj = asConfigObject(op.config);
+      const defObj = asConfigObject(mod?.defaultConfig);
       return "writeResultTo" in cfgObj || "writeResultTo" in defObj;
     } catch {
       return false;
@@ -62,8 +62,8 @@ export default function OperationCard({ id, index, opCount, prevOpId, sourceObj,
 
   if (!op) return null;
 
-  const onConfigPatch = (patch: Record<string, unknown>) => {
-    update(op.id, { config: mergeConfig(op.config, patch) as unknown as JSONValue });
+  const onConfigPatch = (patch: ConfigPatch) => {
+    update(op.id, { config: mergeConfig(op.config, patch) });
   };
 
   return (
@@ -148,8 +148,8 @@ export default function OperationCard({ id, index, opCount, prevOpId, sourceObj,
 
           return (
             <Editor
-              config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
-              onChange={(patch: Record<string, unknown>) => onConfigPatch(patch)}
+              config={asConfigObject(op.config)}
+              onChange={(patch: ConfigPatch) => onConfigPatch(patch)}
               pathIndex={pathIndex}
               rootBefore={rootBefore as JSONValue}
             />

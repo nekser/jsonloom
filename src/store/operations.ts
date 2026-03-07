@@ -2,8 +2,10 @@ import { create } from "zustand";
 import { nanoid } from "nanoid";
 import { getOperationModule, Operation, OperationType, ValidationError } from "../operations/index";
 import type { JSONValue } from "../types/json";
+import { isJSONObject } from "../types/json";
 import { type PathIndex } from "../utils/pathSuggest";
 import { runPipelineOperations } from "../operations/pipelineRunner";
+import { applyOperationPatch } from "../operations/configPatch";
 
 export type State = {
   sourceText: string;
@@ -43,8 +45,6 @@ const safeStringify = (v: JSONValue): string => {
   }
 };
 
-const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
-
 export const useOpsStore = create<State>()((set, get) => ({
   sourceText: "{\n  \"items\": [1, 2, 3],\n  \"user\": { \"id\": 1, \"name\": \"Alice\" }\n}",
   sourceFormat: "json",
@@ -67,8 +67,8 @@ export const useOpsStore = create<State>()((set, get) => ({
   },
   addOperation: (type: OperationType, config: JSONValue = {} as JSONValue) => {
     const mod = getOperationModule(type);
-    const initial: JSONValue = isObject(config) && Object.keys(config).length > 0
-      ? (config as JSONValue)
+    const initial: JSONValue = isJSONObject(config) && Object.keys(config).length > 0
+      ? config
       : ((mod?.defaultConfig as JSONValue | undefined) ?? ({} as JSONValue));
     set((s) => ({
       past: [...s.past, s.operations],
@@ -85,21 +85,7 @@ export const useOpsStore = create<State>()((set, get) => ({
     set((s) => ({
       past: [...s.past, s.operations],
       future: [],
-      operations: s.operations.map((op) => {
-        if (op.id !== id) return op;
-        const base = { ...op, ...patch } as Operation;
-        if (patch.config !== undefined) {
-          const merged = isObject(op.config) && isObject(patch.config)
-            ? ({ ...(op.config as Record<string, unknown>), ...(patch.config as Record<string, unknown>) } as Record<string, unknown>)
-            : (patch.config as unknown as Record<string, unknown>);
-          // Remove keys explicitly set to undefined so UI can clear fields reliably.
-          for (const [k, v] of Object.entries(merged)) {
-            if (v === undefined) delete (merged as Record<string, unknown>)[k];
-          }
-          base.config = merged as unknown as JSONValue;
-        }
-        return base;
-      }),
+      operations: s.operations.map((op) => (op.id !== id ? op : applyOperationPatch(op, patch))),
     }));
     get().runPipeline();
   },
