@@ -1,0 +1,36 @@
+import DocsHero from "@/components/docs/DocsHero";
+import StepList from "@/components/docs/StepList";
+import Callout from "@/components/docs/Callout";
+
+<DocsHero
+  title="Getting Started"
+  subtitle="From source input to validated output in a few steps."
+  ctaHref="/free"
+  ctaLabel="Start In /free"
+/>
+
+<h2 id="quick-start">Quick Start</h2>
+
+<StepList items={[
+  "Paste JSON, YAML, or CSV into the Source panel.",
+  "Add an operation in the Pipeline panel.",
+  "Adjust config and watch Result update.",
+  "Copy/share/export your pipeline once output is correct.",
+]} />
+
+<h2 id="source-formats">Source Formats</h2>
+
+- JSON, YAML, and CSV parsing are supported at input level.
+- Result view always shows normalized JSON.
+- Parse failures stop pipeline execution and surface parser errors.
+
+<h2 id="pipeline-runtime">Pipeline Runtime</h2>
+
+- Operations execute top-to-bottom.
+- Disabled operations are skipped but retained in the pipeline.
+- `MapArray`, `If`, and `Switch` support nested operation chains.
+- `writeResultTo` allows redirecting derived values.
+
+<Callout title="Best practice">
+  Keep each operation focused and compose multiple small steps instead of one large complex config.
+</Callout>

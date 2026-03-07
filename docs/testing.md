@@ -11,6 +11,11 @@
 - Integration: `pnpm test:integration`
 - Combined: `pnpm test`
 - Coverage: `pnpm test:coverage`
+- Dev route smoke: `pnpm check:dev`
+
+`pnpm check:dev` boots the dev server and checks that routes return non-500 responses.
+- Default routes: `/`, `/free`, `/docs`, `/about`
+- Affected-routes run: `ROUTES=\"/docs,/docs/operations\" pnpm check:dev`
 
 ## Performance Execution Mode
 - Default: main-thread execution.

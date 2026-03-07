@@ -1,0 +1,36 @@
+import DocsHero from "@/components/docs/DocsHero";
+import Callout from "@/components/docs/Callout";
+import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
+
+<DocsHero
+  title="Code Generation"
+  subtitle="Export your pipeline logic to multiple implementation targets."
+  ctaHref="/free"
+  ctaLabel="Open Transformer (Generate Code)"
+/>
+
+<h2 id="supported-targets">Supported Targets</h2>
+
+- JavaScript
+- TypeScript
+- Python
+- PHP
+- Go
+- jq
+
+<h2 id="generation-contract">Generation Contract</h2>
+
+- Code is generated from per-operation language templates.
+- Unsupported operation templates are emitted as TODO comments.
+- Source payload embedding depends on language target.
+
+<h2 id="known-limits">Known Limits</h2>
+
+- `jq` support is currently partial for operation coverage.
+- Some advanced nested semantics may require manual post-editing in generated output.
+
+<Callout title="Validation">
+  Always run generated code in the target runtime and verify output against your source fixture.
+</Callout>
+
+<ScreenshotFigure src="/docs/docs-codegen-dialog.svg" alt="Code generation dialog" caption="Language tabs and export controls in code generation dialog." />

@@ -18,7 +18,12 @@ describe("route and navigation contract", () => {
     const requiredPages = [
       path.join(cwd, "app/page.tsx"),
       path.join(cwd, "app/free/page.tsx"),
-      path.join(cwd, "app/docs/page.tsx"),
+      path.join(cwd, "app/docs/page.mdx"),
+      path.join(cwd, "app/docs/getting-started/page.mdx"),
+      path.join(cwd, "app/docs/operations/page.tsx"),
+      path.join(cwd, "app/docs/sharing/page.mdx"),
+      path.join(cwd, "app/docs/codegen/page.mdx"),
+      path.join(cwd, "app/docs/troubleshooting/page.mdx"),
       path.join(cwd, "app/about/page.tsx"),
     ];
     for (const page of requiredPages) {

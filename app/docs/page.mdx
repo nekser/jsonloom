@@ -1,0 +1,49 @@
+import DocsHero from "@/components/docs/DocsHero";
+import Callout from "@/components/docs/Callout";
+import DemoLinkCard from "@/components/docs/DemoLinkCard";
+import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
+import { docsScreenshots } from "@/src/docs/screenshots";
+
+<DocsHero
+  title="Product Documentation"
+  subtitle="A practical guide for the JSON Transformation Tool, focused on shipped capabilities only. Last updated: March 7, 2026."
+  ctaHref="/docs/getting-started"
+  ctaLabel="Start With Guides"
+/>
+
+<h2 id="what-it-covers">What It Covers</h2>
+
+This docs area covers the current app behavior: source parsing, pipeline execution, sharing flows, and code generation outputs.
+
+Read [About](/about) for product context and scope.
+
+<Callout title="Scope">
+  This documentation intentionally excludes deferred product routes and future roadmap-only features.
+</Callout>
+
+<h2 id="core-workflows">Core Workflows</h2>
+
+- Build a transformation pipeline in `/free` with ordered operations.
+- Inspect output and operation-level errors live.
+- Share reproducible links with encoded `pipeline` and `data` query params.
+- Generate code in JavaScript, TypeScript, Python, PHP, Go, and jq.
+
+<div className="mt-4 grid gap-3 md:grid-cols-2">
+  <DemoLinkCard title="User Data Demo" description="Open preloaded User Data pipeline in the transformer." href="/open-demo/user-data" />
+  <DemoLinkCard title="E-commerce Demo" description="Open preloaded e-commerce pipeline with metrics examples." href="/open-demo/ecommerce" />
+</div>
+
+<h2 id="visual-tour">Visual Tour</h2>
+
+<div className="mt-4 space-y-4">
+  {docsScreenshots.map((shot) => (
+    <ScreenshotFigure
+      key={shot.src}
+      src={shot.src}
+      alt={shot.alt}
+      caption={shot.caption}
+      className="mx-auto w-full max-w-4xl"
+      imageClassName="max-h-64 object-contain bg-muted/20"
+    />
+  ))}
+</div>

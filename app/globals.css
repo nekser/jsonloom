@@ -175,3 +175,39 @@ html.dark .tab-btn--active {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .docs-flow > * + * {
+    margin-top: 1.5rem;
+  }
+
+  .docs-flow h2 {
+    margin-top: 2.25rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  .docs-flow h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  .docs-flow ul,
+  .docs-flow ol {
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .docs-flow li + li {
+    margin-top: 0.4rem;
+  }
+
+  .docs-flow figure {
+    margin-top: 1rem;
+  }
+}

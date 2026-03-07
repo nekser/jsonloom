@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" fill="none">
+  <rect width="1200" height="700" fill="#0F172A"/>
+  <rect x="40" y="40" width="1120" height="620" rx="16" fill="#111827" stroke="#334155"/>
+  <text x="80" y="96" fill="#F8FAFC" font-family="sans-serif" font-size="22" font-weight="700">Result</text>
+  <text x="1030" y="96" fill="#94A3B8" font-family="monospace" font-size="16">42ms</text>
+  <rect x="80" y="130" width="1040" height="500" rx="12" fill="#020617"/>
+  <text x="104" y="184" fill="#A7F3D0" font-family="monospace" font-size="17">[{"id":1,"name":"Alice","orderCount":2}]</text>
+  <text x="104" y="222" fill="#93C5FD" font-family="monospace" font-size="17">"generatedAt": "2024-03-08T08:00:00.000Z"</text>
+</svg>

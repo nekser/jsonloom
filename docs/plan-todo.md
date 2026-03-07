@@ -60,6 +60,48 @@ This document breaks down the identified improvements into actionable tasks. We 
 - Integrate `test:ui:ci` into `pnpm check` once test runtime is stable.
 - Document local Playwright setup and troubleshooting in `docs/testing.md`.
 
+## 13) Add in-app guided visual tour with UI highlighting
+- Define guided-tour scope and trigger points:
+  - first app visit (`/free`);
+  - manual launch from Help/Docs;
+  - optional “new features” relaunch after major updates.
+- Decide tour framework and constraints:
+  - evaluate `driver.js` vs `react-joyride` vs custom overlay;
+  - confirm App Router/client-component compatibility;
+  - ensure no interference with Monaco/editor interactions.
+- Create tour step model:
+  - typed step schema (`id`, `target`, `title`, `description`, `placement`, `route`, `action`);
+  - route-aware steps for source editor, operations panel, result panel, sharing, and codegen;
+  - fallback behavior when target is missing (skip/retry/end).
+- Add stable UI anchors for onboarding:
+  - add `data-tour` attributes to major controls/regions;
+  - standardize IDs for mobile + desktop variants;
+  - avoid brittle selectors tied to layout-only class names.
+- Implement tour runtime engine:
+  - next/back/skip/finish controls;
+  - smooth scroll to target + focus management;
+  - spotlight/highlight mask and contextual tooltip card.
+- Add user progress persistence:
+  - store completion and last-seen version in local storage;
+  - support reset action in settings/help;
+  - versioned invalidation when tour steps change.
+- Add accessibility and UX safeguards:
+  - keyboard navigation and ESC to exit;
+  - screen-reader labels and logical tab order;
+  - reduced-motion mode and contrast-safe highlighting.
+- Add analytics + diagnostics:
+  - events for start/step/skip/complete;
+  - capture common drop-off step IDs;
+  - add debug mode for internal QA to jump to any step.
+- Test coverage and QA:
+  - unit tests for step schema validation and persistence logic;
+  - integration tests for route transitions and missing-target handling;
+  - Playwright flows for desktop and mobile tour completion.
+- Documentation + rollout:
+  - add onboarding docs in `docs/getting-started.md`;
+  - add agent implementation notes in `AGENTS.md`;
+  - ship behind feature flag, run staged rollout, then enable by default.
+
 ## Execution Notes
 - Execute sections sequentially to reduce risk.
 - Keep each section as a small PR-sized change set.
