@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Code2, MoreVertical, Plus, Redo2, Share2, ToggleLeft, ToggleRight, Trash2, Undo2, Upload } from "lucide-react";
 import { useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { downloadText } from "../lib/io";
 import { State, useOpsStore } from "../src/store/operations";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
@@ -17,12 +18,16 @@ import SharePipelineDialog from "./SharePipelineDialog";
 
 export default function OperationsToolbar() {
   useIsMobile();
-  const ops = useOpsStore((s: State) => s.operations);
-  const setOperations = useOpsStore((s: State) => s.setOperations);
-  const undo = useOpsStore((s: State) => s.undo);
-  const redo = useOpsStore((s: State) => s.redo);
-  const canUndo = useOpsStore((s: State) => s.past.length > 0);
-  const canRedo = useOpsStore((s: State) => s.future.length > 0);
+  const { ops, setOperations, undo, redo, canUndo, canRedo } = useOpsStore(
+    useShallow((s: State) => ({
+      ops: s.operations,
+      setOperations: s.setOperations,
+      undo: s.undo,
+      redo: s.redo,
+      canUndo: s.past.length > 0,
+      canRedo: s.future.length > 0,
+    }))
+  );
 
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");

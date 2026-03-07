@@ -5,11 +5,11 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Eye, EyeOff, GripVertical, Menu, Trash2 } from "lucide-react";
 import { useMemo, type CSSProperties } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { getOperationModule } from "@/src/operations";
 import { useOpsStore, type OperationType, type State } from "@/src/store/operations";
 import type { JSONValue } from "@/src/types/json";
 import type { PathIndex } from "@/src/utils/pathSuggest";
-import { buildPathIndex } from "@/src/utils/pathSuggest";
 import { useIsMobile } from "@/components/hooks/useMediaQuery";
 import { editors } from "@/components/opEditors/registry";
 import { IfEditorCard, MapArrayEditor, SwitchEditorCard } from "./NestedPipelineEditors";
@@ -20,34 +20,33 @@ import { mergeConfig } from "./config";
 
 const renderNestedContent = createNestedContentRenderer();
 
-export default function OperationCard({ id, index }: { id: string; index: number }) {
-  const op = useOpsStore((s: State) => s.operations[index]);
-  const update = useOpsStore((s: State) => s.updateOperation);
-  const remove = useOpsStore((s: State) => s.deleteOperation);
-  const reorder = useOpsStore((s: State) => s.reorderOperations);
-  const opsAll = useOpsStore((s: State) => s.operations);
-  const sourceText = useOpsStore((s: State) => s.sourceText);
-  const opIndexes = useOpsStore((s: State) => s.opIndexes);
-  const interText = useOpsStore((s: State) => s.intermediate?.[op?.id ?? ""]);
-  const allIntermediate = useOpsStore((s: State) => s.intermediate);
-  const err = useOpsStore((s: State) => s.pipelineError);
+type Props = {
+  id: string;
+  index: number;
+  opCount: number;
+  prevOpId?: string;
+  sourceObj: JSONValue | null;
+  sourceFallbackIndex: PathIndex;
+};
+
+export default function OperationCard({ id, index, opCount, prevOpId, sourceObj, sourceFallbackIndex }: Props) {
+  const { update, remove, reorder } = useOpsStore(
+    useShallow((s: State) => ({
+      update: s.updateOperation,
+      remove: s.deleteOperation,
+      reorder: s.reorderOperations,
+    }))
+  );
+  const op = useOpsStore((s: State) => s.operations.find((item) => item.id === id));
+  const pathIndex: PathIndex = useOpsStore((s: State) => (s.opIndexes[index] as PathIndex) ?? sourceFallbackIndex);
+  const interText = useOpsStore((s: State) => s.intermediate?.[id]);
+  const prevInterText = useOpsStore((s: State) => (prevOpId ? s.intermediate?.[prevOpId] : undefined));
+  const hasErr = useOpsStore((s: State) => (s.pipelineError?.opId === id ? s.pipelineError.message : undefined));
 
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style: CSSProperties = { transform: CSS.Transform.toString(transform), transition };
-  const hasErr = err && err.opId === op?.id ? err.message : undefined;
   const isEnabled = op?.enabled !== false;
   const isMobile = useIsMobile();
-
-  const sourceObj = useMemo(() => {
-    try {
-      return JSON.parse(sourceText);
-    } catch {
-      return null;
-    }
-  }, [sourceText]);
-
-  const fallbackIndex = useMemo(() => buildPathIndex(sourceObj), [sourceObj]);
-  const pathIndex: PathIndex = (opIndexes[index] as PathIndex) ?? fallbackIndex;
 
   const supportsWriteResultTo = useMemo(() => {
     if (!op) return false;
@@ -113,7 +112,7 @@ export default function OperationCard({ id, index }: { id: string; index: number
             <MobileOperationActions
               opId={op.id}
               index={index}
-              opCount={opsAll.length}
+              opCount={opCount}
               isEnabled={isEnabled}
               hasErr={hasErr}
               interText={interText}
@@ -139,12 +138,9 @@ export default function OperationCard({ id, index }: { id: string; index: number
 
           const rootBefore = (() => {
             if (index === 0) return sourceObj;
-            const prev = opsAll[index - 1];
-            if (!prev) return sourceObj;
-            const prevText = allIntermediate?.[prev.id];
-            if (!prevText) return sourceObj;
+            if (!prevInterText) return sourceObj;
             try {
-              return JSON.parse(prevText) as JSONValue;
+              return JSON.parse(prevInterText) as JSONValue;
             } catch {
               return sourceObj;
             }
