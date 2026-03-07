@@ -14,3 +14,11 @@ export function isJSONObject(v: unknown): v is JSONObject {
 export function isJSONArray(v: unknown): v is JSONArray {
   return Array.isArray(v);
 }
+
+export function isJSONValue(v: unknown): v is JSONValue {
+  if (v === null) return true;
+  if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") return true;
+  if (Array.isArray(v)) return v.every((item) => isJSONValue(item));
+  if (isJSONObject(v)) return Object.values(v).every((item) => isJSONValue(item));
+  return false;
+}

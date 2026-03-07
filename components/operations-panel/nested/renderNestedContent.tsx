@@ -4,7 +4,7 @@ import type { PathIndex } from "@/src/utils/pathSuggest";
 import MapArrayEditor from "@/components/operations-panel/MapArrayEditor";
 import IfEditorCard from "@/components/operations-panel/IfEditorCard";
 import SwitchEditorCard from "@/components/operations-panel/SwitchEditorCard";
-import { mergeConfig } from "@/components/operations-panel/config";
+import { asConfigObject, mergeConfig, type ConfigPatch } from "@/components/operations-panel/config";
 import type { RenderNestedContent } from "./types";
 
 export function createNestedContentRenderer(): RenderNestedContent {
@@ -48,8 +48,8 @@ export function createNestedContentRenderer(): RenderNestedContent {
 
     return (
       <Editor
-        config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})}
-        onChange={(patch: Record<string, unknown>) => {
+        config={asConfigObject(op.config)}
+        onChange={(patch: ConfigPatch) => {
           onUpdate(op.id, { config: mergeConfig(op.config, patch) });
         }}
         pathIndex={sampleIndex}

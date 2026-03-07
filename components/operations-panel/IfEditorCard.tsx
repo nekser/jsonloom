@@ -2,26 +2,27 @@ import OperationPicker from "@/components/OperationPicker";
 import { editors } from "@/components/opEditors/registry";
 import { getOperationModule, type Operation } from "@/src/operations";
 import type { OperationType } from "@/src/store/operations";
-import type { JSONObject, JSONValue } from "@/src/types/json";
+import type { JSONValue } from "@/src/types/json";
 import type { PathIndex } from "@/src/utils/pathSuggest";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import SortableNestedList from "./nested/SortableNestedList";
 import type { RenderNestedContent } from "./nested/types";
-import { mergeConfig } from "./config";
+import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
 
 type Props = {
   op: Operation;
   pathIndex: PathIndex;
-  onUpdate: (patch: Record<string, unknown>) => void;
+  onUpdate: (patch: ConfigPatch) => void;
   renderNestedContent: RenderNestedContent;
 };
 
 export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedContent }: Props) {
   const [thenOpen, setThenOpen] = useState(true);
   const [elseOpen, setElseOpen] = useState(true);
-  const nestedThen: Operation[] = ((op.config as Record<string, unknown>)?.then as Operation[]) ?? [];
-  const nestedElse: Operation[] = ((op.config as Record<string, unknown>)?.else as Operation[]) ?? [];
+  const configObj = asConfigObject(op.config);
+  const nestedThen: Operation[] = (Array.isArray(configObj.then) ? (configObj.then as Operation[]) : []);
+  const nestedElse: Operation[] = (Array.isArray(configObj.else) ? (configObj.else as Operation[]) : []);
   const [thenPickerOpen, setThenPickerOpen] = useState(false);
   const [elsePickerOpen, setElsePickerOpen] = useState(false);
   const [lastAddedThenId, setLastAddedThenId] = useState<string | null>(null);
@@ -29,10 +30,10 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
 
   const addNested = (block: "then" | "else", type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
     const key = block === "then" ? "then" : "else";
-    const base = op.config as Record<string, unknown>;
-    const arr = (base?.[key] as Operation[]) ?? [];
+    const base = asConfigObject(op.config);
+    const arr = (Array.isArray(base[key]) ? (base[key] as Operation[]) : []);
     onUpdate({ [key]: [...arr, newOp] });
     if (block === "then") {
       setThenOpen(true);
@@ -46,19 +47,19 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
   };
 
   const updateNested = (block: "then" | "else", id: string, patch: Partial<Operation>) => {
-    const base = op.config as Record<string, unknown>;
-    const arr: Operation[] = (base?.[block] as Operation[]) ?? [];
+    const base = asConfigObject(op.config);
+    const arr: Operation[] = (Array.isArray(base[block]) ? (base[block] as Operation[]) : []);
     const next = arr.map((n) => {
       if (n.id !== id) return n;
-      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config)) ? (patch.config as Record<string, unknown>) : {};
+      const patchCfg = asConfigObject(patch.config);
       return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
     });
     onUpdate({ [block]: next });
   };
 
   const deleteNested = (block: "then" | "else", id: string) => {
-    const base = op.config as Record<string, unknown>;
-    const arr: Operation[] = (base?.[block] as Operation[]) ?? [];
+    const base = asConfigObject(op.config);
+    const arr: Operation[] = (Array.isArray(base[block]) ? (base[block] as Operation[]) : []);
     onUpdate({ [block]: arr.filter((n) => n.id !== id) });
   };
 
@@ -68,7 +69,7 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
         const t = op.type as keyof typeof editors;
         const Editor = editors[t];
         return Editor ? (
-          <Editor config={((op.config && typeof op.config === "object" && !Array.isArray(op.config)) ? (op.config as Record<string, unknown>) : {})} onChange={(patch: Record<string, unknown>) => onUpdate(patch)} pathIndex={pathIndex} />
+          <Editor config={asConfigObject(op.config)} onChange={(patch: ConfigPatch) => onUpdate(patch)} pathIndex={pathIndex} />
         ) : null;
       })()}
 

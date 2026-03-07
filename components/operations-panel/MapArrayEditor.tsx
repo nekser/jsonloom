@@ -6,7 +6,7 @@ import type { OperationType, State } from "@/src/store/operations";
 import { useOpsStore } from "@/src/store/operations";
 import { getOperationModule, type Operation } from "@/src/operations";
 import { getByPath } from "@/src/operations/utils";
-import type { JSONObject, JSONValue } from "@/src/types/json";
+import type { JSONValue } from "@/src/types/json";
 import type { PathIndex } from "@/src/utils/pathSuggest";
 import { buildPathIndex, suggestPathTokens } from "@/src/utils/pathSuggest";
 import { nanoid } from "nanoid";
@@ -14,12 +14,12 @@ import OperationPicker from "@/components/OperationPicker";
 import AutocompleteInput from "@/components/AutocompleteInput";
 import SortableNestedList from "./nested/SortableNestedList";
 import type { RenderNestedContent } from "./nested/types";
-import { mergeConfig } from "./config";
+import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
 
 type Props = {
   op: Operation;
   pathIndex: PathIndex;
-  onUpdate: (patch: Record<string, unknown>) => void;
+  onUpdate: (patch: ConfigPatch) => void;
   renderNestedContent: RenderNestedContent;
 };
 
@@ -36,11 +36,12 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
       return null;
     }
   }, [sourceText]);
+  const configObj = useMemo(() => asConfigObject(op.config), [op.config]);
 
   const cfgPath = useMemo(() => {
-    const cfg = (op.config as Record<string, unknown>) || {};
+    const cfg = configObj;
     return typeof cfg.path === "string" ? cfg.path : "";
-  }, [op.config]);
+  }, [configObj]);
 
   const sampleIndex: PathIndex = useMemo(() => {
     if (!sourceObj) return pathIndex;
@@ -53,11 +54,11 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
     return pathIndex;
   }, [sourceObj, pathIndex, cfgPath]);
 
-  const nestedOps: Operation[] = ((op.config as Record<string, unknown>)?.operations as Operation[]) ?? [];
+  const nestedOps: Operation[] = (Array.isArray(configObj.operations) ? (configObj.operations as Operation[]) : []);
 
   const onAddNested = (type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? ({} as unknown as JSONObject) };
+    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
     onUpdate({ operations: [...nestedOps, newOp] });
     setPickerOpen(false);
     setLastAddedId(newOp.id);
@@ -66,7 +67,7 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
   const onUpdateNested = (id: string, patch: Partial<Operation>) => {
     const next = nestedOps.map((n) => {
       if (n.id !== id) return n;
-      const patchCfg = (patch.config && typeof patch.config === "object" && !Array.isArray(patch.config)) ? (patch.config as Record<string, unknown>) : {};
+      const patchCfg = asConfigObject(patch.config);
       return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
     });
     onUpdate({ operations: next });
@@ -82,7 +83,7 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
         <AutocompleteInput
           className="w-full"
           placeholder="path e.g. items"
-          value={typeof (op.config as Record<string, unknown>)?.path === "string" ? ((op.config as Record<string, unknown>).path as string) : ""}
+          value={typeof configObj.path === "string" ? (configObj.path as string) : ""}
           getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
           onChange={(v) => onUpdate({ path: v })}
         />
@@ -93,7 +94,7 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
         </Button>
         <div className="flex items-center gap-2 text-xs">
           <span>onError</span>
-          <Select value={(op.config as Record<string, unknown>)?.onError as string ?? "propagate"} onValueChange={(v) => onUpdate({ onError: v })}>
+          <Select value={(configObj.onError as string) ?? "propagate"} onValueChange={(v) => onUpdate({ onError: v })}>
             <SelectTrigger className="h-7 px-2 py-1">
               <SelectValue />
             </SelectTrigger>

@@ -24,7 +24,7 @@ export default function WriteResultToField({ config, pathIndex, onConfigChange }
           getSuggestions={(q) => suggestPathTokens(pathIndex, q)}
           onChange={(next) => {
             const merged = mergeConfig(config, { writeResultTo: next.trim() === "" ? undefined : next });
-            onConfigChange(merged as unknown as JSONValue);
+            onConfigChange(merged);
           }}
         />
         {value ? (
@@ -32,7 +32,7 @@ export default function WriteResultToField({ config, pathIndex, onConfigChange }
             type="button"
             aria-label="Clear writeResultTo"
             className="absolute right-1 top-1.5 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 text-xs px-1"
-            onClick={() => onConfigChange(clearConfigKey(config, "writeResultTo") as unknown as JSONValue)}
+            onClick={() => onConfigChange(clearConfigKey(config, "writeResultTo"))}
           >
             x
           </button>

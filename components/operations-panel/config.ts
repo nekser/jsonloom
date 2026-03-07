@@ -1,24 +1,17 @@
-import type { JSONObject } from "@/src/types/json";
+import { asConfigObject, mergeConfigPatch, type ConfigPatch } from "@/src/operations/configPatch";
 
-function asRecord(value: unknown): Record<string, unknown> {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
-  }
-  return {};
+export type { ConfigPatch } from "@/src/operations/configPatch";
+export { asConfigObject };
+
+export function mergeConfig(baseConfig: unknown, patch: ConfigPatch) {
+  return mergeConfigPatch(baseConfig, patch);
 }
 
-export function mergeConfig(baseConfig: unknown, patch: Record<string, unknown>): JSONObject {
-  const base = asRecord(baseConfig);
-  return { ...base, ...patch } as unknown as JSONObject;
-}
-
-export function clearConfigKey(baseConfig: unknown, key: string): JSONObject {
-  const next = { ...asRecord(baseConfig) };
-  next[key] = undefined;
-  return next as unknown as JSONObject;
+export function clearConfigKey(baseConfig: unknown, key: string) {
+  return mergeConfigPatch(baseConfig, { [key]: undefined });
 }
 
 export function getStringConfig(baseConfig: unknown, key: string): string {
-  const value = asRecord(baseConfig)[key];
+  const value = asConfigObject(baseConfig)[key];
   return typeof value === "string" ? value : "";
 }
