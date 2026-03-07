@@ -3,7 +3,8 @@
 import clsx from "clsx";
 import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import OperationPicker from "@/components/OperationPicker";
 import OperationsToolbar from "@/components/OperationsToolbar";
@@ -11,16 +12,32 @@ import { useIsMobile } from "@/components/hooks/useMediaQuery";
 import { useOpsStore, type State } from "@/src/store/operations";
 import OperationCard from "@/components/operations-panel/OperationCard";
 import { useCatalogOpenListener, useHydratePipelineFromUrl } from "@/components/operations-panel/hooks";
+import { buildPathIndex, type PathIndex } from "@/src/utils/pathSuggest";
+import type { JSONValue } from "@/src/types/json";
 
 export function OperationsPanel() {
   const isMobile = useIsMobile();
-  const ops = useOpsStore((s: State) => s.operations);
-  const reorder = useOpsStore((s: State) => s.reorderOperations);
-  const setOperations = useOpsStore((s: State) => s.setOperations);
+  const { ops, reorder, setOperations, sourceText } = useOpsStore(
+    useShallow((s: State) => ({
+      ops: s.operations,
+      reorder: s.reorderOperations,
+      setOperations: s.setOperations,
+      sourceText: s.sourceText,
+    }))
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
 
   useHydratePipelineFromUrl(setOperations);
   useCatalogOpenListener(() => setPickerOpen(true));
+
+  const sourceObj = useMemo(() => {
+    try {
+      return JSON.parse(sourceText) as JSONValue;
+    } catch {
+      return null;
+    }
+  }, [sourceText]);
+  const sourceFallbackIndex: PathIndex = useMemo(() => buildPathIndex(sourceObj), [sourceObj]);
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
@@ -40,7 +57,15 @@ export function OperationsPanel() {
           <DndContext onDragEnd={onDragEnd}>
             <SortableContext items={ops.map((o: { id: string }) => o.id)} strategy={verticalListSortingStrategy}>
               {ops.map((op: { id: string }, idx: number) => (
-                <OperationCard key={op.id} id={op.id} index={idx} />
+                <OperationCard
+                  key={op.id}
+                  id={op.id}
+                  index={idx}
+                  opCount={ops.length}
+                  prevOpId={idx > 0 ? ops[idx - 1]?.id : undefined}
+                  sourceObj={sourceObj}
+                  sourceFallbackIndex={sourceFallbackIndex}
+                />
               ))}
             </SortableContext>
           </DndContext>
