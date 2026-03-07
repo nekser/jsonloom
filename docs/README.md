@@ -6,6 +6,8 @@
 - [Operations](./operations.md)
 - [Testing](./testing.md)
 - [React/Next Audit](./react-next-audit.md)
+- [Agent Workflow](./agent-workflow.md)
+- [Plan TODO](./plan-todo.md)
 
 ## Intended Audience
 - Human contributors onboarding to this codebase
