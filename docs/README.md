@@ -5,6 +5,7 @@
 - [Architecture](./architecture.md)
 - [Operations](./operations.md)
 - [Testing](./testing.md)
+- [Performance](./performance.md)
 - [React/Next Audit](./react-next-audit.md)
 - [Agent Workflow](./agent-workflow.md)
 - [Plan TODO](./plan-todo.md)

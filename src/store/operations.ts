@@ -4,8 +4,9 @@ import { getOperationModule, Operation, OperationType, ValidationError } from ".
 import type { JSONValue } from "../types/json";
 import { isJSONObject } from "../types/json";
 import { type PathIndex } from "../utils/pathSuggest";
-import { runPipelineOperations } from "../operations/pipelineRunner";
+import { executePipelineFromSource } from "../operations/pipelineExecution";
 import { applyOperationPatch } from "../operations/configPatch";
+import { executePipelinePreferWorker } from "../operations/worker/client";
 
 export type State = {
   sourceText: string;
@@ -14,6 +15,13 @@ export type State = {
   operations: Operation[];
   resultText: string;
   pipelineError?: ValidationError | undefined;
+  pipelinePerf: {
+    lastRunMs: number;
+    avgRunMs: number;
+    runs: number;
+    slow: boolean;
+    mode: "main" | "worker";
+  };
   opIndexes: PathIndex[]; // index of JSON state before each operation
   intermediate?: Record<string, string>; // opId -> JSON string after this op
   // history (operations only)
@@ -45,11 +53,18 @@ const safeStringify = (v: JSONValue): string => {
   }
 };
 
+const SOURCE_DEBOUNCE_MS = 180;
+const SLOW_RUN_MS = 120;
+const EXECUTION_MODE: "main" | "worker" = process.env.NEXT_PUBLIC_PIPELINE_EXECUTION_MODE === "worker" ? "worker" : "main";
+let sourceDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let pipelineRunVersion = 0;
+
 export const useOpsStore = create<State>()((set, get) => ({
   sourceText: "{\n  \"items\": [1, 2, 3],\n  \"user\": { \"id\": 1, \"name\": \"Alice\" }\n}",
   sourceFormat: "json",
   operations: [],
   resultText: "",
+  pipelinePerf: { lastRunMs: 0, avgRunMs: 0, runs: 0, slow: false, mode: "main" },
   opIndexes: [],
   past: [],
   future: [],
@@ -63,7 +78,11 @@ export const useOpsStore = create<State>()((set, get) => ({
     const fmt = get().sourceFormat;
     const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
     set({ sourceText: text, sourceError: parsed.error });
-    get().runPipeline();
+    if (sourceDebounceTimer) clearTimeout(sourceDebounceTimer);
+    sourceDebounceTimer = setTimeout(() => {
+      void get().runPipeline();
+      sourceDebounceTimer = null;
+    }, SOURCE_DEBOUNCE_MS);
   },
   addOperation: (type: OperationType, config: JSONValue = {} as JSONValue) => {
     const mod = getOperationModule(type);
@@ -75,11 +94,11 @@ export const useOpsStore = create<State>()((set, get) => ({
       future: [],
       operations: [...s.operations, { id: nanoid(), type, config: initial }],
     }));
-    get().runPipeline();
+    void get().runPipeline();
   },
   setOperations: (ops: Operation[]) => {
     set((s) => ({ past: [...s.past, s.operations], future: [], operations: ops }));
-    get().runPipeline();
+    void get().runPipeline();
   },
   updateOperation: (id: string, patch: Partial<Operation>) => {
     set((s) => ({
@@ -87,7 +106,7 @@ export const useOpsStore = create<State>()((set, get) => ({
       future: [],
       operations: s.operations.map((op) => (op.id !== id ? op : applyOperationPatch(op, patch))),
     }));
-    get().runPipeline();
+    void get().runPipeline();
   },
   deleteOperation: (id: string) => {
   set((s) => ({
@@ -95,7 +114,7 @@ export const useOpsStore = create<State>()((set, get) => ({
       future: [],
       operations: s.operations.filter((op) => op.id !== id),
     }));
-    get().runPipeline();
+    void get().runPipeline();
   },
   reorderOperations: (from: number, to: number) => {
   set((s) => {
@@ -104,21 +123,45 @@ export const useOpsStore = create<State>()((set, get) => ({
       arr.splice(to, 0, moved);
       return { past: [...s.past, s.operations], future: [], operations: arr } as Partial<State> as State;
     });
-    get().runPipeline();
+    void get().runPipeline();
   },
-  runPipeline: () => {
-  const { sourceText, sourceFormat, operations } = get();
-  const parsed = sourceFormat === "json" ? importJSON(sourceText) : sourceFormat === "yaml" ? importYAML(sourceText) : importCSV(sourceText);
-  if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [], intermediate: {} });
-  const res = runPipelineOperations(parsed.value as JSONValue, operations);
+  runPipeline: async () => {
+  const { sourceText, sourceFormat, operations, pipelinePerf } = get();
+  const runVersion = ++pipelineRunVersion;
+  const started = Date.now();
+
+  const exec = EXECUTION_MODE === "worker"
+    ? await executePipelinePreferWorker({ sourceText, sourceFormat, operations })
+    : { result: executePipelineFromSource({ sourceText, sourceFormat, operations }), mode: "main" as const };
+
+  if (runVersion !== pipelineRunVersion) return;
+
+  const durationMs = Date.now() - started;
+  const runs = pipelinePerf.runs + 1;
+  const avgRunMs = Math.round(((pipelinePerf.avgRunMs * pipelinePerf.runs) + durationMs) / runs);
+  const nextPerf = {
+    lastRunMs: durationMs,
+    avgRunMs,
+    runs,
+    slow: durationMs >= SLOW_RUN_MS,
+    mode: exec.mode,
+  } as const;
+
+  if (!exec.result.ok) {
+    set({ resultText: "", pipelineError: { message: exec.result.parseError }, opIndexes: [], intermediate: {}, pipelinePerf: nextPerf });
+    return;
+  }
+
+  const res = exec.result.run;
   if (res.error) {
     const interText: Record<string, string> = {};
     for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v as JSONValue);
-    return set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes, intermediate: interText });
+    set({ resultText: "", pipelineError: res.error, opIndexes: res.indexes, intermediate: interText, pipelinePerf: nextPerf });
+    return;
   }
   const interText: Record<string, string> = {};
   for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v as JSONValue);
-  set({ resultText: safeStringify((res.output ?? null) as JSONValue), pipelineError: undefined, opIndexes: res.indexes, intermediate: interText });
+  set({ resultText: safeStringify((res.output ?? null) as JSONValue), pipelineError: undefined, opIndexes: res.indexes, intermediate: interText, pipelinePerf: nextPerf });
   },
   clearAll: () =>
     set({
@@ -127,6 +170,7 @@ export const useOpsStore = create<State>()((set, get) => ({
       operations: [],
       resultText: "",
       pipelineError: undefined,
+      pipelinePerf: { lastRunMs: 0, avgRunMs: 0, runs: 0, slow: false, mode: "main" },
       past: [],
       future: [],
     }),

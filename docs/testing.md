@@ -12,6 +12,12 @@
 - Combined: `pnpm test`
 - Coverage: `pnpm test:coverage`
 
+## Performance Execution Mode
+- Default: main-thread execution.
+- Optional worker prototype:
+  - `NEXT_PUBLIC_PIPELINE_EXECUTION_MODE=worker`
+  - App runs a non-blocking prototype mode in browser and falls back safely to main-thread mode outside browser runtime.
+
 ## Coverage Strategy
 Risk-based baseline:
 - Prioritize shared runtime utilities and complex operations.

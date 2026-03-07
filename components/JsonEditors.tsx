@@ -46,6 +46,7 @@ export function SourceEditor() {
 export function ResultEditor() {
   const resultText = useOpsStore((s: State) => s.resultText);
   const pipelineError = useOpsStore((s: State) => s.pipelineError);
+  const pipelinePerf = useOpsStore((s: State) => s.pipelinePerf);
   const theme = useEditorTheme();
 
   return (
@@ -53,6 +54,9 @@ export function ResultEditor() {
       <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Result</div>
         <div className="flex items-center gap-3">
+          <div className={`text-xs ${pipelinePerf.slow ? "text-amber-600 dark:text-amber-400" : "text-neutral-500"}`}>
+            {pipelinePerf.lastRunMs}ms ({pipelinePerf.mode})
+          </div>
           <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
           <ResultPanelToolbar />
         </div>
