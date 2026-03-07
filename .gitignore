@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 .coverage-e2e
 210.png
+x86
+public/docs/*-live.png
+public/docs/*-anchor-*.png
+public/docs/*visual-tour*.png
