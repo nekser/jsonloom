@@ -60,14 +60,6 @@ This document breaks down the identified improvements into actionable tasks. We 
 - Integrate `test:ui:ci` into `pnpm check` once test runtime is stable.
 - Document local Playwright setup and troubleshooting in `docs/testing.md`.
 
-## 9) Resolve header links and route consistency
-- Audit current nav links and expected route ownership.
-- Decide: implement `/docs`, `/about`, `/pricing`, `/blog` pages or remove placeholders.
-- If implementing, scaffold minimal pages with clear status labels.
-- If removing, adjust header menus and external links accordingly.
-- Add route-level tests/smoke checks for header navigation.
-- Update docs and metadata for final nav structure.
-
 ## Execution Notes
 - Execute sections sequentially to reduce risk.
 - Keep each section as a small PR-sized change set.
@@ -76,6 +68,7 @@ This document breaks down the identified improvements into actionable tasks. We 
 ## Completed
 - [x] 1) Split `NestedPipelineEditors` into smaller modules.
 - [x] 2) Optimize Zustand selector usage and re-renders.
+- [x] 9) Resolve header links and route consistency.
 - [x] 4) Reduce `unknown` casts with stronger runtime typings.
 - [x] 10) Add performance guardrails for large JSON payloads.
 - [x] 12) Add `jq` code generator.
