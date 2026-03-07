@@ -17,7 +17,11 @@ All execution is client-side. No network calls or persistence/auth.
 
 1. Install deps: `pnpm install`
 2. Run dev server: `pnpm dev`
-3. Run tests: `pnpm test` (unit) / `pnpm test:e2e` (e2e pipelines)
+3. Run tests:
+   - `pnpm test:unit` (runtime/unit)
+   - `pnpm test:integration` (pipeline integration suites)
+   - `pnpm test` (all tests)
+4. Run project quality gate: `pnpm check`
 
 ### Operations metadata export
 
@@ -100,8 +104,10 @@ The test/evaluation runner now resolves `${}` expressions against the evolving p
 
 ## Testing
 
-- Unit / lightweight: `pnpm test`
-- End-to-end pipeline suites: `pnpm test:e2e`
+- Unit/runtime suites: `pnpm test:unit`
+- Integration pipeline suites: `pnpm test:integration`
+- Combined run: `pnpm test`
+- Coverage report: `pnpm test:coverage`
 - Example combination tests show canonical patterns for capturing intermediate results using `_internal` paths.
 
 ---

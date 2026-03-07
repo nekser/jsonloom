@@ -2,9 +2,8 @@ import { create } from "zustand";
 import { nanoid } from "nanoid";
 import { getOperationModule, Operation, OperationType, ValidationError } from "../operations/index";
 import type { JSONValue } from "../types/json";
-import { buildPathIndex, type PathIndex } from "../utils/pathSuggest";
-import { resetVarContext } from "../operations/varContext";
-import { resolveConfig } from "../operations/configResolver";
+import { type PathIndex } from "../utils/pathSuggest";
+import { runPipelineOperations } from "../operations/pipelineRunner";
 
 export type State = {
   sourceText: string;
@@ -45,44 +44,6 @@ const safeStringify = (v: JSONValue): string => {
 };
 
 const isObject = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
-
-function runAll(input: JSONValue, ops: Operation[]): { output?: JSONValue; error?: ValidationError; indexes: PathIndex[]; inter: Record<string, JSONValue> } {
-  try {
-  // Reset variables for this execution
-  resetVarContext();
-  let cur = input;
-    const indexes: PathIndex[] = [];
-    const inter: Record<string, JSONValue> = {};
-    for (const op of ops) {
-      // Index the state BEFORE applying this op
-      indexes.push(buildPathIndex(cur));
-  // Skip disabled operations but still record intermediate state (unchanged)
-  if (op.enabled === false) {
-    inter[op.id] = cur;
-    continue;
-  }
-  const mod = getOperationModule(op.type);
-  if (!mod) return { error: { opId: op.id, message: `Operation type '${op.type}' is not registered` }, indexes, inter };
-  // Resolve variables within config against the root input.
-  // Special-case MapArray: do NOT resolve nested operations here; MapArray will resolve them per element with the correct current scope.
-  let resolvedCfg: unknown;
-  if (op.type === "MapArray" && op.config && typeof op.config === "object" && !Array.isArray(op.config)) {
-    const { operations, ...rest } = op.config as Record<string, unknown>;
-    const resolvedRest = resolveConfig(rest as unknown, { root: input });
-    resolvedCfg = { ...(resolvedRest as Record<string, unknown>), operations } as unknown;
-  } else {
-    resolvedCfg = resolveConfig(op.config as unknown, { root: input });
-  }
-  const err = mod.validate(resolvedCfg as unknown, cur);
-  if (err) return { error: { opId: op.id, message: err }, indexes, inter };
-  cur = mod.apply(cur, resolvedCfg as unknown);
-      inter[op.id] = cur;
-    }
-    return { output: cur, indexes, inter };
-  } catch (e: unknown) {
-    return { error: { message: (e as { message?: string })?.message ?? "Pipeline failed" }, indexes: [], inter: {} as Record<string, JSONValue> };
-  }
-}
 
 export const useOpsStore = create<State>()((set, get) => ({
   sourceText: "{\n  \"items\": [1, 2, 3],\n  \"user\": { \"id\": 1, \"name\": \"Alice\" }\n}",
@@ -163,7 +124,7 @@ export const useOpsStore = create<State>()((set, get) => ({
   const { sourceText, sourceFormat, operations } = get();
   const parsed = sourceFormat === "json" ? importJSON(sourceText) : sourceFormat === "yaml" ? importYAML(sourceText) : importCSV(sourceText);
   if (parsed.error) return set({ resultText: "", pipelineError: { message: parsed.error }, opIndexes: [], intermediate: {} });
-  const res = runAll(parsed.value as JSONValue, operations);
+  const res = runPipelineOperations(parsed.value as JSONValue, operations);
   if (res.error) {
     const interText: Record<string, string> = {};
     for (const [id, v] of Object.entries(res.inter)) interText[id] = safeStringify(v as JSONValue);

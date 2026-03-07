@@ -1,56 +1,32 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import { useOpsStore, State } from "../src/store/operations";
-import SourcePanelToolbar from "./SourcePanelToolbar";
-import ResultPanelToolbar from "./ResultPanelToolbar";
+import SourcePanelToolbar from "@/components/SourcePanelToolbar";
+import ResultPanelToolbar from "@/components/ResultPanelToolbar";
+import { useOpsStore, type State } from "@/src/store/operations";
+import { useEditorTheme } from "@/components/hooks/useEditorTheme";
 
 export function SourceEditor() {
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const sourceError = useOpsStore((s: State) => s.sourceError);
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document === "undefined") return "light";
-    const attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "dark" || attr === "light") return attr;
-    // fallback to class or system preference
-    if (document.documentElement.classList.contains("dark")) return "dark";
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
-    return "light";
-  });
+  const theme = useEditorTheme();
 
   useEffect(() => {
-    // run once to compute initial result
     useOpsStore.getState().runPipeline();
-  }, []);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    const update = () => {
-      const t = root.getAttribute("data-theme");
-      if (t === "dark" || t === "light") {
-        setTheme(t);
-        return;
-      }
-      setTheme(root.classList.contains("dark") ? "dark" : "light");
-    };
-    update();
-    const mo = new MutationObserver(update);
-    mo.observe(root, { attributes: true, attributeFilter: ["class", "data-theme"] });
-    return () => mo.disconnect();
   }, []);
 
   return (
     <div className="flex flex-col h-full min-h-0">
-  <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
-      <div className="font-medium">Source</div>
+      <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
+        <div className="font-medium">Source</div>
         <div className="flex items-center gap-3">
           <div className="text-xs text-neutral-500">{new Blob([sourceText]).size} bytes</div>
           <SourcePanelToolbar />
         </div>
       </div>
-  <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0">
         <Editor
           height="100%"
           defaultLanguage="json"
@@ -61,9 +37,7 @@ export function SourceEditor() {
         />
       </div>
       {sourceError && (
-        <div className="p-2 text-xs text-red-600 border-t border-red-300 bg-red-50 dark:bg-red-950 dark:text-red-300">
-          {sourceError}
-        </div>
+        <div className="p-2 text-xs text-red-600 border-t border-red-300 bg-red-50 dark:bg-red-950 dark:text-red-300">{sourceError}</div>
       )}
     </div>
   );
@@ -72,41 +46,18 @@ export function SourceEditor() {
 export function ResultEditor() {
   const resultText = useOpsStore((s: State) => s.resultText);
   const pipelineError = useOpsStore((s: State) => s.pipelineError);
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
-    if (typeof document === "undefined") return "light";
-    const attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "dark" || attr === "light") return attr;
-    if (document.documentElement.classList.contains("dark")) return "dark";
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
-    return "light";
-  });
+  const theme = useEditorTheme();
 
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    const update = () => {
-      const t = root.getAttribute("data-theme");
-      if (t === "dark" || t === "light") {
-        setTheme(t);
-        return;
-      }
-      setTheme(root.classList.contains("dark") ? "dark" : "light");
-    };
-    update();
-    const mo = new MutationObserver(update);
-    mo.observe(root, { attributes: true, attributeFilter: ["class", "data-theme"] });
-    return () => mo.disconnect();
-  }, []);
   return (
     <div className="flex flex-col h-full min-h-0">
-  <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
+      <div className="sticky top-0 z-10 bg-background flex h-12 items-center justify-between px-2 border-b border-neutral-200 dark:border-neutral-800">
         <div className="font-medium">Result</div>
         <div className="flex items-center gap-3">
           <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
           <ResultPanelToolbar />
         </div>
       </div>
-  <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0">
         <Editor
           height="100%"
           defaultLanguage="json"
@@ -116,9 +67,7 @@ export function ResultEditor() {
         />
       </div>
       {pipelineError && (
-        <div className="p-2 text-xs text-red-600 border-t border-red-300 bg-red-50 dark:bg-red-950 dark:text-red-300">
-          {pipelineError.message}
-        </div>
+        <div className="p-2 text-xs text-red-600 border-t border-red-300 bg-red-50 dark:bg-red-950 dark:text-red-300">{pipelineError.message}</div>
       )}
     </div>
   );
