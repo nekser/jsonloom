@@ -25,9 +25,10 @@ export function OperationsPanel() {
       sourceText: s.sourceText,
     }))
   );
+  const setSourceText = useOpsStore((s: State) => s.setSourceText);
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  useHydratePipelineFromUrl(setOperations);
+  useHydratePipelineFromUrl(setOperations, setSourceText);
   useCatalogOpenListener(() => setPickerOpen(true));
 
   const sourceObj = useMemo(() => {
