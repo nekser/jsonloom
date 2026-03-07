@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import ChunkErrorHandler from "@/components/ChunkErrorHandler";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
+          <ChunkErrorHandler />
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

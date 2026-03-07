@@ -210,4 +210,8 @@ html.dark .tab-btn--active {
   .docs-flow figure {
     margin-top: 1rem;
   }
+
+  .docs-flow [id] {
+    scroll-margin-top: 5.5rem;
+  }
 }
