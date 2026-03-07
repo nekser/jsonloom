@@ -1,6 +1,6 @@
 import type { JSONValue } from "../../types/json";
 
-export type Language = "javascript" | "typescript" | "python" | "php" | "go";
+export type Language = "javascript" | "typescript" | "python" | "php" | "go" | "jq";
 
 export function mapOperator(lang: Language, op: string): string {
   const m: Record<string, Record<string, string>> = {
@@ -9,6 +9,7 @@ export function mapOperator(lang: Language, op: string): string {
     python: { eq: "==", neq: "!=", gt: ">", lt: "<", gte: ">=", lte: "<=", contains: "in", in: "in" },
     php: { eq: "===", neq: "!==", gt: ">", lt: "<", gte: ">=", lte: "<=", contains: "in_array", in: "in_array" },
     go: { eq: "==", neq: "!=", gt: ">", lt: "<", gte: ">=", lte: "<=", contains: "contains", in: "contains" },
+    jq: { eq: "==", neq: "!=", gt: ">", lt: "<", gte: ">=", lte: "<=", contains: "contains", in: "in" },
   };
   return m[lang][op] ?? op;
 }
@@ -17,6 +18,7 @@ export function literal(lang: Language, v: JSONValue): string {
   if (lang === "javascript" || lang === "typescript") return JSON.stringify(v, null, 2);
   if (lang === "python") return toPythonLiteral(v);
   if (lang === "php") return toPhpLiteral(v);
+  if (lang === "jq") return JSON.stringify(v);
   // go
   return toGoLiteral(v);
 }

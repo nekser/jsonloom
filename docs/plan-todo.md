@@ -2,21 +2,6 @@
 
 This document breaks down the identified improvements into actionable tasks. We can execute these sections one by one.
 
-## 1) Split `NestedPipelineEditors` into smaller modules
-- Define target module boundaries: `MapArrayEditor`, `IfEditor`, `SwitchEditor`, shared nested-list primitives.
-- Extract shared DnD/sortable list UI into reusable components.
-- Move nested operation mutation helpers into a dedicated utility module.
-- Keep behavior parity by snapshot-checking current editor interactions.
-- Add/update tests for extracted component behavior.
-- Remove dead code and finalize import structure.
-
-## 2) Optimize Zustand selector usage and re-renders
-- Audit `OperationCard` subscriptions and identify high-churn selectors.
-- Introduce `shallow`/memoized selectors where appropriate.
-- Split derived state computations from render body into hooks/memos.
-- Measure render churn before/after with React DevTools profiler.
-- Add regression checks for drag/edit responsiveness.
-
 ## 3) Add component tests for operations panel interactions
 - Choose test stack for UI components (Jest + RTL baseline).
 - Add tests for add, delete, enable/disable, reorder (desktop).
@@ -29,14 +14,6 @@ This document breaks down the identified improvements into actionable tasks. We 
   - reorder operations and verify output changes;
   - test import/export dialogs and pipeline share URL hydration;
   - validate mobile viewport operation actions.
-
-## 4) Reduce `unknown` casts with stronger runtime typings
-- Inventory high-cast files (`store`, operation editors, config merge helpers).
-- Introduce typed operation config patch helpers.
-- Add operation-type-to-config mapping utilities.
-- Refactor config merge/update callsites to typed APIs.
-- Add compile-time guards and unit tests for config patch behavior.
-- Remove redundant unsafe casts after migration.
 
 ## 5) Expand pipeline runner orchestration tests
 - Add tests for unknown operation type handling.
@@ -91,15 +68,14 @@ This document breaks down the identified improvements into actionable tasks. We 
 - Add route-level tests/smoke checks for header navigation.
 - Update docs and metadata for final nav structure.
 
-## 10) Add performance guardrails for large JSON payloads
-- Add debounce/throttle to expensive recomputation triggers.
-- Measure pipeline run duration and editor responsiveness on large inputs.
-- Prototype worker-based execution for pipeline runtime.
-- Add feature flag for worker mode and fallback behavior.
-- Add tests for functional parity between main-thread and worker execution.
-- Document performance limits and recommended usage patterns.
-
 ## Execution Notes
 - Execute sections sequentially to reduce risk.
 - Keep each section as a small PR-sized change set.
 - Run `pnpm check` after each section.
+
+## Completed
+- [x] 1) Split `NestedPipelineEditors` into smaller modules.
+- [x] 2) Optimize Zustand selector usage and re-renders.
+- [x] 4) Reduce `unknown` casts with stronger runtime typings.
+- [x] 10) Add performance guardrails for large JSON payloads.
+- [x] 12) Add `jq` code generator.

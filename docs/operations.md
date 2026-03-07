@@ -37,3 +37,10 @@ Most operations support optional `writeResultTo`.
 3. Add editor component mapping if UI-editable.
 4. Add unit tests in `tests/unit/` and integration tests in `tests/e2e/operations/`.
 5. Run `pnpm run export:ops` if metadata is affected.
+
+## Codegen Notes (`jq`)
+- The code generator includes a `jq` target with partial operation coverage.
+- Supported baseline ops: `ExtractPath`, `SetPath`, `DeletePath`, `MapArray`, `FilterArray`, `SortArray`, `SliceArray`, `CountArray`, `StringReplace`, `TrimStrings`, `Add`, `Subtract`, `Multiply`, `Divide`.
+- Unsupported ops are rendered as explicit jq TODO comments with serialized config to keep output deterministic.
+- Generated jq output is a filter pipeline only; it does not embed input JSON.
+- `writeResultTo` semantics are not auto-translated to jq yet.
