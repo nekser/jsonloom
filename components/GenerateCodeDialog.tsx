@@ -58,6 +58,8 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
         ? "py"
         : lang === "php"
         ? "php"
+        : lang === "jq"
+        ? "jq"
         : "go";
     downloadText(`pipeline-${ts}.${ext}`, code, "text/plain");
   };
@@ -76,6 +78,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
               <TabsTrigger value="python">Python</TabsTrigger>
               <TabsTrigger value="php">PHP</TabsTrigger>
               <TabsTrigger value="go">Go</TabsTrigger>
+              <TabsTrigger value="jq">jq</TabsTrigger>
             </TabsList>
           </Tabs>
           <div className="flex gap-2">
@@ -100,7 +103,7 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
         <div className="h-[60vh]">
           <Editor
             height="100%"
-            language={lang === "javascript" ? "javascript" : lang === "typescript" ? "typescript" : lang === "python" ? "python" : lang === "php" ? "php" : "go"}
+            language={lang === "javascript" ? "javascript" : lang === "typescript" ? "typescript" : lang === "python" ? "python" : lang === "php" ? "php" : lang === "go" ? "go" : "shell"}
             theme={theme === "dark" ? "vs-dark" : "light"}
             value={code}
             options={{ readOnly: true, minimap: { enabled: false }, wordWrap: "on" }}
