@@ -13,7 +13,7 @@
 
 ## Feature plans
 
-- [API Execution Mode and Integration Surface](./api-execution-mode-and-integration-surface.md)
+- [API Execution Mode and Integration Surface](./features/api-execution-mode-and-integration-surface.md)
 
 ## Intended Audience
 
