@@ -1,5 +1,5 @@
 {
-  "v": 1,
+  "schemaVersion": 1,
   "ops": [
     { "id": "op-parse-meta-generatedAt", "type": "ParseDate", "config": { "path": "meta.generatedAt", "format": "yyyy-LL-dd'T'HH:mm:ss'Z'", "timezone": "utc" } },
     { "id": "op-add7d-generatedAt", "type": "DateAdd", "config": { "path": "meta.generatedAt", "amount": 7, "unit": "days" } },

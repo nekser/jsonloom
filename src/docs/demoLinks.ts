@@ -11,7 +11,7 @@ function op(type: OperationType, config: JSONValue): Operation {
 }
 
 export function buildDemoLink(type: OperationType, input: JSONValue, config: JSONValue): string {
-  const pipeline = { v: 1 as const, ops: [op(type, config)] };
+  const pipeline = { schemaVersion: 1 as const, ops: [op(type, config)] };
   const p = PipelineEncoder.encode(pipeline);
   const d = PipelineEncoder.encode(input);
   return `/?pipeline=${p}&data=${d}`;

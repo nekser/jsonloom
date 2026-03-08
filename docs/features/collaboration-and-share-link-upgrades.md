@@ -15,7 +15,7 @@ Additional product direction for this feature:
 
 ### Existing sharing behavior
 - Sharing is currently URL-only and client-side:
-  - pipeline is serialized as `{ v: 1, ops }` in `src/utils/sharing/PipelineSerializer.ts`.
+  - pipeline is serialized as `{ schemaVersion: 1, ops }` in `src/utils/sharing/PipelineSerializer.ts`.
   - payload is compressed using `lz-string` URI encoding in `src/utils/sharing/PipelineEncoder.ts`.
   - URL hydration reads `pipeline` and `data` query params in `components/operations-panel/hooks.ts`.
 - `components/OperationsToolbar.tsx` supports:
@@ -189,7 +189,7 @@ Additional product direction for this feature:
 ## Migration and Compatibility
 - Keep current URL-encoded import/export fully supported.
 - Add “Convert current URL payload to snapshot” action for legacy links.
-- Serialization version remains `v: 1` initially; add server-side schema wrapper for forward migrations.
+- Serialization version remains `schemaVersion: 1` initially; add server-side schema wrapper for forward migrations.
 
 ## Implementation Plan
 

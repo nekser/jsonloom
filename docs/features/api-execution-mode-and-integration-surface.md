@@ -11,13 +11,13 @@ This document elaborates TODO item `P1) API execution mode and integration surfa
 ## Current State Research
 
 ### Pipeline config format that already exists
-- Pipeline shape is serialized as `{ v: 1, ops: Operation[] }` in `src/utils/sharing/PipelineSerializer.ts`.
+- Pipeline shape is serialized as `{ schemaVersion: 1, ops: Operation[] }` in `src/utils/sharing/PipelineSerializer.ts`.
 - Share links store pipeline config in query param `pipeline`.
 - The `pipeline` param is produced by `PipelineEncoder.encode`, which uses `lz-string` URL-safe compression (`compressToEncodedURIComponent`) in `src/utils/sharing/PipelineEncoder.ts`.
 - Import UI already accepts:
   - encoded `pipeline` value,
   - a full URL containing `pipeline`,
-  - JSON (`{ v, ops }` or raw `ops[]`) in `components/OperationsToolbar.tsx`.
+  - JSON (`{ schemaVersion, ops }` or raw `ops[]`) in `components/OperationsToolbar.tsx`.
 
 ### Runtime execution path that can be reused
 - `executePipelineFromSource` (`src/operations/pipelineExecution.ts`) parses source and executes pipeline.
@@ -55,7 +55,7 @@ Current transformation execution is browser-only. This blocks server-to-server a
 - `pipeline`:
   - encoded pipeline string from current share/export flow, or
   - serialized JSON string, or
-  - object `{ "v": 1, "ops": [...] }`, or
+  - object `{ "schemaVersion": 1, "ops": [...] }`, or
   - raw operation array `[...]`.
 - `pipelineEncoding`:
   - `lz-uri` (default, backward-compatible with current share links),
@@ -74,7 +74,7 @@ Current transformation execution is browser-only. This blocks server-to-server a
     ]
   },
   "meta": {
-    "pipelineVersion": 1,
+    "schemaVersion": 1,
     "operationCount": 5,
     "durationMs": 6
   }
@@ -189,7 +189,7 @@ API keys, request logging, and usage limits provide operational control for mult
 ## Testing Strategy
 - Positive cases:
   - valid encoded pipeline + JSON input,
-  - valid raw `{ v, ops }` payload,
+  - valid raw `{ schemaVersion, ops }` payload,
   - nested operation pipelines.
 - Negative cases:
   - invalid encoded token,

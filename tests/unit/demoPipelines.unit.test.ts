@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { executePipelineFromSource } from "@/src/operations/pipelineExecution";
 
-type SerializedPipeline = { v: 1; ops: Array<{ id: string; type: string; config: unknown }> };
+type SerializedPipeline = { schemaVersion: 1; ops: Array<{ id: string; type: string; config: unknown }> };
 
 function loadFixture(relPath: string): string {
   return fs.readFileSync(path.join(process.cwd(), relPath), "utf8");
