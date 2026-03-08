@@ -17,12 +17,27 @@ type Props = {
   renderNestedContent: RenderNestedContent;
 };
 
+function isOperationLike(value: unknown): value is Operation {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.id === "string" && typeof v.type === "string" && "config" in v;
+}
+
+function toOperationArray(value: unknown): Operation[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isOperationLike);
+}
+
+function asJsonValue(value: Operation[]): JSONValue {
+  return value as unknown as JSONValue;
+}
+
 export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedContent }: Props) {
   const [thenOpen, setThenOpen] = useState(true);
   const [elseOpen, setElseOpen] = useState(true);
   const configObj = asConfigObject(op.config);
-  const nestedThen: Operation[] = (Array.isArray(configObj.then) ? (configObj.then as Operation[]) : []);
-  const nestedElse: Operation[] = (Array.isArray(configObj.else) ? (configObj.else as Operation[]) : []);
+  const nestedThen = toOperationArray(configObj.then);
+  const nestedElse = toOperationArray(configObj.else);
   const [thenPickerOpen, setThenPickerOpen] = useState(false);
   const [elsePickerOpen, setElsePickerOpen] = useState(false);
   const [lastAddedThenId, setLastAddedThenId] = useState<string | null>(null);
@@ -33,8 +48,8 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
     const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
     const key = block === "then" ? "then" : "else";
     const base = asConfigObject(op.config);
-    const arr = (Array.isArray(base[key]) ? (base[key] as Operation[]) : []);
-    onUpdate({ [key]: [...arr, newOp] });
+    const arr = toOperationArray(base[key]);
+    onUpdate({ [key]: asJsonValue([...arr, newOp]) });
     if (block === "then") {
       setThenOpen(true);
       setThenPickerOpen(false);
@@ -48,19 +63,19 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
 
   const updateNested = (block: "then" | "else", id: string, patch: Partial<Operation>) => {
     const base = asConfigObject(op.config);
-    const arr: Operation[] = (Array.isArray(base[block]) ? (base[block] as Operation[]) : []);
+    const arr = toOperationArray(base[block]);
     const next = arr.map((n) => {
       if (n.id !== id) return n;
       const patchCfg = asConfigObject(patch.config);
       return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
     });
-    onUpdate({ [block]: next });
+    onUpdate({ [block]: asJsonValue(next) });
   };
 
   const deleteNested = (block: "then" | "else", id: string) => {
     const base = asConfigObject(op.config);
-    const arr: Operation[] = (Array.isArray(base[block]) ? (base[block] as Operation[]) : []);
-    onUpdate({ [block]: arr.filter((n) => n.id !== id) });
+    const arr = toOperationArray(base[block]);
+    onUpdate({ [block]: asJsonValue(arr.filter((n) => n.id !== id)) });
   };
 
   return (
@@ -87,7 +102,7 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
             sampleIndex={pathIndex}
             onUpdate={(id, patch) => updateNested("then", id, patch)}
             onDelete={(id) => deleteNested("then", id)}
-            onReorder={(arr) => onUpdate({ then: arr })}
+            onReorder={(arr) => onUpdate({ then: asJsonValue(arr) })}
             renderContent={renderNestedContent}
             lastAddedId={lastAddedThenId}
           />
@@ -109,7 +124,7 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
             sampleIndex={pathIndex}
             onUpdate={(id, patch) => updateNested("else", id, patch)}
             onDelete={(id) => deleteNested("else", id)}
-            onReorder={(arr) => onUpdate({ else: arr })}
+            onReorder={(arr) => onUpdate({ else: asJsonValue(arr) })}
             renderContent={renderNestedContent}
             lastAddedId={lastAddedElseId}
           />

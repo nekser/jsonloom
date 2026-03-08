@@ -1,8 +1,8 @@
 import Ajv, { type AnySchema, type ErrorObject, type ValidateFunction } from "ajv";
-import generateSchema from "json-schema-generator";
 import type { JSONValue } from "../types/json";
 import type { OperationModule } from "./types";
 import { getByPath } from "./utils";
+import { inferJsonSchema } from "@/src/utils/inferJsonSchema";
 
 export type ValidateJSONConfig = {
   path?: string;
@@ -86,14 +86,7 @@ function apply(input: JSONValue, cfg: ValidateJSONConfig): JSONValue {
   if (cfg.generateSchema) {
     // getByPath may return a single value or an array of matches (wildcards)
     const matches = toArray(target as JSONValue | JSONValue[]);
-    const inferred = matches.map((m) => {
-      // If the match itself is an array (e.g., path points to an array), infer from its items
-      if (Array.isArray(m)) {
-        const itemSchemas = (m as JSONValue[]).map((x) => stripDollarSchema(generateSchema(x as unknown) as AnySchema));
-        return mergeSchemas(itemSchemas);
-      }
-      return stripDollarSchema(generateSchema(m as unknown) as AnySchema);
-    });
+    const inferred = matches.map((m) => stripDollarSchema(inferJsonSchema(m as unknown) as AnySchema));
     const combined = mergeSchemas(inferred);
 
     const { validate, error } = compileSchema(combined);

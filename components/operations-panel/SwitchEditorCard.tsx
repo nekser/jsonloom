@@ -19,29 +19,59 @@ type Props = {
   renderNestedContent: RenderNestedContent;
 };
 
+type SwitchCase = { value: string; ops: Operation[] };
+
+function isOperationLike(value: unknown): value is Operation {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.id === "string" && typeof v.type === "string" && "config" in v;
+}
+
+function toOperationArray(value: unknown): Operation[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isOperationLike);
+}
+
+function toSwitchCases(value: unknown): SwitchCase[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item) => item && typeof item === "object" && !Array.isArray(item))
+    .map((item) => {
+      const c = item as Record<string, unknown>;
+      return {
+        value: typeof c.value === "string" ? c.value : "",
+        ops: toOperationArray(c.ops),
+      };
+    });
+}
+
+function asJsonValue(value: unknown): JSONValue {
+  return value as JSONValue;
+}
+
 export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNestedContent }: Props) {
   const config = asConfigObject(op.config);
-  const cases: Array<{ value: string; ops: Operation[] }> = (config.cases as Array<{ value: string; ops: Operation[] }>) ?? [];
-  const defOps: Operation[] | undefined = (config.default as Operation[]) ?? [];
+  const cases = toSwitchCases(config.cases);
+  const defOps = toOperationArray(config.default);
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [defaultPickerOpen, setDefaultPickerOpen] = useState(false);
   const [lastAddedCaseOpId, setLastAddedCaseOpId] = useState<Record<number, string | null>>({});
   const [lastAddedDefaultOpId, setLastAddedDefaultOpId] = useState<string | null>(null);
 
   const addCase = () => {
-    onUpdate({ cases: [...cases, { value: "", ops: [] }] });
+    onUpdate({ cases: asJsonValue([...cases, { value: "", ops: [] }]) });
   };
 
   const updateCaseValue = (i: number, value: string) => {
     const next = cases.map((c, idx) => (idx === i ? { ...c, value } : c));
-    onUpdate({ cases: next });
+    onUpdate({ cases: asJsonValue(next) });
   };
 
   const addOpToCase = (i: number, type: OperationType) => {
     const mod = getOperationModule(type);
     const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
     const next = cases.map((c, idx) => (idx === i ? { ...c, ops: [...c.ops, newOp] } : c));
-    onUpdate({ cases: next });
+    onUpdate({ cases: asJsonValue(next) });
     setPickerIndex(null);
     setLastAddedCaseOpId((prev) => ({ ...prev, [i]: newOp.id }));
   };
@@ -55,32 +85,32 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
         return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
       }),
     } : c));
-    onUpdate({ cases: next });
+    onUpdate({ cases: asJsonValue(next) });
   };
 
   const deleteNested = (i: number, id: string) => {
-    onUpdate({ cases: cases.map((c, idx) => (idx === i ? { ...c, ops: c.ops.filter((n) => n.id !== id) } : c)) });
+    onUpdate({ cases: asJsonValue(cases.map((c, idx) => (idx === i ? { ...c, ops: c.ops.filter((n) => n.id !== id) } : c))) });
   };
 
   const addDefaultOp = (type: OperationType) => {
     const mod = getOperationModule(type);
     const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
-    onUpdate({ default: [...(defOps ?? []), newOp] });
+    onUpdate({ default: asJsonValue([...defOps, newOp]) });
     setDefaultPickerOpen(false);
     setLastAddedDefaultOpId(newOp.id);
   };
 
   const updateDefaultNested = (id: string, patch: Partial<Operation>) => {
-    const next = (defOps ?? []).map((n) => {
+    const next = defOps.map((n) => {
       if (n.id !== id) return n;
       const patchCfg = asConfigObject(patch.config);
       return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
     });
-    onUpdate({ default: next });
+    onUpdate({ default: asJsonValue(next) });
   };
 
   const deleteDefaultNested = (id: string) => {
-    onUpdate({ default: (defOps ?? []).filter((n) => n.id !== id) });
+    onUpdate({ default: asJsonValue(defOps.filter((n) => n.id !== id)) });
   };
 
   return (
@@ -110,7 +140,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
             onDelete={(id) => deleteNested(i, id)}
             onReorder={(arr) => {
               const next = cases.map((cc, idx) => (idx === i ? { ...cc, ops: arr } : cc));
-              onUpdate({ cases: next });
+              onUpdate({ cases: asJsonValue(next) });
             }}
             renderContent={renderNestedContent}
             lastAddedId={lastAddedCaseOpId[i] ?? null}
@@ -127,11 +157,11 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
           </div>
         </div>
         <SortableNestedList
-          ops={defOps ?? []}
+          ops={defOps}
           sampleIndex={pathIndex}
           onUpdate={(id, patch) => updateDefaultNested(id, patch)}
           onDelete={(id) => deleteDefaultNested(id)}
-          onReorder={(arr) => onUpdate({ default: arr })}
+          onReorder={(arr) => onUpdate({ default: asJsonValue(arr) })}
           renderContent={renderNestedContent}
           lastAddedId={lastAddedDefaultOpId}
         />

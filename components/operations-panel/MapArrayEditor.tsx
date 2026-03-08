@@ -23,6 +23,21 @@ type Props = {
   renderNestedContent: RenderNestedContent;
 };
 
+function isOperationLike(value: unknown): value is Operation {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.id === "string" && typeof v.type === "string" && "config" in v;
+}
+
+function toOperationArray(value: unknown): Operation[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isOperationLike);
+}
+
+function asJsonValue(value: Operation[]): JSONValue {
+  return value as unknown as JSONValue;
+}
+
 export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedContent }: Props) {
   const [open, setOpen] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -54,12 +69,12 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
     return pathIndex;
   }, [sourceObj, pathIndex, cfgPath]);
 
-  const nestedOps: Operation[] = (Array.isArray(configObj.operations) ? (configObj.operations as Operation[]) : []);
+  const nestedOps = toOperationArray(configObj.operations);
 
   const onAddNested = (type: OperationType) => {
     const mod = getOperationModule(type);
     const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
-    onUpdate({ operations: [...nestedOps, newOp] });
+    onUpdate({ operations: asJsonValue([...nestedOps, newOp]) });
     setPickerOpen(false);
     setLastAddedId(newOp.id);
   };
@@ -70,11 +85,11 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
       const patchCfg = asConfigObject(patch.config);
       return { ...n, ...patch, config: mergeConfig(n.config, patchCfg) };
     });
-    onUpdate({ operations: next });
+    onUpdate({ operations: asJsonValue(next) });
   };
 
   const onDeleteNested = (id: string) => {
-    onUpdate({ operations: nestedOps.filter((n) => n.id !== id) });
+    onUpdate({ operations: asJsonValue(nestedOps.filter((n) => n.id !== id)) });
   };
 
   return (
@@ -120,7 +135,7 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
             sampleIndex={sampleIndex}
             onUpdate={onUpdateNested}
             onDelete={onDeleteNested}
-            onReorder={(arr) => onUpdate({ operations: arr })}
+            onReorder={(arr) => onUpdate({ operations: asJsonValue(arr) })}
             renderContent={renderNestedContent}
             lastAddedId={lastAddedId}
           />

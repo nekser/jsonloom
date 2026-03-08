@@ -4,6 +4,7 @@ import type { AnySchema } from "ajv";
 import { useCallback, useMemo, useState } from "react";
 import { getByPath } from "../../src/operations/utils";
 import type { JSONValue } from "../../src/types/json";
+import { inferJsonSchema } from "../../src/utils/inferJsonSchema";
 import AutocompleteInput from "../AutocompleteInput";
 import { EditorProps } from "./common";
 
@@ -36,15 +37,13 @@ export function ValidateJSONEditor({ config, onChange, pathIndex, rootBefore }: 
 
   const handleGenerate = useCallback(async () => {
     try {
-      const mod = await import("json-schema-generator");
-      const gen = (mod as unknown as { default?: (x: unknown) => AnySchema }).default || (mod as unknown as (x: unknown) => AnySchema);
       const sample = targetSample;
       if (sample === undefined) {
         setError("No data available to infer schema at this step.")
         return;
       }
       const samples = Array.isArray(sample) ? sample : [sample];
-      const schemas = samples.map((s) => stripDollarSchema(gen(s as unknown) as AnySchema));
+      const schemas = samples.map((s) => stripDollarSchema(inferJsonSchema(s as unknown) as AnySchema));
       const combined: AnySchema = schemas.length === 1 ? (schemas[0] as AnySchema) : ({ anyOf: schemas } as unknown as AnySchema);
       const pretty = JSON.stringify(combined, null, 2);
       setText(pretty);
