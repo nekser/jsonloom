@@ -20,4 +20,14 @@ describe("ValidateJSON (unit)", () => {
 
     expect(() => applyOperation(input, op)).toThrow();
   });
+
+  it("infers schema when generateSchema is enabled", () => {
+    const input = { user: { id: 1, name: "Alice" } };
+    const op = {
+      type: "ValidateJSON" as const,
+      config: { path: "user", generateSchema: true, failOnError: true },
+    };
+
+    expect(() => applyOperation(input, op)).not.toThrow();
+  });
 });

@@ -30,7 +30,7 @@ const baseInput = {
   ],
   metrics: { revenue: 160.5, vat: 0.24 },
   meta: { generatedAt: "2024-03-01T08:00:00Z", region: "eu" },
-} as const;
+};
 
 function pretty(v: JSONValue): string {
   return JSON.stringify(v, null, 2);

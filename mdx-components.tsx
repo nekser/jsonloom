@@ -1,9 +1,11 @@
-import type { MDXComponents } from "mdx/types";
+import type { ComponentType } from "react";
 import DocsHero from "@/components/docs/DocsHero";
 import Callout from "@/components/docs/Callout";
 import StepList from "@/components/docs/StepList";
 import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
 import DemoLinkCard from "@/components/docs/DemoLinkCard";
+
+type MDXComponents = Record<string, ComponentType<Record<string, unknown>>>;
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -17,11 +19,11 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     a: (props) => <a className="text-primary underline" {...props} />,
     code: (props) => <code className="rounded bg-muted px-1 py-0.5 text-xs" {...props} />,
     pre: (props) => <pre className="mt-3 overflow-auto rounded-xl border bg-card p-3 text-xs" {...props} />,
-    DocsHero,
-    Callout,
-    StepList,
-    ScreenshotFigure,
-    DemoLinkCard,
+    DocsHero: DocsHero as ComponentType<Record<string, unknown>>,
+    Callout: Callout as ComponentType<Record<string, unknown>>,
+    StepList: StepList as ComponentType<Record<string, unknown>>,
+    ScreenshotFigure: ScreenshotFigure as ComponentType<Record<string, unknown>>,
+    DemoLinkCard: DemoLinkCard as ComponentType<Record<string, unknown>>,
     ...components,
   };
 }
