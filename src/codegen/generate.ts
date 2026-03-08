@@ -199,24 +199,53 @@ import PH_UniqueArray from "./php/UniqueArray";
 import PH_ValidateJSON from "./php/ValidateJSON";
 // Go
 import GO_Add from "./go/Add";
+import GO_Base64 from "./go/Base64";
 import GO_Clamp from "./go/Clamp";
+import GO_CoerceType from "./go/CoerceType";
+import GO_Count from "./go/Count";
 import GO_CountArray from "./go/CountArray";
+import GO_DateAdd from "./go/DateAdd";
+import GO_DateDiff from "./go/DateDiff";
 import GO_DeletePath from "./go/DeletePath";
 import GO_Divide from "./go/Divide";
 import GO_ExtractPath from "./go/ExtractPath";
 import GO_FilterArray from "./go/FilterArray";
+import GO_FilterByKey from "./go/FilterByKey";
+import GO_FlattenArray from "./go/FlattenArray";
+import GO_FlattenObject from "./go/FlattenObject";
+import GO_GroupBy from "./go/GroupBy";
+import GO_If from "./go/If";
+import GO_IsDateCompare from "./go/IsDateCompare";
 import GO_JoinArray from "./go/JoinArray";
 import GO_MapArray from "./go/MapArray";
 import GO_Max from "./go/Max";
+import GO_MergeAtPath from "./go/MergeAtPath";
 import GO_Min from "./go/Min";
 import GO_Modulo from "./go/Modulo";
 import GO_Multiply from "./go/Multiply";
+import GO_NormalizeKeyCase from "./go/NormalizeKeyCase";
+import GO_OmitPaths from "./go/OmitPaths";
+import GO_ParseDate from "./go/ParseDate";
+import GO_PickPaths from "./go/PickPaths";
 import GO_Power from "./go/Power";
+import GO_ReduceArray from "./go/ReduceArray";
+import GO_RegexReplace from "./go/RegexReplace";
+import GO_RenameKey from "./go/RenameKey";
+import GO_RenameKeysByPattern from "./go/RenameKeysByPattern";
 import GO_Round from "./go/Round";
 import GO_SetPath from "./go/SetPath";
+import GO_SliceArray from "./go/SliceArray";
+import GO_SortArray from "./go/SortArray";
+import GO_StringCase from "./go/StringCase";
 import GO_StringReplace from "./go/StringReplace";
 import GO_Subtract from "./go/Subtract";
 import GO_Sum from "./go/Sum";
+import GO_Switch from "./go/Switch";
+import GO_TemplateInterpolate from "./go/TemplateInterpolate";
+import GO_TrimStrings from "./go/TrimStrings";
+import GO_UnflattenObject from "./go/UnflattenObject";
+import GO_UniqueArray from "./go/UniqueArray";
+import GO_ValidateJSON from "./go/ValidateJSON";
 import goHeader from "./go/_header";
 // jq
 import JQ_Add from "./jq/Add";
@@ -464,12 +493,12 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
     MapArray: GO_MapArray as unknown as TemplateFn,
     CountArray: GO_CountArray as unknown as TemplateFn,
     JoinArray: GO_JoinArray as unknown as TemplateFn,
-    SortArray: (await import("./go/SortArray")).default as unknown as TemplateFn,
-    UniqueArray: (await import("./go/UniqueArray")).default as unknown as TemplateFn,
-    FlattenArray: (await import("./go/FlattenArray")).default as unknown as TemplateFn,
-    SliceArray: (await import("./go/SliceArray")).default as unknown as TemplateFn,
-    GroupBy: (await import("./go/GroupBy")).default as unknown as TemplateFn,
-    ReduceArray: (await import("./go/ReduceArray")).default as unknown as TemplateFn,
+    SortArray: GO_SortArray as unknown as TemplateFn,
+    UniqueArray: GO_UniqueArray as unknown as TemplateFn,
+    FlattenArray: GO_FlattenArray as unknown as TemplateFn,
+    SliceArray: GO_SliceArray as unknown as TemplateFn,
+    GroupBy: GO_GroupBy as unknown as TemplateFn,
+    ReduceArray: GO_ReduceArray as unknown as TemplateFn,
 
     // Math & Numbers
     Add: GO_Add as unknown as TemplateFn,
@@ -485,41 +514,41 @@ const registry: Record<Lang, Record<string, TemplateFn>> = {
     Max: GO_Max as unknown as TemplateFn,
 
     // Paths & Objects
-    FilterByKey: (await import("./go/FilterByKey")).default as unknown as TemplateFn,
+    FilterByKey: GO_FilterByKey as unknown as TemplateFn,
     SetPath: GO_SetPath as unknown as TemplateFn,
     DeletePath: GO_DeletePath as unknown as TemplateFn,
     ExtractPath: GO_ExtractPath as unknown as TemplateFn,
-    RenameKey: (await import("./go/RenameKey")).default as unknown as TemplateFn,
-    RenameKeysByPattern: (await import("./go/RenameKeysByPattern")).default as unknown as TemplateFn,
-    NormalizeKeyCase: (await import("./go/NormalizeKeyCase")).default as unknown as TemplateFn,
-    PickPaths: (await import("./go/PickPaths")).default as unknown as TemplateFn,
-    OmitPaths: (await import("./go/OmitPaths")).default as unknown as TemplateFn,
-    MergeAtPath: (await import("./go/MergeAtPath")).default as unknown as TemplateFn,
-    FlattenObject: (await import("./go/FlattenObject")).default as unknown as TemplateFn,
-    UnflattenObject: (await import("./go/UnflattenObject")).default as unknown as TemplateFn,
+    RenameKey: GO_RenameKey as unknown as TemplateFn,
+    RenameKeysByPattern: GO_RenameKeysByPattern as unknown as TemplateFn,
+    NormalizeKeyCase: GO_NormalizeKeyCase as unknown as TemplateFn,
+    PickPaths: GO_PickPaths as unknown as TemplateFn,
+    OmitPaths: GO_OmitPaths as unknown as TemplateFn,
+    MergeAtPath: GO_MergeAtPath as unknown as TemplateFn,
+    FlattenObject: GO_FlattenObject as unknown as TemplateFn,
+    UnflattenObject: GO_UnflattenObject as unknown as TemplateFn,
 
     // Strings
-    RegexReplace: (await import("./go/RegexReplace")).default as unknown as TemplateFn,
-    TrimStrings: (await import("./go/TrimStrings")).default as unknown as TemplateFn,
-    TemplateInterpolate: (await import("./go/TemplateInterpolate")).default as unknown as TemplateFn,
-    StringCase: (await import("./go/StringCase")).default as unknown as TemplateFn,
+    RegexReplace: GO_RegexReplace as unknown as TemplateFn,
+    TrimStrings: GO_TrimStrings as unknown as TemplateFn,
+    TemplateInterpolate: GO_TemplateInterpolate as unknown as TemplateFn,
+    StringCase: GO_StringCase as unknown as TemplateFn,
     StringReplace: GO_StringReplace as unknown as TemplateFn,
 
     // Types & Misc
-    CoerceType: (await import("./go/CoerceType")).default as unknown as TemplateFn,
-    Base64: (await import("./go/Base64")).default as unknown as TemplateFn,
-    ValidateJSON: (await import("./go/ValidateJSON")).default as unknown as TemplateFn,
+    CoerceType: GO_CoerceType as unknown as TemplateFn,
+    Base64: GO_Base64 as unknown as TemplateFn,
+    ValidateJSON: GO_ValidateJSON as unknown as TemplateFn,
 
     // Dates
-    ParseDate: (await import("./go/ParseDate")).default as unknown as TemplateFn,
-    IsDateCompare: (await import("./go/IsDateCompare")).default as unknown as TemplateFn,
-    DateAdd: (await import("./go/DateAdd")).default as unknown as TemplateFn,
-    DateDiff: (await import("./go/DateDiff")).default as unknown as TemplateFn,
+    ParseDate: GO_ParseDate as unknown as TemplateFn,
+    IsDateCompare: GO_IsDateCompare as unknown as TemplateFn,
+    DateAdd: GO_DateAdd as unknown as TemplateFn,
+    DateDiff: GO_DateDiff as unknown as TemplateFn,
 
     // Control Flow & Vars
-    If: (await import("./go/If")).default as unknown as TemplateFn,
-    Switch: (await import("./go/Switch")).default as unknown as TemplateFn,
-    Count: (await import("./go/Count")).default as unknown as TemplateFn,
+    If: GO_If as unknown as TemplateFn,
+    Switch: GO_Switch as unknown as TemplateFn,
+    Count: GO_Count as unknown as TemplateFn,
   },
   jq: {
     FilterArray: JQ_FilterArray as unknown as TemplateFn,
