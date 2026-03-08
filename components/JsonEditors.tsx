@@ -6,12 +6,14 @@ import SourcePanelToolbar from "@/components/SourcePanelToolbar";
 import ResultPanelToolbar from "@/components/ResultPanelToolbar";
 import { useOpsStore, type State } from "@/src/store/operations";
 import { useEditorTheme } from "@/components/hooks/useEditorTheme";
+import { getSourceJsonValidity } from "@/src/utils/sourceValidity";
 
 export function SourceEditor() {
   const sourceText = useOpsStore((s: State) => s.sourceText);
   const sourceError = useOpsStore((s: State) => s.sourceError);
   const setSourceText = useOpsStore((s: State) => s.setSourceText);
   const theme = useEditorTheme();
+  const sourceValidity = getSourceJsonValidity(sourceError);
 
   useEffect(() => {
     useOpsStore.getState().runPipeline();
@@ -23,6 +25,7 @@ export function SourceEditor() {
         <div className="font-medium">Source</div>
         <div className="flex items-center gap-3">
           <div className="text-xs text-neutral-500">{new Blob([sourceText]).size} bytes</div>
+          <div className={`rounded border px-2 py-0.5 text-xs ${sourceValidity.className}`}>{sourceValidity.text}</div>
           <SourcePanelToolbar />
         </div>
       </div>
