@@ -15,6 +15,7 @@ import AutocompleteInput from "@/components/AutocompleteInput";
 import SortableNestedList from "./nested/SortableNestedList";
 import type { RenderNestedContent } from "./nested/types";
 import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
+import { sanitizeConfigValue } from "@/src/operations/configPatch";
 
 type Props = {
   op: Operation;
@@ -73,7 +74,7 @@ export default function MapArrayEditor({ op, pathIndex, onUpdate, renderNestedCo
 
   const onAddNested = (type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: sanitizeConfigValue(mod?.defaultConfig, {} as JSONValue) };
     onUpdate({ operations: asJsonValue([...nestedOps, newOp]) });
     setPickerOpen(false);
     setLastAddedId(newOp.id);

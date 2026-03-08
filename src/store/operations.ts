@@ -5,7 +5,7 @@ import type { JSONValue } from "../types/json";
 import { isJSONObject } from "../types/json";
 import { type PathIndex } from "../utils/pathSuggest";
 import { executePipelineFromSource } from "../operations/pipelineExecution";
-import { applyOperationPatch } from "../operations/configPatch";
+import { applyOperationPatch, sanitizeConfigValue } from "../operations/configPatch";
 import { executePipelinePreferWorker } from "../operations/worker/client";
 
 export type State = {
@@ -83,9 +83,10 @@ export const useOpsStore = create<State>()((set, get) => ({
   },
   addOperation: (type: OperationType, config: JSONValue = {} as JSONValue) => {
     const mod = getOperationModule(type);
-    const initial: JSONValue = isJSONObject(config) && Object.keys(config).length > 0
+    const initialBase: unknown = isJSONObject(config) && Object.keys(config).length > 0
       ? config
-      : ((mod?.defaultConfig as JSONValue | undefined) ?? ({} as JSONValue));
+      : mod?.defaultConfig;
+    const initial: JSONValue = sanitizeConfigValue(initialBase, {} as JSONValue);
     set((s) => ({
       past: [...s.past, s.operations],
       future: [],
