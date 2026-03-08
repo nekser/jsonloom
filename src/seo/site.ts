@@ -2,7 +2,7 @@ const DEFAULT_LOCAL_SITE_URL = "http://localhost:3000";
 
 export const SITE_NAME = "JSONLoom";
 export const SITE_DESCRIPTION =
-  "Visual JSON, YAML, and CSV transformation workspace with composable operation pipelines.";
+  "Visual JSON transformation workspace with composable operation pipelines.";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");

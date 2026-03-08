@@ -7,7 +7,7 @@ import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/src/seo/site";
 
 const HOME_TITLE = "JSON Transformer";
 const HOME_DESCRIPTION =
-  "Build repeatable JSON, YAML, and CSV data pipelines in your browser with live preview, operation-level errors, and shareable links.";
+  "Build repeatable JSON data pipelines in your browser with live preview, operation-level errors, and shareable links.";
 
 export const metadata: Metadata = {
   title: HOME_TITLE,
@@ -53,7 +53,7 @@ export default function HomePage() {
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold">Browser-Based JSON Transformer</h1>
           <p className="text-muted-foreground">
-            Convert and reshape JSON, YAML, and CSV with composable operations, live output, and reproducible share links.
+            Convert and reshape JSON with composable operations, live output, and reproducible share links.
           </p>
         </header>
 

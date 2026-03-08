@@ -44,7 +44,7 @@ export default function AboutPage() {
         <section className="space-y-2">
           <h2 className="text-2xl font-semibold">What It Supports</h2>
           <ul className="list-disc pl-5 space-y-1 text-sm">
-            <li>Source formats: JSON, YAML, and CSV.</li>
+            <li>Source format: JSON.</li>
             <li>Pipeline operations across object, array, string, math, control-flow, validation, and date categories.</li>
             <li>Live preview, intermediate state inspection, and operation-level error reporting.</li>
             <li>Pipeline sharing via encoded URL and downloadable generated code.</li>

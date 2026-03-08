@@ -11,7 +11,7 @@ import { executePipelinePreferWorker } from "../operations/worker/client";
 export type State = {
   sourceText: string;
   sourceError?: string;
-  sourceFormat: "json" | "yaml" | "csv";
+  sourceFormat: "json";
   operations: Operation[];
   resultText: string;
   pipelineError?: ValidationError | undefined;
@@ -42,8 +42,6 @@ export type State = {
 
 // ---------- Utilities ----------
 import { importJSON } from "../importers/json";
-import { importYAML } from "../importers/yaml";
-import { importCSV } from "../importers/csv";
 
 const safeStringify = (v: JSONValue): string => {
   try {
@@ -75,8 +73,7 @@ export const useOpsStore = create<State>()((set, get) => ({
       set({ sourceText: text.slice(0, 1024), sourceError: "JSON exceeds 5 MB limit" });
       return;
     }
-    const fmt = get().sourceFormat;
-    const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
+    const parsed = importJSON(text);
     set({ sourceText: text, sourceError: parsed.error });
     if (sourceDebounceTimer) clearTimeout(sourceDebounceTimer);
     sourceDebounceTimer = setTimeout(() => {
