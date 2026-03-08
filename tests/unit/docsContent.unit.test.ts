@@ -16,5 +16,6 @@ describe("docs content wiring", () => {
     const docsIndex = fs.readFileSync(path.join(cwd, "app/docs/page.mdx"), "utf8");
     expect(docsIndex).toContain("pipeline in `/`");
     expect(docsIndex).toContain("/about");
+    expect(docsIndex).not.toContain("code generation");
   });
 });

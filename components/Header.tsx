@@ -8,6 +8,7 @@ import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { useIsMobile } from "./hooks/useMediaQuery";
 import ThemeToggle from "./ThemeToggle";
 import { APP_ROUTES } from "@/src/navigation/routes";
+import { DOCS_AND_CODEGEN_ENABLED } from "@/src/config/features";
 
 export default function Header() {
   const isMobile = useIsMobile();
@@ -54,9 +55,11 @@ export default function Header() {
             <DropdownMenuItem asChild>
               <Link href={APP_ROUTES.home}><AppWindow className="h-4 w-4 mr-2" /> Application</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={APP_ROUTES.docs}><BookOpenText className="h-4 w-4 mr-2" /> Docs</Link>
-            </DropdownMenuItem>
+            {DOCS_AND_CODEGEN_ENABLED ? (
+              <DropdownMenuItem asChild>
+                <Link href={APP_ROUTES.docs}><BookOpenText className="h-4 w-4 mr-2" /> Docs</Link>
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem asChild>
               <Link href={APP_ROUTES.about}><Info className="h-4 w-4 mr-2" /> About</Link>
             </DropdownMenuItem>

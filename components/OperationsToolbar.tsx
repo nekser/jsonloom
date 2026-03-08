@@ -5,6 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Code2, MoreVertical, Plus, Redo2, Share2, ToggleLeft, ToggleRight, Trash2, Undo2, Upload } from "lucide-react";
 import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { DOCS_AND_CODEGEN_ENABLED } from "@/src/config/features";
 import { downloadText } from "../lib/io";
 import { State, useOpsStore } from "../src/store/operations";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
@@ -163,9 +164,11 @@ export default function OperationsToolbar() {
             <DropdownMenuItem onClick={doShare}>
               <Share2 className="h-4 w-4 mr-2" /> Share
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCodeOpen(true)}>
-              <Code2 className="h-4 w-4 mr-2" /> Generate Code
-            </DropdownMenuItem>
+            {DOCS_AND_CODEGEN_ENABLED ? (
+              <DropdownMenuItem onClick={() => setCodeOpen(true)}>
+                <Code2 className="h-4 w-4 mr-2" /> Generate Code
+              </DropdownMenuItem>
+            ) : null}
             <DropdownMenuItem onClick={() => setImportOpen(true)}>
               <Upload className="h-4 w-4 mr-2" /> Import
             </DropdownMenuItem>
@@ -208,7 +211,7 @@ export default function OperationsToolbar() {
         onConfirm={doClearAll}
       />
 
-  <GenerateCodeDialog open={codeOpen} onOpenChange={setCodeOpen} />
+      {DOCS_AND_CODEGEN_ENABLED ? <GenerateCodeDialog open={codeOpen} onOpenChange={setCodeOpen} /> : null}
     </div>
   );
 }

@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: getSiteOrigin(),
   title: {
-    default: `${SITE_NAME} | JSON Transformation Tool`,
+    default: `${SITE_NAME} | JSONLoom`,
     template: "%s | JSONLoom",
   },
   description: SITE_DESCRIPTION,
@@ -30,14 +30,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    title: `${SITE_NAME} | JSON Transformation Tool`,
+    title: `${SITE_NAME} | JSONLoom`,
     description: SITE_DESCRIPTION,
     siteName: SITE_NAME,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} | JSON Transformation Tool`,
+    title: `${SITE_NAME} | JSONLoom`,
     description: SITE_DESCRIPTION,
   },
   robots: {

@@ -31,7 +31,7 @@ pnpm test:ui:ci
 
 For route-scoped changes, you may run affected-page smoke checks:
 ```bash
-ROUTES="/docs,/docs/operations" pnpm check:dev
+ROUTES="/about" pnpm check:dev
 ```
 
 ## 5. Agent Output Contract

@@ -7,10 +7,9 @@ The app lets you:
 - Build ordered transformation pipelines
 - Preview results live after each change
 - Share reproducible pipelines via URL
-- Generate code for multiple languages from a pipeline
 
 Primary app route: `/`  
-Documentation route: `/docs`
+Optional docs route (feature-flagged): `/docs`
 
 ## What It Is
 
@@ -28,14 +27,16 @@ Core model:
 - Undo/redo for pipeline edits
 - Import/export helpers for source and pipelines
 - URL-based sharing with encoded `pipeline` and `data`
-- Code generation for:
+
+Optional (hidden by default behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
+- In-app docs with operation examples and workflow references
+- Pipeline code generation targets:
   - JavaScript
   - TypeScript
   - Python
   - PHP
   - Go
   - jq
-- In-app docs with operation examples and workflow references
 
 ## Quick Start
 

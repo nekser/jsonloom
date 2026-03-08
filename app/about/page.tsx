@@ -46,7 +46,7 @@ export default function AboutPage() {
             <li>Source format: JSON.</li>
             <li>Pipeline operations across object, array, string, math, control-flow, validation, and date categories.</li>
             <li>Live preview, intermediate state inspection, and operation-level error reporting.</li>
-            <li>Pipeline sharing via encoded URL and downloadable generated code.</li>
+            <li>Pipeline sharing via encoded URL and import/export workflows.</li>
           </ul>
         </section>
 

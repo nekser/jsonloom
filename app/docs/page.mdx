@@ -6,17 +6,17 @@ import { SITE_NAME, absoluteUrl } from "@/src/seo/site";
 
 export const metadata = {
   title: "Docs",
-  description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+  description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, and sharing.",
   alternates: { canonical: APP_ROUTES.docs },
   openGraph: {
     title: `Docs | ${SITE_NAME}`,
-    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, and sharing.",
     url: APP_ROUTES.docs,
   },
   twitter: {
     card: "summary_large_image",
     title: `Docs | ${SITE_NAME}`,
-    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, and sharing.",
   },
 };
 
@@ -25,7 +25,7 @@ export const metadata = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: `${SITE_NAME} Documentation`,
-    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, and sharing.",
     url: absoluteUrl(APP_ROUTES.docs),
     isPartOf: {
       "@type": "WebSite",
@@ -42,7 +42,7 @@ export const metadata = {
 
 <h2 id="what-it-covers">What It Covers</h2>
 
-This docs area covers shipped behavior across source parsing, pipeline execution, sharing/import flows, and code generation outputs.
+This docs area covers shipped behavior across source parsing, pipeline execution, and sharing/import flows.
 
 Read [About](/about) for product context and scope.
 
@@ -53,9 +53,8 @@ Read [About](/about) for product context and scope.
 - Inspect output and operation-level errors live.
 - Share reproducible links with encoded `pipeline` and optional `data` query params for source hydration.
 - Import pipelines from encoded payloads, full links, serialized JSON, or raw operation arrays.
-- Generate code in JavaScript, TypeScript, Python, PHP, Go, and jq.
 
 <div className="mt-4 grid gap-3 md:grid-cols-2">
-  <DemoLinkCard title="User Data Demo" description="Open preloaded User Data pipeline in the transformer." href="/open-demo/user-data" />
+  <DemoLinkCard title="User Data Demo" description="Open preloaded User Data pipeline in JSONLoom." href="/open-demo/user-data" />
   <DemoLinkCard title="E-commerce Demo" description="Open preloaded e-commerce pipeline with metrics examples." href="/open-demo/ecommerce" />
 </div>

@@ -4,7 +4,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import { APP_ROUTES } from "@/src/navigation/routes";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/src/seo/site";
 
-const HOME_TITLE = "JSON Transformer";
+const HOME_TITLE = "JSONLoom";
 const HOME_DESCRIPTION =
   "Build repeatable JSON data pipelines in your browser with live preview, operation-level errors, and shareable links.";
 
