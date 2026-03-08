@@ -14,9 +14,8 @@
 - Dev route smoke: `pnpm check:dev`
 
 `pnpm check:dev` boots the dev server and checks that routes return non-500 responses.
-- Default routes: `/`, `/about`
-- With docs/codegen enabled (`NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`), defaults include `/docs`.
-- Affected-routes run: `ROUTES=\"/about\" pnpm check:dev`
+- Default routes: `/`, `/docs`, `/about`
+- Affected-routes run: `ROUTES=\"/docs,/docs/operations\" pnpm check:dev`
 
 ## Performance Execution Mode
 - Default: main-thread execution.

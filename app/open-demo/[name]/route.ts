@@ -20,7 +20,7 @@ async function loadJson(file: string): Promise<unknown> {
 export async function GET(request: Request, ctx: { params: Promise<{ name: string }> }) {
   const { name } = await ctx.params;
   if (!(name in demoMap)) {
-    return NextResponse.redirect(new URL("/", request.url), 302);
+    return NextResponse.redirect(new URL("/docs/sharing", request.url), 302);
   }
 
   const key = name as DemoName;

@@ -9,7 +9,7 @@ The app lets you:
 - Share reproducible pipelines via URL
 
 Primary app route: `/`  
-Optional docs route (feature-flagged): `/docs`
+Documentation route: `/docs`
 
 ## What It Is
 
@@ -28,9 +28,8 @@ Core model:
 - Import/export helpers for source and pipelines
 - URL-based sharing with encoded `pipeline` and `data`
 
-Optional (hidden by default behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
 - In-app docs with operation examples and workflow references
-- Pipeline code generation targets:
+- Pipeline code generation targets (hidden by default behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
   - JavaScript
   - TypeScript
   - Python
