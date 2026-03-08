@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import HomeWorkspace from "@/components/home/HomeWorkspace";
 import JsonLd from "@/components/seo/JsonLd";
+import { APP_ROUTES } from "@/src/navigation/routes";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/src/seo/site";
 
 const HOME_TITLE = "JSON Transformer";
