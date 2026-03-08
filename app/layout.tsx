@@ -17,8 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JSON Transformation Tool",
+  title: "JSONLoom",
   description: "Visual JSON, YAML, and CSV transformation workspace with composable operation pipelines.",
+  icons: {
+    icon: "/brand/jsonloom-mark.svg",
+    shortcut: "/brand/jsonloom-mark.svg",
+    apple: "/brand/jsonloom-mark.svg",
+  },
 };
 
 export default function RootLayout({
