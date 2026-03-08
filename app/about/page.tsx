@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { APP_ROUTES } from "@/src/navigation/routes";
 import JsonLd from "@/components/seo/JsonLd";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/src/seo/site";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "What JSONLoom does today and how to use it.",
+  description: "What JSONLoom does today and how to get in touch.",
   alternates: { canonical: APP_ROUTES.about },
   openGraph: {
     title: `About | ${SITE_NAME}`,
-    description: "What JSONLoom does today and how to use it.",
+    description: "What JSONLoom does today and how to get in touch.",
     url: APP_ROUTES.about,
   },
   twitter: {
     card: "summary_large_image",
     title: `About | ${SITE_NAME}`,
-    description: "What JSONLoom does today and how to use it.",
+    description: "What JSONLoom does today and how to get in touch.",
   },
 };
 
@@ -52,19 +51,12 @@ export default function AboutPage() {
         </section>
 
         <section className="space-y-2">
-          <h2 className="text-2xl font-semibold">Current Status</h2>
+          <h2 className="text-2xl font-semibold">Contact</h2>
           <p className="text-sm text-muted-foreground">
-            The tool is actively evolving. Documentation and tests are being expanded in parallel with feature work.
-            Route scope is intentionally focused on core product pages.
+            Questions, feedback, or collaboration requests:
+            {" "}
+            <a className="underline" href="mailto:your.email@example.com">your.email@example.com</a>
           </p>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="text-2xl font-semibold">Navigate</h2>
-          <div className="flex gap-4 text-sm">
-            <Link className="underline" href={APP_ROUTES.home}>Open Transformer</Link>
-            <Link className="underline" href={APP_ROUTES.docs}>Read Docs</Link>
-          </div>
         </section>
       </main>
     </>

@@ -26,14 +26,7 @@ export default function OperationsDocsPage() {
     <div className="space-y-8">
       <DocsHero
         title="Operation Catalog"
-        subtitle="Every operation includes use case, input/config/output examples, and a runnable deep link."
-        ctaHref="/"
-        ctaLabel="Try Operations"
       />
-
-      <section id="category-coverage" className="rounded-xl border bg-card p-4 text-sm shadow-sm">
-        <strong>{operationCatalog.length}</strong> operations documented across {categoryOrder.length} categories.
-      </section>
 
       <section id="operation-catalog" className="space-y-8">
         {categoryOrder.map((category) => {
@@ -50,6 +43,17 @@ export default function OperationsDocsPage() {
             </section>
           );
         })}
+
+        <section id="extra" className="space-y-3 rounded-xl border bg-card p-4 shadow-sm">
+          <h2 className="text-2xl font-semibold">Extra</h2>
+          <div id="write-result-to" className="space-y-2 text-sm">
+            <h3 className="text-lg font-semibold">writeResultTo</h3>
+            <p className="text-muted-foreground">
+              When an operation exposes <code>writeResultTo</code>, you can write the computed value to a different JSON path instead of applying it in place.
+              Leave it empty to keep in-place behavior.
+            </p>
+          </div>
+        </section>
       </section>
     </div>
   );
