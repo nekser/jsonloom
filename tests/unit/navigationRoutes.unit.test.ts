@@ -3,19 +3,22 @@ import path from "node:path";
 import { APP_ROUTES, DEFERRED_ROUTES, getActivePublicRoutes, getDocsRoutes } from "@/src/navigation/routes";
 
 describe("route and navigation contract", () => {
-  it("defaults to home/about and defers pricing/blog", () => {
-    const activeRoutes = getActivePublicRoutes(false);
+  it("keeps docs visible in active public routes and defers pricing/blog", () => {
+    const activeRoutes = getActivePublicRoutes();
     expect(activeRoutes).toContain("/");
-    expect(activeRoutes).not.toContain("/docs");
+    expect(activeRoutes).toContain("/docs");
     expect(activeRoutes).toContain("/about");
     for (const deferred of DEFERRED_ROUTES) {
       expect(activeRoutes).not.toContain(deferred);
     }
   });
 
-  it("exposes docs routes when docs/codegen flag is enabled", () => {
-    const activeRoutes = getActivePublicRoutes(true);
-    expect(activeRoutes).toContain(APP_ROUTES.docs);
+  it("hides only the codegen docs route when docs/codegen flag is disabled", () => {
+    expect(getDocsRoutes(false)).toContain(APP_ROUTES.docs);
+    expect(getDocsRoutes(false)).not.toContain("/docs/codegen");
+  });
+
+  it("exposes codegen docs route when docs/codegen flag is enabled", () => {
     expect(getDocsRoutes(true)).toContain("/docs/codegen");
   });
 

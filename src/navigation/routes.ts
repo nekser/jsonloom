@@ -7,7 +7,15 @@ export const APP_ROUTES = {
 } as const;
 
 export function getDocsRoutes(enabled = DOCS_AND_CODEGEN_ENABLED): readonly string[] {
-  if (!enabled) return [];
+  if (!enabled) {
+    return [
+      APP_ROUTES.docs,
+      "/docs/getting-started",
+      "/docs/operations",
+      "/docs/sharing",
+      "/docs/troubleshooting",
+    ] as const;
+  }
   return [
     APP_ROUTES.docs,
     "/docs/getting-started",
@@ -18,8 +26,7 @@ export function getDocsRoutes(enabled = DOCS_AND_CODEGEN_ENABLED): readonly stri
   ] as const;
 }
 
-export function getActivePublicRoutes(enabled = DOCS_AND_CODEGEN_ENABLED): readonly string[] {
-  if (!enabled) return [APP_ROUTES.home, APP_ROUTES.about] as const;
+export function getActivePublicRoutes(): readonly string[] {
   return [APP_ROUTES.home, APP_ROUTES.docs, APP_ROUTES.about] as const;
 }
 

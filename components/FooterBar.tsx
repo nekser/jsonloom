@@ -2,7 +2,6 @@ import Link from "next/link";
 import { APP_ROUTES } from "@/src/navigation/routes";
 import { SITE_NAME } from "@/src/seo/site";
 import packageJson from "@/package.json";
-import { DOCS_AND_CODEGEN_ENABLED } from "@/src/config/features";
 
 const APP_BUILD_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version;
 
@@ -13,7 +12,7 @@ export default function FooterBar() {
         <div>© {new Date().getFullYear()} {SITE_NAME}. All rights reserved. Build {APP_BUILD_VERSION}.</div>
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-1" aria-label="Quick links">
           <Link href={APP_ROUTES.home} className="hover:underline">Application</Link>
-          {DOCS_AND_CODEGEN_ENABLED ? <Link href={APP_ROUTES.docs} className="hover:underline">Docs</Link> : null}
+          <Link href={APP_ROUTES.docs} className="hover:underline">Docs</Link>
           <Link href={APP_ROUTES.about} className="hover:underline">About</Link>
         </nav>
       </div>

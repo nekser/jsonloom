@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-import { isDocsAndCodegenEnabled } from "./feature-flags.mjs";
 
-const DEFAULT_PATHS = isDocsAndCodegenEnabled() ? ["/", "/docs", "/about"] : ["/", "/about"];
+const DEFAULT_PATHS = ["/", "/docs", "/about"];
 const DEFAULT_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 function trimTrailingSlash(value) {
