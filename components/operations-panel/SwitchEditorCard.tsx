@@ -11,6 +11,7 @@ import { useState } from "react";
 import SortableNestedList from "./nested/SortableNestedList";
 import type { RenderNestedContent } from "./nested/types";
 import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
+import { sanitizeConfigValue } from "@/src/operations/configPatch";
 
 type Props = {
   op: Operation;
@@ -69,7 +70,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
 
   const addOpToCase = (i: number, type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: sanitizeConfigValue(mod?.defaultConfig, {} as JSONValue) };
     const next = cases.map((c, idx) => (idx === i ? { ...c, ops: [...c.ops, newOp] } : c));
     onUpdate({ cases: asJsonValue(next) });
     setPickerIndex(null);
@@ -94,7 +95,7 @@ export default function SwitchEditorCard({ op, pathIndex, onUpdate, renderNested
 
   const addDefaultOp = (type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: sanitizeConfigValue(mod?.defaultConfig, {} as JSONValue) };
     onUpdate({ default: asJsonValue([...defOps, newOp]) });
     setDefaultPickerOpen(false);
     setLastAddedDefaultOpId(newOp.id);

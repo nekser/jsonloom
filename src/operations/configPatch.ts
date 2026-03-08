@@ -22,6 +22,33 @@ export function toConfigPatch(value: unknown): ConfigPatch {
   return out;
 }
 
+function toJSONValue(value: unknown): JSONValue | undefined {
+  if (value === null) return null;
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return value;
+  if (Array.isArray(value)) {
+    const out: JSONValue[] = [];
+    for (const item of value) {
+      const normalized = toJSONValue(item);
+      if (normalized !== undefined) out.push(normalized);
+    }
+    return out;
+  }
+  if (isJSONObject(value)) {
+    const out: JSONObject = {};
+    for (const [key, val] of Object.entries(value)) {
+      const normalized = toJSONValue(val);
+      if (normalized !== undefined) out[key] = normalized;
+    }
+    return out;
+  }
+  return undefined;
+}
+
+export function sanitizeConfigValue(value: unknown, fallback: JSONValue = {} as JSONValue): JSONValue {
+  const normalized = toJSONValue(value);
+  return normalized === undefined ? fallback : normalized;
+}
+
 export function mergeConfigPatch(baseConfig: unknown, patch: ConfigPatch): JSONObject {
   const merged: ConfigPatch = { ...asConfigObject(baseConfig), ...patch };
   const out: JSONObject = {};

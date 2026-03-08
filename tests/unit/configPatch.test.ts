@@ -1,5 +1,6 @@
 import type { Operation } from "@/src/operations";
-import { applyOperationPatch, asConfigObject, mergeConfigPatch, toConfigPatch } from "@/src/operations/configPatch";
+import { getOperationModule } from "@/src/operations";
+import { applyOperationPatch, asConfigObject, mergeConfigPatch, sanitizeConfigValue, toConfigPatch } from "@/src/operations/configPatch";
 
 describe("configPatch helpers", () => {
   it("normalizes config object and filters non-json values", () => {
@@ -16,6 +17,30 @@ describe("configPatch helpers", () => {
   it("converts unknown patch to typed config patch", () => {
     const p = toConfigPatch({ s: "x", n: 1, drop: () => null });
     expect(p).toEqual({ s: "x", n: 1 });
+  });
+
+  it("sanitizes undefined recursively from config values", () => {
+    const out = sanitizeConfigValue({
+      keep: 1,
+      drop: undefined,
+      nested: { a: "x", b: undefined },
+      arr: [1, undefined, { ok: true, nope: undefined }],
+    });
+    expect(out).toEqual({
+      keep: 1,
+      nested: { a: "x" },
+      arr: [1, { ok: true }],
+    });
+  });
+
+  it("keeps nested operations serializable when defaults contain undefined keys", () => {
+    const nested = {
+      id: "nested-1",
+      type: "MapArray",
+      config: sanitizeConfigValue(getOperationModule("MapArray")?.defaultConfig, {}),
+    };
+    const cfg = { operations: [nested] };
+    expect(asConfigObject(cfg)).toEqual(cfg);
   });
 
   it("applies operation patch with merged object config", () => {
