@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_NAME, getSiteOrigin } from "@/src/seo/site";
 import "./globals.css";
  
 const geistSans = Geist({
@@ -17,8 +18,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JSONLoom",
-  description: "Visual JSON, YAML, and CSV transformation workspace with composable operation pipelines.",
+  metadataBase: getSiteOrigin(),
+  title: {
+    default: `${SITE_NAME} | JSON Transformation Tool`,
+    template: "%s | JSONLoom",
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    title: `${SITE_NAME} | JSON Transformation Tool`,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} | JSON Transformation Tool`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/brand/jsonloom-mark.svg",
     shortcut: "/brand/jsonloom-mark.svg",
