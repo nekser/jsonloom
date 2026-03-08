@@ -60,6 +60,9 @@ Open: [http://localhost:3000](http://localhost:3000)
 - `pnpm check:dev`: boot app and smoke-check routes
 - `pnpm check`: project quality gate (`lint + unit + integration`)
 - `pnpm export:ops`: export operation metadata to `operations.json`
+- `pnpm seo:submit-sitemap`: submit sitemap to Google Search Console (env-driven)
+- `pnpm seo:indexnow`: notify IndexNow endpoint for key URLs (env-driven)
+- `pnpm seo:notify`: run sitemap submit + IndexNow notify
 
 ## Project Docs
 
@@ -70,6 +73,7 @@ See `docs/` for contributor and architecture documentation:
 - `docs/testing.md`
 - `docs/agent-workflow.md`
 - `docs/plan-todo.md`
+- `docs/promotion-google-ai-agents.md`
 
 ## Technical Notes
 

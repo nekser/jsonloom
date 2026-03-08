@@ -2,7 +2,41 @@ import DocsHero from "@/components/docs/DocsHero";
 import Callout from "@/components/docs/Callout";
 import DemoLinkCard from "@/components/docs/DemoLinkCard";
 import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
+import JsonLd from "@/components/seo/JsonLd";
+import { APP_ROUTES } from "@/src/navigation/routes";
 import { docsScreenshots } from "@/src/docs/screenshots";
+import { SITE_NAME, absoluteUrl } from "@/src/seo/site";
+
+export const metadata = {
+  title: "Docs",
+  description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+  alternates: { canonical: APP_ROUTES.docs },
+  openGraph: {
+    title: `Docs | ${SITE_NAME}`,
+    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+    url: APP_ROUTES.docs,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `Docs | ${SITE_NAME}`,
+    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+  },
+};
+
+<JsonLd
+  data={{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: `${SITE_NAME} Documentation`,
+    description: "Product documentation for JSONLoom covering source parsing, pipeline runtime, sharing, and code generation.",
+    url: absoluteUrl(APP_ROUTES.docs),
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: absoluteUrl(APP_ROUTES.home),
+    },
+  }}
+/>
 
 <DocsHero
   title="Product Documentation"

@@ -15,7 +15,10 @@
     "test:coverage": "jest --config jest.unit.config.ts tests/unit --coverage --runInBand",
     "test:e2e": "jest --config jest.config.ts --runInBand",
     "check:dev": "node scripts/smoke-dev-routes.mjs",
-    "check": "pnpm lint && pnpm test:unit && pnpm test:integration"
+    "check": "pnpm lint && pnpm test:unit && pnpm test:integration",
+    "seo:submit-sitemap": "node scripts/submit-sitemap.mjs",
+    "seo:indexnow": "node scripts/indexnow-ping.mjs",
+    "seo:notify": "pnpm seo:submit-sitemap && pnpm seo:indexnow"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
