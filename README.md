@@ -3,7 +3,7 @@
 Visual, browser-based workspace for transforming structured data with operation pipelines.
 
 The app lets you:
-- Load source data (`JSON`, `YAML`, `CSV`)
+- Load source data (`JSON`)
 - Build ordered transformation pipelines
 - Preview results live after each change
 - Share reproducible pipelines via URL

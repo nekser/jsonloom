@@ -132,7 +132,7 @@ Recommended pipeline:
 
 ### Example `ci.yml`
 
-```yaml
+```text
 name: CI
 
 on:

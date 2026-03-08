@@ -139,7 +139,7 @@ Current state baseline:
 ### P1) Batch transformation and dataset mode
 - Add batch input mode for arrays/record sets with per-record status.
 - Add sampling controls and preview-first execution for large data.
-- Add batch export outputs (JSON/CSV) and failure report download.
+- Add batch export outputs (JSON) and failure report download.
 - Add optional concurrency controls for worker/API execution.
 - Add performance tests for large payload and high record counts.
 

@@ -212,5 +212,5 @@ API keys, request logging, and usage limits provide operational control for mult
 ## Open Decisions
 - Route location: `/transform` vs `/api/transform`.
 - Whether to auto-detect encoding when `pipelineEncoding` is omitted.
-- Whether to support non-JSON inputs (`yaml`, `csv`) in MVP or later.
+- Whether to support non-JSON inputs in MVP or later.
 - Whether intermediate outputs are returned by default or behind option/privileged mode.
