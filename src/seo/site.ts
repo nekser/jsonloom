@@ -1,4 +1,5 @@
 const DEFAULT_LOCAL_SITE_URL = "http://localhost:3000";
+const DEFAULT_CONTACT_EMAIL = "your.email@example.com";
 
 export const SITE_NAME = "JSONLoom";
 export const SITE_DESCRIPTION =
@@ -36,4 +37,10 @@ export function getSiteOrigin(): URL {
 
 export function absoluteUrl(path: string): string {
   return new URL(path, `${getSiteUrl()}/`).toString();
+}
+
+export function getContactEmail(): string {
+  const configured = process.env.NEXT_PUBLIC_CONTACT_EMAIL || process.env.CONTACT_EMAIL;
+  const normalized = configured?.trim();
+  return normalized || DEFAULT_CONTACT_EMAIL;
 }
