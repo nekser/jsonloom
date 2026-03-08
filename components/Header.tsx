@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpenText, Info, MoreVertical } from "lucide-react";
+import { AppWindow, BookOpenText, Info, MoreVertical } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
@@ -51,6 +51,9 @@ export default function Header() {
               sideOffset={isMobile ? 0 : 4}
               className={isMobile ? "w-screen max-w-none rounded-none" : undefined}
             >
+            <DropdownMenuItem asChild>
+              <Link href={APP_ROUTES.home}><AppWindow className="h-4 w-4 mr-2" /> Application</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={APP_ROUTES.docs}><BookOpenText className="h-4 w-4 mr-2" /> Docs</Link>
             </DropdownMenuItem>
