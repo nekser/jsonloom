@@ -3,8 +3,8 @@ import Link from "next/link";
 import { APP_ROUTES } from "@/src/navigation/routes";
 
 export const metadata: Metadata = {
-  title: "About | JSON Transformation Tool",
-  description: "What the JSON Transformation Tool does today and how to use it.",
+  title: "About | JSONLoom",
+  description: "What JSONLoom does today and how to use it.",
 };
 
 export default function AboutPage() {
@@ -13,7 +13,7 @@ export default function AboutPage() {
       <header className="space-y-3">
         <h1 className="text-3xl font-semibold">About</h1>
         <p className="text-muted-foreground">
-          JSON Transformation Tool is a browser-based workspace for building repeatable data transformations with
+          JSONLoom is a browser-based workspace for building repeatable data transformations with
           composable pipeline steps.
         </p>
       </header>

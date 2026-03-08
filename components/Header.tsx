@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { BookOpenText, Info, MoreVertical } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { PipelineEncoder } from "../src/utils/sharing/PipelineEncoder";
 import { useIsMobile } from "./hooks/useMediaQuery";
@@ -34,7 +35,10 @@ export default function Header() {
 
   return (
     <header className="h-12 px-3 border-b border-neutral-200 dark:border-neutral-800 flex items-center gap-2">
-      <Link href={APP_ROUTES.home} className="font-semibold mr-auto">JSON Transformation Tool</Link>
+      <Link href={APP_ROUTES.home} className="mr-auto inline-flex items-center gap-2 font-semibold">
+        <Image src="/brand/jsonloom-mark.svg" alt="JSONLoom" width={20} height={20} priority />
+        <span>JSONLoom</span>
+      </Link>
       <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

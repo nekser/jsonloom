@@ -1,4 +1,4 @@
-# JSON Transformation Tool
+# JSONLoom
 
 Visual, browser-based workspace for transforming structured data with operation pipelines.
 
