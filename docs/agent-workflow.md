@@ -55,6 +55,7 @@ Agents should proceed autonomously on implementation details inside accepted sco
 - Lint/tests pass (`pnpm check`).
 - Docs updated for changed behavior.
 - Review findings resolved or explicitly tracked.
+- Implementation is finalized with `git commit` and `git push` for each fix or feature.
 
 ## 8. Iteration Loop
 1. Pick next `plan-todo` item.
@@ -63,3 +64,7 @@ Agents should proceed autonomously on implementation details inside accepted sco
 4. Update docs with Agent C.
 5. Risk-review with Agent D.
 6. Merge and move to next item.
+
+## 9. Git Finalization Rule
+- Every fix or feature must end with a commit and push to the active branch.
+- Do not leave validated code changes uncommitted.
