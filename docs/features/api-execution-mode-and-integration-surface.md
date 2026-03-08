@@ -122,7 +122,7 @@ API keys, request logging, and usage limits provide operational control for mult
 ## Possible Scenarios
 
 ### Scenario A: No-code to backend handoff
-- Analyst builds pipeline in `/free`.
+- Analyst builds pipeline in `/`.
 - Engineer copies encoded pipeline token.
 - Backend calls `/transform` on incoming webhook payloads.
 

@@ -29,7 +29,7 @@ export async function GET(request: Request, ctx: { params: Promise<{ name: strin
   const [data, pipeline] = await Promise.all([loadJson(map.dataFile), loadJson(map.pipelineFile)]);
   const dataEnc = PipelineEncoder.encode(data);
   const pipelineEnc = PipelineEncoder.encode(pipeline);
-  const redirect = `/free?pipeline=${pipelineEnc}&data=${dataEnc}`;
+  const redirect = `/?pipeline=${pipelineEnc}&data=${dataEnc}`;
 
   return NextResponse.redirect(new URL(redirect, request.url), 302);
 }

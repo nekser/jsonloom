@@ -14,5 +14,5 @@ export function buildDemoLink(type: OperationType, input: JSONValue, config: JSO
   const pipeline = { v: 1 as const, ops: [op(type, config)] };
   const p = PipelineEncoder.encode(pipeline);
   const d = PipelineEncoder.encode(input);
-  return `/free?pipeline=${p}&data=${d}`;
+  return `/?pipeline=${p}&data=${d}`;
 }

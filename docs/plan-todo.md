@@ -10,7 +10,7 @@ This document breaks down the identified improvements into actionable tasks. We 
 - Add tests for nested pipeline editor interactions.
 - Integrate these tests into `pnpm check` workflow.
 - Add Playwright E2E flows for core UI behavior on real browser runtime:
-  - open `/free`, edit source, add operation, verify result updates;
+  - open `/`, edit source, add operation, verify result updates;
   - reorder operations and verify output changes;
   - test import/export dialogs and pipeline share URL hydration;
   - validate mobile viewport operation actions.
@@ -51,7 +51,7 @@ This document breaks down the identified improvements into actionable tasks. We 
 
 ## 11) Add Playwright E2E test pipeline
 - Install Playwright and initialize test project structure.
-- Add `e2e/` specs for primary user flows (`/free` editor workflow + pipeline operations UX).
+- Add `e2e/` specs for primary user flows (`/` editor workflow + pipeline operations UX).
 - Add stable selectors/test IDs for flaky UI targets (drag handles, dialogs, editor actions).
 - Add Playwright config for Chromium baseline and optional mobile project.
 - Add scripts:
@@ -62,7 +62,7 @@ This document breaks down the identified improvements into actionable tasks. We 
 
 ## 13) Add in-app guided visual tour with UI highlighting
 - Define guided-tour scope and trigger points:
-  - first app visit (`/free`);
+  - first app visit (`/`);
   - manual launch from Help/Docs;
   - optional “new features” relaunch after major updates.
 - Decide tour framework and constraints:

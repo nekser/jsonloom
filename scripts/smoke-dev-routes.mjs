@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 
-const DEFAULT_ROUTES = ["/", "/free", "/docs", "/about"];
+const DEFAULT_ROUTES = ["/", "/docs", "/about"];
 const port = Number(process.env.SMOKE_PORT || 3100);
 const host = process.env.SMOKE_HOST || "127.0.0.1";
 const startupTimeoutMs = Number(process.env.SMOKE_START_TIMEOUT_MS || 45_000);

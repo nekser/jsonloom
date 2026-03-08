@@ -11,7 +11,7 @@ export default function OperationCard({ entry }: { entry: OperationDocEntry }) {
       <p className="text-sm text-muted-foreground">{entry.useCase}</p>
       <ExamplePair input={entry.inputExample} config={entry.configExample} output={entry.outputExample} />
       <div className="rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">{entry.notes}</div>
-      <DemoLinkCard title={`${entry.type} demo`} description="Runnable one-step pipeline preloaded in /free." href={entry.demoLink} />
+      <DemoLinkCard title={`${entry.type} demo`} description="Runnable one-step pipeline preloaded in /." href={entry.demoLink} />
     </article>
   );
 }

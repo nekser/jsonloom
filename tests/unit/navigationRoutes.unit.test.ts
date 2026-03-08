@@ -1,15 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { APP_ROUTES, DEFERRED_ROUTES, LANDING_NAV_LINKS } from "@/src/navigation/routes";
+import { APP_ROUTES, DEFERRED_ROUTES } from "@/src/navigation/routes";
 
 describe("route and navigation contract", () => {
-  it("keeps only active public routes in nav and defers pricing/blog", () => {
-    const hrefs = LANDING_NAV_LINKS.map((x) => x.href);
-    expect(hrefs).toContain("#features");
-    expect(hrefs).toContain(APP_ROUTES.docs);
-    expect(hrefs).toContain(APP_ROUTES.about);
+  it("keeps only active public routes and defers pricing/blog", () => {
+    const activeRoutes = Object.values(APP_ROUTES);
+    expect(activeRoutes).toContain("/");
+    expect(activeRoutes).toContain("/docs");
+    expect(activeRoutes).toContain("/about");
     for (const deferred of DEFERRED_ROUTES) {
-      expect(hrefs).not.toContain(deferred);
+      expect(activeRoutes).not.toContain(deferred);
     }
   });
 
@@ -17,7 +17,6 @@ describe("route and navigation contract", () => {
     const cwd = process.cwd();
     const requiredPages = [
       path.join(cwd, "app/page.tsx"),
-      path.join(cwd, "app/free/page.tsx"),
       path.join(cwd, "app/docs/page.mdx"),
       path.join(cwd, "app/docs/getting-started/page.mdx"),
       path.join(cwd, "app/docs/operations/page.tsx"),
