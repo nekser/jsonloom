@@ -14,7 +14,6 @@ export const docsTocByPath: Record<string, DocsTocItem[]> = {
   "/docs": [
     { label: "What It Covers", href: "#what-it-covers" },
     { label: "Core Workflows", href: "#core-workflows" },
-    { label: "Visual Tour", href: "#visual-tour" },
   ],
   "/docs/getting-started": [
     { label: "Quick Start", href: "#quick-start" },
@@ -47,10 +46,13 @@ function buildOperationsCategoryToc(): DocsTocItem[] {
   const categoryOrder: OperationCategory[] = ["Object", "Array", "String", "Math", "Control", "Validation", "Date", "Other"];
   const usedCategories = new Set(operationCatalog.map((op) => op.category));
 
-  return categoryOrder
-    .filter((category) => usedCategories.has(category))
-    .map((category) => ({
-      label: category,
-      href: `#category-${category.toLowerCase()}`,
-    }));
+  return [
+    ...categoryOrder
+      .filter((category) => usedCategories.has(category))
+      .map((category) => ({
+        label: category,
+        href: `#category-${category.toLowerCase()}`,
+      })),
+    { label: "Extra", href: "#extra" },
+  ];
 }

@@ -1,30 +1,28 @@
 import DocsHero from "@/components/docs/DocsHero";
 import DemoLinkCard from "@/components/docs/DemoLinkCard";
-import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
 
 <DocsHero
   title="Sharing"
-  subtitle="Share reproducible pipelines with data hydration built into URL parameters."
-  ctaHref="/open-demo/user-data"
-  ctaLabel="Open Shared Demo Link"
 />
 
 <h2 id="share-links">Share Links</h2>
 
 - Pipelines are serialized and compressed into URL-safe payloads.
 - Shared links can include both `pipeline` and `data` parameters.
-- Opening a valid link hydrates operations and source data automatically.
+- `pipeline` hydrates operations and `data` hydrates Source input when a valid payload is provided.
+- Opening a valid link loads the workspace automatically without manual import.
 
 <h2 id="demo-links">Demo Links</h2>
 
 <div className="mt-3 grid gap-3 md:grid-cols-2">
   <DemoLinkCard title="User Data Demo" description="Profile/order pipeline example with nested array transforms." href="/open-demo/user-data" />
   <DemoLinkCard title="E-commerce Demo" description="Order metrics demo with computed fields and write-result routing." href="/open-demo/ecommerce" />
+  <DemoLinkCard title="Date Functions Demo" description="Date parse/add/diff pipeline with date-focused operations." href="/open-demo/date-functions" />
 </div>
 
 <h2 id="import-export">Import/Export</h2>
 
 - Import and export options are available in the operations toolbar.
+- Import accepts encoded `pipeline` payloads, full URLs containing `pipeline`, serialized JSON (`{ "v": ..., "ops": [...] }`), and raw ops arrays.
+- Share dialog supports copying link, copying serialized JSON, and downloading JSON.
 - Generated links preserve operation ordering and config values.
-
-<ScreenshotFigure src="/docs/docs-sharing-dialog.svg" alt="Sharing dialog" caption="Pipeline URL sharing and import flow." />

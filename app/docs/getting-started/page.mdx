@@ -4,9 +4,6 @@ import Callout from "@/components/docs/Callout";
 
 <DocsHero
   title="Getting Started"
-  subtitle="From source input to validated output in a few steps."
-  ctaHref="/"
-  ctaLabel="Start In /"
 />
 
 <h2 id="quick-start">Quick Start</h2>
@@ -23,12 +20,16 @@ import Callout from "@/components/docs/Callout";
 - JSON parsing is supported at input level.
 - Result view always shows normalized JSON.
 - Source header shows `Valid JSON` or `Invalid JSON` beside payload size.
+- Source input is limited to 5 MB; larger payloads are rejected with an explicit source error.
 - Parse failures stop pipeline execution and surface parser errors.
 
 <h2 id="pipeline-runtime">Pipeline Runtime</h2>
 
 - Operations execute top-to-bottom.
 - Disabled operations are skipped but retained in the pipeline.
+- Use undo/redo in the operations toolbar to move through pipeline edit history.
+- Reorder steps with drag-and-drop on desktop or move up/down actions on mobile.
+- Toggle per-operation result view to inspect intermediate output and isolate failing steps.
 - `MapArray`, `If`, and `Switch` support nested operation chains.
 - `writeResultTo` allows redirecting derived values.
 
