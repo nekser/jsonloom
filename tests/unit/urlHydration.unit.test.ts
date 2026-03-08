@@ -8,7 +8,7 @@ describe("getHydrationFromUrl", () => {
       v: 1,
       ops: [{ id: "op-1", type: "ExtractPath", config: { path: "users" } }],
     };
-    const url = new URL("http://localhost/free");
+    const url = new URL("http://localhost/");
     url.searchParams.set("data", PipelineEncoder.encode(data));
     url.searchParams.set("pipeline", PipelineEncoder.encode(pipeline));
 
@@ -19,7 +19,7 @@ describe("getHydrationFromUrl", () => {
 
   it("ignores invalid pipeline payload and keeps valid data payload", () => {
     const data = { orders: [1, 2, 3] };
-    const url = new URL("http://localhost/free");
+    const url = new URL("http://localhost/");
     url.searchParams.set("data", PipelineEncoder.encode(data));
     url.searchParams.set("pipeline", "invalid");
 

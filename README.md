@@ -9,7 +9,7 @@ The app lets you:
 - Share reproducible pipelines via URL
 - Generate code for multiple languages from a pipeline
 
-Primary app route: `/free`  
+Primary app route: `/`  
 Documentation route: `/docs`
 
 ## What It Is

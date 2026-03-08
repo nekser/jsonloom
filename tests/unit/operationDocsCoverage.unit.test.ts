@@ -18,7 +18,7 @@ describe("operation docs coverage", () => {
       expect(entry.configExample.trim().length).toBeGreaterThan(10);
       expect(entry.outputExample.trim().length).toBeGreaterThan(0);
       expect(entry.notes.trim().length).toBeGreaterThan(10);
-      expect(entry.demoLink.startsWith("/free?pipeline=")).toBe(true);
+      expect(entry.demoLink.startsWith("/?pipeline=")).toBe(true);
       expect(entry.demoLink.includes("&data=")).toBe(true);
     }
   });

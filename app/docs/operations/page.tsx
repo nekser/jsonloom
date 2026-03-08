@@ -27,7 +27,7 @@ export default function OperationsDocsPage() {
       <DocsHero
         title="Operation Catalog"
         subtitle="Every operation includes use case, input/config/output examples, and a runnable deep link."
-        ctaHref="/free"
+        ctaHref="/"
         ctaLabel="Try Operations"
       />
 

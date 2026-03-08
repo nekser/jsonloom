@@ -39,7 +39,7 @@ export default function AboutPage() {
       <section className="space-y-2">
         <h2 className="text-2xl font-semibold">Navigate</h2>
         <div className="flex gap-4 text-sm">
-          <Link className="underline" href={APP_ROUTES.free}>Open Transformer</Link>
+          <Link className="underline" href={APP_ROUTES.home}>Open Transformer</Link>
           <Link className="underline" href={APP_ROUTES.docs}>Read Docs</Link>
         </div>
       </section>

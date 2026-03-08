@@ -26,4 +26,4 @@
 
 ## Notes
 - Pipeline execution is client-side.
-- The `/free` route is the main transformation workspace.
+- The `/` route is the main transformation workspace.
