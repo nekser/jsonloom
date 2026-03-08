@@ -46,6 +46,12 @@ pnpm dev
 
 Open: [http://localhost:3000](http://localhost:3000)
 
+Set compile-time envs as needed (example):
+
+```bash
+NEXT_PUBLIC_CONTACT_EMAIL=you@example.com
+```
+
 ## Development Scripts
 
 - `pnpm dev`: start local dev server

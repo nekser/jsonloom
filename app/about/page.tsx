@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { APP_ROUTES } from "@/src/navigation/routes";
 import JsonLd from "@/components/seo/JsonLd";
-import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/src/seo/site";
+import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl, getContactEmail } from "@/src/seo/site";
 
 export const metadata: Metadata = {
   title: "About",
@@ -20,12 +20,15 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const contactEmail = getContactEmail();
+
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE_NAME,
     description: SITE_DESCRIPTION,
     url: absoluteUrl(APP_ROUTES.home),
+    email: contactEmail,
   };
 
   return (
@@ -55,7 +58,7 @@ export default function AboutPage() {
           <p className="text-sm text-muted-foreground">
             Questions, feedback, or collaboration requests:
             {" "}
-            <a className="underline" href="mailto:your.email@example.com">your.email@example.com</a>
+            <a className="underline" href={`mailto:${contactEmail}`}>{contactEmail}</a>
           </p>
         </section>
       </main>
