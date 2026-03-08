@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import ChunkErrorHandler from "@/components/ChunkErrorHandler";
+import FooterBar from "@/components/FooterBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
@@ -71,6 +72,7 @@ export default function RootLayout({
             <TooltipProvider>
               <Header/>
               <div className="flex-1 min-h-0">{children}</div>
+              <FooterBar />
             </TooltipProvider>
           </ThemeProvider>
       </body>
