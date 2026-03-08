@@ -2,29 +2,35 @@
 
 ## Executive summary
 
-- **Recommended hosting for lowest cost + least friction**: **Vercel Hobby** first.
-- **Alternative for maximum cost minimization**: **Cloudflare Workers + OpenNext** (cheaper at scale, more setup complexity).
-- **Do not deploy yet**: current repo has a **production build blocker** and **known dependency vulnerabilities**.
+- **Decision**: deploy on **Vercel Hobby**.
+- **CI/CD model**: GitHub Actions for quality gate + Vercel Git integration for deployments.
+- **Current state**: build/test/audit checks are now green and suitable for deployment.
 
 ## Current readiness check (this repo)
+
+Readiness status: **READY_FOR_VERCEL_DEPLOYMENT** (with non-blocking warnings).
 
 Commands run:
 
 - `pnpm lint` ✅
-- `pnpm test:unit` ✅ (20/20 suites passed)
-- `pnpm test:integration` ✅ (59/59 suites passed)
+- `pnpm test:unit` ✅
+- `pnpm test:integration` ✅
+- `pnpm check` ✅ (quality gate passed)
 - `pnpm check:dev` ✅ (routes responded, including `/`, `/free`, `/docs`, `/about`)
-- `pnpm build` ❌
-- `pnpm audit --prod` ❌ (13 vulnerabilities: 3 critical, 2 high, 8 moderate)
+- `pnpm build` ✅
+- `pnpm audit --prod` ✅ (no known vulnerabilities)
 
-### Build blocker
+### Resolved blockers
 
-`pnpm build` fails on:
+- Build/type blockers in nested operation editors fixed.
+- Vulnerable dependency chain removed by replacing `json-schema-generator` with local schema inference utility.
+- Next.js and Ajv upgraded to patched versions.
 
-- `components/operations-panel/IfEditorCard.tsx:24`
-- `components/operations-panel/IfEditorCard.tsx:25`
+### Non-blocking warnings still visible
 
-TypeScript rejects `JSONValue[]` -> `Operation[]` assertion in build type-check.
+- Repeated bundler warning from `src/codegen/generate.ts` about `topLevelAwait` and async/await target support.
+- Next.js warning about ESLint plugin detection during build.
+- Neither warning currently fails `lint`, `check`, `check:dev`, or `build`.
 
 ## Hosting options (cost-focused)
 
@@ -84,15 +90,20 @@ Tradeoff:
 
 - Works well with Git-based CI/CD, but Next.js experience is generally less direct than Vercel-first path.
 
-## Recommended deployment approach
+## Recommended deployment approach (chosen: Vercel)
 
-1. **Phase 1 (now):** Deploy on **Vercel Hobby**.
-2. **Phase 2 (if costs grow):** evaluate migration to **Cloudflare Workers + OpenNext**.
+1. Create Vercel project from this GitHub repo.
+2. Keep `main` as Production Branch.
+3. Use Vercel default build settings (`pnpm install`, `pnpm build`, Next.js preset).
+4. Enable automatic Preview Deployments for pull requests.
+5. Use custom domain only after first successful production deploy.
+6. Keep plan on Hobby initially; review usage before considering Pro.
 
 Rationale:
 
-- Lowest immediate cost and lowest implementation risk.
-- Fastest path to reliable CI/CD and previews.
+- Lowest ops overhead for Next.js.
+- Lowest initial spend (Hobby free tier).
+- Native preview/rollback workflow.
 
 ## GitHub CI/CD design
 
@@ -109,13 +120,15 @@ Recommended pipeline:
    - `pnpm audit --prod --audit-level=high`
 
 2. **Deployment**
-   - Vercel Git integration handles deploys automatically:
+   - Vercel Git integration handles CD automatically:
      - every push creates deployment
      - PRs get preview URLs
      - production branch updates production deployment
+   - GitHub remains the source of truth for merge policy; Vercel handles runtime deployment.
 
 3. **Branch protection**
    - Require CI checks to pass before merge into `main`.
+   - Optionally require “Vercel Preview” status before merge for UI-sensitive changes.
 
 ### Example `ci.yml`
 
@@ -149,20 +162,14 @@ jobs:
 
 ## Security findings
 
-### Critical / high deployment risks
+### Dependency status (resolved)
 
-1. **Framework vulnerabilities in `next@15.5.2`**
-   - Audit reports critical/high advisories affecting current version.
-   - Recommendation from advisories reaches at least `15.5.10` for full listed set.
+1. `next` upgraded to `15.5.10`.
+2. `ajv` upgraded to `8.18.0`.
+3. `json-schema-generator` removed from production dependencies.
+4. `pnpm audit --prod` currently reports no known vulnerabilities.
 
-2. **Transitive vulnerable chain via `json-schema-generator`**
-   - Pulls deprecated/vulnerable packages (`request`, `form-data`, `minimist`, `qs`, `tough-cookie`).
-   - This is currently a production dependency and should be removed/replaced if possible.
-
-3. **`ajv@8.17.1` flagged (ReDoS advisory)**
-   - Upgrade to patched version (`>=8.18.0`).
-
-### App-level risk review
+### Remaining app-level risk review
 
 1. **Potential client-side DoS via shared URL hydration**
    - URL payload is decoded and JSON-stringified without explicit query-size/decompression bounds in hydration path.
@@ -194,14 +201,13 @@ Yes, but mostly in **client-side abuse scenarios**, not server compromise:
 
 ## Go-live checklist (minimum)
 
-1. Fix build type error in `IfEditorCard.tsx`.
-2. Upgrade `next` to a patched release (target at least `15.5.10` or newer stable).
-3. Upgrade `ajv` to `>=8.18.0`.
-4. Remove or replace `json-schema-generator` (or isolate to dev-only if possible).
-5. Add URL payload size/depth limits before decode and operation-count caps.
-6. Add regex safety constraints (safe-regex check, timeboxing, or RE2-style engine).
-7. Add path-segment denylist in `setByPath`.
-8. Add GitHub Actions CI workflow and enforce required checks.
+1. Add `.github/workflows/ci.yml` from this plan.
+2. Enable branch protection on `main` requiring CI checks.
+3. Connect repo to Vercel and enable preview/production deploys.
+4. Add URL payload size/depth limits before decode and operation-count caps.
+5. Add regex safety constraints (safe-regex check, timeboxing, or RE2-style engine).
+6. Add path-segment denylist in `setByPath`.
+7. Run first production deploy, then smoke-check `/`, `/free`, `/docs`, `/about`.
 
 ## References
 
@@ -221,9 +227,11 @@ Yes, but mostly in **client-side abuse scenarios**, not server compromise:
 
 ### Local code and command evidence
 
-- Build error location: `components/operations-panel/IfEditorCard.tsx:24-25`
+- Quality gate: `pnpm check` passes
+- Build checks: `pnpm build` passes
+- Dev route smoke: `pnpm check:dev` passes
 - URL hydration logic: `components/operations-panel/hooks.ts:7-29`
 - Regex execution logic: `src/operations/RegexReplace.ts:26-55`
 - Generic path setter: `src/operations/utils.ts:42-100`
 - Input size limit: `src/store/operations.ts:71-77`
-- Audit command output: `pnpm audit --prod --json` (run on 2026-03-08)
+- Audit command output: `pnpm audit --prod` shows no known vulnerabilities
