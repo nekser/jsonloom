@@ -24,13 +24,13 @@ export default function ImportPipelineDialog({
         <DialogHeader>
           <DialogTitle>Import Pipeline</DialogTitle>
           <DialogDescription>
-            Paste one of: encoded &#39;pipeline&#39; value, a full URL containing it, or JSON (either the serialized object with v/ops or a raw ops array).
+            Paste one of: encoded &#39;pipeline&#39; value, a full URL containing it, or JSON (either the serialized object with schemaVersion/ops or a raw ops array).
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <Textarea
             className="h-36"
-            placeholder="Paste encoded string, full URL, or JSON (serialized { v, ops } or just [ ...ops ])"
+            placeholder="Paste encoded string, full URL, or JSON (serialized { schemaVersion, ops } or just [ ...ops ])"
             value={importText}
             onChange={(e) => setImportText(e.target.value)}
           />

@@ -21,7 +21,7 @@ export default function Header() {
       ]);
       if (!dataRes.ok || !pipeRes.ok) return;
       const dataJson = await dataRes.json();
-      const pipelineJson = await pipeRes.json(); // already serialized { v, ops }
+      const pipelineJson = await pipeRes.json(); // already serialized { schemaVersion, ops }
       const encPipeline = PipelineEncoder.encode(pipelineJson);
       const encData = PipelineEncoder.encode(dataJson);
       const url = new URL(window.location.origin + "/");
