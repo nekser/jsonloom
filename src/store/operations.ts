@@ -7,6 +7,7 @@ import { type PathIndex } from "../utils/pathSuggest";
 import { executePipelineFromSource } from "../operations/pipelineExecution";
 import { applyOperationPatch, sanitizeConfigValue } from "../operations/configPatch";
 import { executePipelinePreferWorker } from "../operations/worker/client";
+import { SOURCE_MAX_BYTES } from "../utils/jsonFormatting";
 
 export type State = {
   sourceText: string;
@@ -67,9 +68,8 @@ export const useOpsStore = create<State>()((set, get) => ({
   past: [],
   future: [],
   setSourceText: (text: string) => {
-    const max = 5 * 1024 * 1024; // 5MB
     const size = new Blob([text]).size;
-    if (size > max) {
+    if (size > SOURCE_MAX_BYTES) {
       set({ sourceText: text.slice(0, 1024), sourceError: "JSON exceeds 5 MB limit" });
       return;
     }

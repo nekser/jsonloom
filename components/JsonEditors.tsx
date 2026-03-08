@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Editor from "@monaco-editor/react";
 import SourcePanelToolbar from "@/components/SourcePanelToolbar";
 import ResultPanelToolbar from "@/components/ResultPanelToolbar";
 import { useOpsStore, type State } from "@/src/store/operations";
 import { useEditorTheme } from "@/components/hooks/useEditorTheme";
 import { getSourceJsonValidity } from "@/src/utils/sourceValidity";
+import { formatJsonText, type JsonFormatMode } from "@/src/utils/jsonFormatting";
 
 export function SourceEditor() {
   const sourceText = useOpsStore((s: State) => s.sourceText);
@@ -51,6 +52,12 @@ export function ResultEditor() {
   const pipelineError = useOpsStore((s: State) => s.pipelineError);
   const pipelinePerf = useOpsStore((s: State) => s.pipelinePerf);
   const theme = useEditorTheme();
+  const [formatMode, setFormatMode] = useState<JsonFormatMode>("pretty");
+  const displayResultText = useMemo(() => {
+    if (!resultText) return "";
+    const formatted = formatJsonText(resultText, formatMode);
+    return formatted.ok ? formatted.text : resultText;
+  }, [resultText, formatMode]);
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -60,8 +67,8 @@ export function ResultEditor() {
           <div className={`text-xs ${pipelinePerf.slow ? "text-amber-600 dark:text-amber-400" : "text-neutral-500"}`}>
             {pipelinePerf.lastRunMs}ms ({pipelinePerf.mode})
           </div>
-          <div className="text-xs text-neutral-500">{new Blob([resultText]).size} bytes</div>
-          <ResultPanelToolbar />
+          <div className="text-xs text-neutral-500">{new Blob([displayResultText]).size} bytes</div>
+          <ResultPanelToolbar text={displayResultText} formatMode={formatMode} onFormatModeChange={setFormatMode} />
         </div>
       </div>
       <div className="flex-1 min-h-0">
@@ -69,7 +76,7 @@ export function ResultEditor() {
           height="100%"
           defaultLanguage="json"
           theme={theme === "dark" ? "vs-dark" : "light"}
-          value={pipelineError ? safeErr(pipelineError.message) : resultText}
+          value={pipelineError ? safeErr(pipelineError.message) : displayResultText}
           options={{ readOnly: true, minimap: { enabled: false }, wordWrap: "on" }}
         />
       </div>
