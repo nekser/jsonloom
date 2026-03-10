@@ -10,6 +10,7 @@
 - [React/Next Audit](./react-next-audit.md)
 - [Agent Workflow](./agent-workflow.md)
 - [Plan TODO](./plan-todo.md)
+- [Promotion (Google + AI Agents)](./promotion-google-ai-agents.md)
 
 ## Feature plans
 

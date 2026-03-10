@@ -1,9 +1,11 @@
 import Header from "@/components/Header";
 import ChunkErrorHandler from "@/components/ChunkErrorHandler";
+import FooterBar from "@/components/FooterBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_NAME, getSiteOrigin } from "@/src/seo/site";
 import "./globals.css";
  
 const geistSans = Geist({
@@ -17,8 +19,36 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "JSON Transformation Tool",
-  description: "Visual JSON, YAML, and CSV transformation workspace with composable operation pipelines.",
+  metadataBase: getSiteOrigin(),
+  title: {
+    default: `${SITE_NAME} | JSONLoom`,
+    template: "%s | JSONLoom",
+  },
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    title: `${SITE_NAME} | JSONLoom`,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} | JSONLoom`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/brand/jsonloom-mark.svg",
+    shortcut: "/brand/jsonloom-mark.svg",
+    apple: "/brand/jsonloom-mark.svg",
+  },
 };
 
 export default function RootLayout({
@@ -42,6 +72,7 @@ export default function RootLayout({
             <TooltipProvider>
               <Header/>
               <div className="flex-1 min-h-0">{children}</div>
+              <FooterBar />
             </TooltipProvider>
           </ThemeProvider>
       </body>

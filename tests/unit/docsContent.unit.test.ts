@@ -11,10 +11,11 @@ describe("docs content wiring", () => {
     expect(operationsPage).toContain("OperationCard");
   });
 
-  it("keeps docs cross-links to free and about routes", () => {
+  it("keeps docs cross-links to home and about routes", () => {
     const cwd = process.cwd();
     const docsIndex = fs.readFileSync(path.join(cwd, "app/docs/page.mdx"), "utf8");
-    expect(docsIndex).toContain("/free");
+    expect(docsIndex).toContain("pipeline in `/`");
     expect(docsIndex).toContain("/about");
+    expect(docsIndex).not.toContain("code generation");
   });
 });

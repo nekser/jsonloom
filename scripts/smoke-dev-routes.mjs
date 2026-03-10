@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 
-const DEFAULT_ROUTES = ["/", "/free", "/docs", "/about"];
+const DEFAULT_ROUTES = ["/", "/docs", "/about"];
 const port = Number(process.env.SMOKE_PORT || 3100);
 const host = process.env.SMOKE_HOST || "127.0.0.1";
 const startupTimeoutMs = Number(process.env.SMOKE_START_TIMEOUT_MS || 45_000);
@@ -78,10 +78,37 @@ async function checkRoute(route) {
   const timer = setTimeout(() => controller.abort(), routeTimeoutMs);
   try {
     const res = await fetch(url, { signal: controller.signal, redirect: "follow" });
-    if (res.status >= 500) {
+    if (res.status >= 400) {
       throw new Error(`route ${route} returned ${res.status}`);
     }
+
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      const html = await res.text();
+      if (/<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i.test(html)) {
+        throw new Error(`route ${route} contains noindex meta`);
+      }
+      if (!/<link[^>]+rel=["']canonical["']/i.test(html)) {
+        throw new Error(`route ${route} is missing canonical link`);
+      }
+    }
+
     console.log(`[smoke] ${route} -> ${res.status}`);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function checkAsset(path) {
+  const url = `http://${host}:${port}${path}`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), routeTimeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal, redirect: "follow" });
+    if (res.status >= 400) {
+      throw new Error(`asset ${path} returned ${res.status}`);
+    }
+    console.log(`[smoke] ${path} -> ${res.status}`);
   } finally {
     clearTimeout(timer);
   }
@@ -93,6 +120,8 @@ async function checkRoute(route) {
     for (const route of routes) {
       await checkRoute(route);
     }
+    await checkAsset("/robots.txt");
+    await checkAsset("/sitemap.xml");
     shutdown(0);
   } catch (err) {
     console.error(`[smoke] failed: ${(err && err.message) || err}`);

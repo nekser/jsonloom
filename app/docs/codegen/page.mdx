@@ -1,12 +1,12 @@
 import DocsHero from "@/components/docs/DocsHero";
 import Callout from "@/components/docs/Callout";
-import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
+import { notFound } from "next/navigation";
+import { DOCS_AND_CODEGEN_ENABLED } from "@/src/config/features";
+
+{!DOCS_AND_CODEGEN_ENABLED ? notFound() : null}
 
 <DocsHero
   title="Code Generation"
-  subtitle="Export your pipeline logic to multiple implementation targets."
-  ctaHref="/free"
-  ctaLabel="Open Transformer (Generate Code)"
 />
 
 <h2 id="supported-targets">Supported Targets</h2>
@@ -32,5 +32,3 @@ import ScreenshotFigure from "@/components/docs/ScreenshotFigure";
 <Callout title="Validation">
   Always run generated code in the target runtime and verify output against your source fixture.
 </Callout>
-
-<ScreenshotFigure src="/docs/docs-codegen-dialog.svg" alt="Code generation dialog" caption="Language tabs and export controls in code generation dialog." />

@@ -1,15 +1,14 @@
-# JSON Transformation Tool
+# JSONLoom
 
 Visual, browser-based workspace for transforming structured data with operation pipelines.
 
 The app lets you:
-- Load source data (`JSON`, `YAML`, `CSV`)
+- Load source data (`JSON`)
 - Build ordered transformation pipelines
 - Preview results live after each change
 - Share reproducible pipelines via URL
-- Generate code for multiple languages from a pipeline
 
-Primary app route: `/free`  
+Primary app route: `/`  
 Documentation route: `/docs`
 
 ## What It Is
@@ -28,14 +27,15 @@ Core model:
 - Undo/redo for pipeline edits
 - Import/export helpers for source and pipelines
 - URL-based sharing with encoded `pipeline` and `data`
-- Code generation for:
+
+- In-app docs with operation examples and workflow references
+- Pipeline code generation targets (hidden by default behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
   - JavaScript
   - TypeScript
   - Python
   - PHP
   - Go
   - jq
-- In-app docs with operation examples and workflow references
 
 ## Quick Start
 
@@ -45,6 +45,12 @@ pnpm dev
 ```
 
 Open: [http://localhost:3000](http://localhost:3000)
+
+Set compile-time envs as needed (example):
+
+```bash
+NEXT_PUBLIC_CONTACT_EMAIL=you@example.com
+```
 
 ## Development Scripts
 
@@ -60,6 +66,9 @@ Open: [http://localhost:3000](http://localhost:3000)
 - `pnpm check:dev`: boot app and smoke-check routes
 - `pnpm check`: project quality gate (`lint + unit + integration`)
 - `pnpm export:ops`: export operation metadata to `operations.json`
+- `pnpm seo:submit-sitemap`: submit sitemap to Google Search Console (env-driven)
+- `pnpm seo:indexnow`: notify IndexNow endpoint for key URLs (env-driven)
+- `pnpm seo:notify`: run sitemap submit + IndexNow notify
 
 ## Project Docs
 
@@ -70,6 +79,7 @@ See `docs/` for contributor and architecture documentation:
 - `docs/testing.md`
 - `docs/agent-workflow.md`
 - `docs/plan-todo.md`
+- `docs/promotion-google-ai-agents.md`
 
 ## Technical Notes
 

@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
 import { useState, type CSSProperties } from "react";
+import OperationHelperDialog from "@/components/operations-panel/OperationHelperDialog";
 import type { Operation } from "@/src/operations";
 import type { PathIndex } from "@/src/utils/pathSuggest";
 import type { RenderNestedContent } from "./types";
@@ -68,6 +69,9 @@ export default function NestedOperationCard({ op, sampleIndex, onUpdate, onDelet
         </div>
       )}
       {!collapsed && <div className="mt-2">{renderContent(op, sampleIndex, onUpdate)}</div>}
+      <div className="mt-2 flex justify-end">
+        <OperationHelperDialog operationType={op.type} />
+      </div>
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { IfEditorCard, MapArrayEditor, SwitchEditorCard } from "./NestedPipeline
 import { createNestedContentRenderer } from "./nested/renderNestedContent";
 import WriteResultToField from "./WriteResultToField";
 import MobileOperationActions from "./MobileOperationActions";
+import OperationHelperDialog from "./OperationHelperDialog";
 import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
 
 const renderNestedContent = createNestedContentRenderer();
@@ -170,6 +171,10 @@ export default function OperationCard({ id, index, opCount, prevOpId, sourceObj,
           )}
         </div>
       )}
+
+      <div className="mt-2 flex justify-end">
+        <OperationHelperDialog operationType={op.type as OperationType} />
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 {
-  "v": 1,
+  "schemaVersion": 1,
   "ops": [
     {
       "id": "op-map-rows",

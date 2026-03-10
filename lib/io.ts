@@ -11,11 +11,9 @@ export function downloadText(filename: string, text: string, mime = "text/plain"
   URL.revokeObjectURL(a.href);
 }
 
-export function detectFormatFromFilename(name: string | undefined): "json" | "yaml" | "csv" | undefined {
+export function detectFormatFromFilename(name: string | undefined): "json" | undefined {
   if (!name) return undefined;
   const lower = name.toLowerCase();
   if (lower.endsWith(".json")) return "json";
-  if (lower.endsWith(".yml") || lower.endsWith(".yaml")) return "yaml";
-  if (lower.endsWith(".csv")) return "csv";
   return undefined;
 }

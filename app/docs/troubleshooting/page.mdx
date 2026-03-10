@@ -3,9 +3,6 @@ import Callout from "@/components/docs/Callout";
 
 <DocsHero
   title="Troubleshooting"
-  subtitle="Common failure modes and fast ways to isolate pipeline issues."
-  ctaHref="/free"
-  ctaLabel="Debug In /free"
 />
 
 <h2 id="pipeline-errors">Pipeline Errors</h2>
@@ -13,11 +10,13 @@ import Callout from "@/components/docs/Callout";
 - Operation-level errors include operation id and validation message.
 - Unknown operation types are rejected before execution.
 - Nested operation errors bubble up from `MapArray`, `If`, and `Switch` branches.
+- Per-step intermediate output helps isolate where state diverges from expected output.
 
 <h2 id="validation">Validation</h2>
 
 - Config schema validation runs before apply.
-- Source parse errors (JSON/YAML/CSV) short-circuit execution.
+- Source parse errors (JSON) short-circuit execution and surface in both Source and Result panels.
+- Source payloads above 5 MB are rejected before execution.
 - `ValidateJSON` can enforce strict schema behavior.
 
 <h2 id="performance">Performance</h2>

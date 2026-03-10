@@ -9,6 +9,7 @@ import { useState } from "react";
 import SortableNestedList from "./nested/SortableNestedList";
 import type { RenderNestedContent } from "./nested/types";
 import { asConfigObject, mergeConfig, type ConfigPatch } from "./config";
+import { sanitizeConfigValue } from "@/src/operations/configPatch";
 
 type Props = {
   op: Operation;
@@ -45,7 +46,7 @@ export default function IfEditorCard({ op, pathIndex, onUpdate, renderNestedCont
 
   const addNested = (block: "then" | "else", type: OperationType) => {
     const mod = getOperationModule(type);
-    const newOp: Operation = { id: nanoid(), type, config: (mod?.defaultConfig as JSONValue) ?? {} };
+    const newOp: Operation = { id: nanoid(), type, config: sanitizeConfigValue(mod?.defaultConfig, {} as JSONValue) };
     const key = block === "then" ? "then" : "else";
     const base = asConfigObject(op.config);
     const arr = toOperationArray(base[key]);

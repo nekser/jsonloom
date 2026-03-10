@@ -38,7 +38,7 @@ function pretty(v: JSONValue): string {
 
 function useCase(type: OperationType): string {
   const meta = operationMetaByType[type];
-  return `${meta.description}. Example scenario: normalize incoming e-commerce payloads before API sync and analytics export.`;
+  return meta.description;
 }
 
 function notes(type: OperationType): string {
@@ -46,7 +46,7 @@ function notes(type: OperationType): string {
   if (type === "ValidateJSON") return "ValidateJSON can fail fast; tune failOnError for strict vs permissive pipelines.";
   if (type === "TemplateInterpolate") return "Template placeholders support ${...}; missing values depend on onMissing mode.";
   if (type === "DateDiff" || type === "DateAdd" || type === "ParseDate" || type === "IsDateCompare") return "Date operations rely on parseable ISO strings and explicit units/timezones.";
-  return "Can be combined with writeResultTo to route computed output without mutating original target path.";
+  return "";
 }
 
 function configFor(type: OperationType): JSONValue {

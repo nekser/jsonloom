@@ -4,9 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { generatePipeline, type Lang } from "@/src/codegen/generate";
-import { importCSV } from "@/src/importers/csv";
 import { importJSON } from "@/src/importers/json";
-import { importYAML } from "@/src/importers/yaml";
 import Editor from "@monaco-editor/react";
 import { Copy, Download } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +14,6 @@ import { State, useOpsStore } from "../src/store/operations";
 export default function GenerateCodeDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const ops = useOpsStore((s: State) => s.operations);
   const sourceText = useOpsStore((s: State) => s.sourceText);
-  const sourceFormat = useOpsStore((s: State) => s.sourceFormat);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [lang, setLang] = useState<Lang>("javascript");
 
@@ -34,17 +31,15 @@ export default function GenerateCodeDialog({ open, onOpenChange }: { open: boole
   }, []);
 
   const code = useMemo(() => {
-    // Parse the current source text to a JSON value regardless of input format
+    // Parse the current source text to a JSON value for code generation examples.
     let parsed: unknown = undefined;
     try {
-      if (sourceFormat === "json") parsed = importJSON(sourceText).value;
-      else if (sourceFormat === "yaml") parsed = importYAML(sourceText).value;
-      else parsed = importCSV(sourceText).value;
+      parsed = importJSON(sourceText).value;
     } catch {
       parsed = undefined;
     }
     return generatePipeline(lang, ops, "data", parsed);
-  }, [lang, ops, sourceText, sourceFormat]);
+  }, [lang, ops, sourceText]);
 
   const copy = async () => { await navigator.clipboard.writeText(code); };
   const exportFile = () => {

@@ -5,13 +5,14 @@ import type { JSONValue } from "../types/json";
 import { isJSONObject } from "../types/json";
 import { type PathIndex } from "../utils/pathSuggest";
 import { executePipelineFromSource } from "../operations/pipelineExecution";
-import { applyOperationPatch } from "../operations/configPatch";
+import { applyOperationPatch, sanitizeConfigValue } from "../operations/configPatch";
 import { executePipelinePreferWorker } from "../operations/worker/client";
+import { SOURCE_MAX_BYTES } from "../utils/jsonFormatting";
 
 export type State = {
   sourceText: string;
   sourceError?: string;
-  sourceFormat: "json" | "yaml" | "csv";
+  sourceFormat: "json";
   operations: Operation[];
   resultText: string;
   pipelineError?: ValidationError | undefined;
@@ -42,8 +43,6 @@ export type State = {
 
 // ---------- Utilities ----------
 import { importJSON } from "../importers/json";
-import { importYAML } from "../importers/yaml";
-import { importCSV } from "../importers/csv";
 
 const safeStringify = (v: JSONValue): string => {
   try {
@@ -69,14 +68,12 @@ export const useOpsStore = create<State>()((set, get) => ({
   past: [],
   future: [],
   setSourceText: (text: string) => {
-    const max = 5 * 1024 * 1024; // 5MB
     const size = new Blob([text]).size;
-    if (size > max) {
+    if (size > SOURCE_MAX_BYTES) {
       set({ sourceText: text.slice(0, 1024), sourceError: "JSON exceeds 5 MB limit" });
       return;
     }
-    const fmt = get().sourceFormat;
-    const parsed = fmt === "json" ? importJSON(text) : fmt === "yaml" ? importYAML(text) : importCSV(text);
+    const parsed = importJSON(text);
     set({ sourceText: text, sourceError: parsed.error });
     if (sourceDebounceTimer) clearTimeout(sourceDebounceTimer);
     sourceDebounceTimer = setTimeout(() => {
@@ -86,9 +83,10 @@ export const useOpsStore = create<State>()((set, get) => ({
   },
   addOperation: (type: OperationType, config: JSONValue = {} as JSONValue) => {
     const mod = getOperationModule(type);
-    const initial: JSONValue = isJSONObject(config) && Object.keys(config).length > 0
+    const initialBase: unknown = isJSONObject(config) && Object.keys(config).length > 0
       ? config
-      : ((mod?.defaultConfig as JSONValue | undefined) ?? ({} as JSONValue));
+      : mod?.defaultConfig;
+    const initial: JSONValue = sanitizeConfigValue(initialBase, {} as JSONValue);
     set((s) => ({
       past: [...s.past, s.operations],
       future: [],
