@@ -4,6 +4,8 @@ export const APP_ROUTES = {
   home: "/",
   docs: "/docs",
   about: "/about",
+  privacy: "/privacy",
+  cookies: "/cookies",
 } as const;
 
 export function getDocsRoutes(enabled = DOCS_AND_CODEGEN_ENABLED): readonly string[] {
@@ -27,11 +29,11 @@ export function getDocsRoutes(enabled = DOCS_AND_CODEGEN_ENABLED): readonly stri
 }
 
 export function getActivePublicRoutes(): readonly string[] {
-  return [APP_ROUTES.home, APP_ROUTES.docs, APP_ROUTES.about] as const;
+  return [APP_ROUTES.home, APP_ROUTES.docs, APP_ROUTES.about, APP_ROUTES.privacy, APP_ROUTES.cookies] as const;
 }
 
 export function getIndexableRoutes(enabled = DOCS_AND_CODEGEN_ENABLED): readonly string[] {
-  return [APP_ROUTES.home, APP_ROUTES.about, ...getDocsRoutes(enabled)] as const;
+  return [APP_ROUTES.home, APP_ROUTES.about, APP_ROUTES.privacy, APP_ROUTES.cookies, ...getDocsRoutes(enabled)] as const;
 }
 
 export const DOCS_ROUTES = getDocsRoutes();

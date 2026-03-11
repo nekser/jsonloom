@@ -4,6 +4,8 @@ import { PipelineSerializer } from "@/src/utils/sharing/PipelineSerializer";
 import { PipelineValidator } from "@/src/utils/sharing/PipelineValidator";
 import type { Operation } from "@/src/operations";
 
+const SHARE_QUERY_PARAMS = ["data", "pipeline"] as const;
+
 export function getHydrationFromUrl(url: URL): { operations?: Operation[]; sourceText?: string } {
   const out: { operations?: Operation[]; sourceText?: string } = {};
   const encodedData = url.searchParams.get("data");
@@ -29,12 +31,27 @@ export function getHydrationFromUrl(url: URL): { operations?: Operation[]; sourc
   return out;
 }
 
+export function removeShareQueryParams(url: URL): boolean {
+  let changed = false;
+  for (const param of SHARE_QUERY_PARAMS) {
+    if (!url.searchParams.has(param)) continue;
+    url.searchParams.delete(param);
+    changed = true;
+  }
+  return changed;
+}
+
 export function useHydratePipelineFromUrl(setOperations: (ops: Operation[]) => void, setSourceText: (text: string) => void) {
   useEffect(() => {
     const url = new URL(window.location.href);
     const hydrated = getHydrationFromUrl(url);
     if (hydrated.sourceText) setSourceText(hydrated.sourceText);
     if (hydrated.operations) setOperations(hydrated.operations);
+
+    const sanitized = new URL(url.toString());
+    if (!removeShareQueryParams(sanitized)) return;
+    const nextPath = `${sanitized.pathname}${sanitized.search}${sanitized.hash}`;
+    window.history.replaceState(window.history.state, "", nextPath || "/");
   }, [setOperations, setSourceText]);
 }
 

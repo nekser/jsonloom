@@ -8,6 +8,8 @@ describe("route and navigation contract", () => {
     expect(activeRoutes).toContain("/");
     expect(activeRoutes).toContain("/docs");
     expect(activeRoutes).toContain("/about");
+    expect(activeRoutes).toContain("/privacy");
+    expect(activeRoutes).toContain("/cookies");
     for (const deferred of DEFERRED_ROUTES) {
       expect(activeRoutes).not.toContain(deferred);
     }
@@ -27,6 +29,8 @@ describe("route and navigation contract", () => {
     const requiredDefaultPages = [
       path.join(cwd, "app/page.tsx"),
       path.join(cwd, "app/about/page.tsx"),
+      path.join(cwd, "app/privacy/page.tsx"),
+      path.join(cwd, "app/cookies/page.tsx"),
     ];
     const requiredDocsPages = [
       path.join(cwd, "app/docs/page.mdx"),

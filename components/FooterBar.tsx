@@ -2,6 +2,7 @@ import Link from "next/link";
 import { APP_ROUTES } from "@/src/navigation/routes";
 import { SITE_NAME } from "@/src/seo/site";
 import packageJson from "@/package.json";
+import OpenPrivacySettingsButton from "@/components/privacy/OpenPrivacySettingsButton";
 
 const APP_BUILD_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version;
 
@@ -14,6 +15,9 @@ export default function FooterBar() {
           <Link href={APP_ROUTES.home} className="hover:underline">Application</Link>
           <Link href={APP_ROUTES.docs} className="hover:underline">Docs</Link>
           <Link href={APP_ROUTES.about} className="hover:underline">About</Link>
+          <Link href={APP_ROUTES.privacy} className="hover:underline">Privacy</Link>
+          <Link href={APP_ROUTES.cookies} className="hover:underline">Cookies</Link>
+          <OpenPrivacySettingsButton />
         </nav>
       </div>
     </footer>
