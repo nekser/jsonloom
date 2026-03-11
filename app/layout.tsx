@@ -1,6 +1,8 @@
 import Header from "@/components/Header";
 import ChunkErrorHandler from "@/components/ChunkErrorHandler";
 import FooterBar from "@/components/FooterBar";
+import VercelObservability from "@/components/analytics/VercelObservability";
+import ConsentManager from "@/components/privacy/ConsentManager";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
@@ -73,6 +75,8 @@ export default function RootLayout({
               <Header/>
               <div className="flex-1 min-h-0">{children}</div>
               <FooterBar />
+              <ConsentManager />
+              <VercelObservability />
             </TooltipProvider>
           </ThemeProvider>
       </body>

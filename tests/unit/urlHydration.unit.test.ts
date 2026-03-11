@@ -1,4 +1,4 @@
-import { getHydrationFromUrl } from "@/components/operations-panel/hooks";
+import { getHydrationFromUrl, removeShareQueryParams } from "@/components/operations-panel/hooks";
 import { PipelineEncoder } from "@/src/utils/sharing/PipelineEncoder";
 
 describe("getHydrationFromUrl", () => {
@@ -26,5 +26,14 @@ describe("getHydrationFromUrl", () => {
     const out = getHydrationFromUrl(url);
     expect(out.sourceText).toBe(JSON.stringify(data, null, 2));
     expect(out.operations).toBeUndefined();
+  });
+
+  it("removes share query parameters while preserving other params", () => {
+    const url = new URL("http://localhost/?pipeline=abc&data=xyz&tab=editor");
+    const changed = removeShareQueryParams(url);
+    expect(changed).toBe(true);
+    expect(url.searchParams.has("pipeline")).toBe(false);
+    expect(url.searchParams.has("data")).toBe(false);
+    expect(url.searchParams.get("tab")).toBe("editor");
   });
 });
