@@ -1,0 +1,28 @@
+name: Support question
+description: Ask for help using JSONLoom
+title: "[Support] "
+labels:
+  - question
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Current behavior
+      description: Include input data and pipeline details if possible.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What outcome do you expect?
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser + OS

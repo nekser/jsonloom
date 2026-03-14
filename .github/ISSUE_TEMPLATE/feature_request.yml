@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an enhancement for JSONLoom
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe your preferred approach.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds or alternative ideas?
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Example data, links, screenshots, or references.

@@ -1,7 +1,22 @@
 {
-  "name": "app",
+  "name": "jsonloom-app",
   "version": "0.1.0",
+  "description": "Browser-based JSON transformation workspace with composable operation pipelines.",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nekser/json-tool-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nekser/json-tool-ui/issues"
+  },
+  "homepage": "https://github.com/nekser/json-tool-ui#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
