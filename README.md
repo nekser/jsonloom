@@ -27,13 +27,6 @@ Input data + ordered operations => transformed output
 - Import/export helpers for source and pipelines
 - URL-based sharing with encoded `pipeline` and `data`
 - In-app docs with operation examples and workflow references
-- Pipeline code generation targets (behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
-  - JavaScript
-  - TypeScript
-  - Python
-  - PHP
-  - Go
-  - jq
 
 ## Quick Start
 
