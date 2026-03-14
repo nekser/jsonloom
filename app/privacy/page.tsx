@@ -26,6 +26,7 @@ export default function PrivacyPage() {
           <li>Necessary browser storage for app behavior (for example, theme and reliability guards).</li>
           <li>Optional analytics/performance telemetry only after your consent.</li>
           <li>No ad-tech or cross-site retargeting trackers by default.</li>
+          <li>Pipeline input and transformation output stay in your browser unless you intentionally share a URL.</li>
         </ul>
       </section>
 
@@ -47,4 +48,3 @@ export default function PrivacyPage() {
     </main>
   );
 }
-

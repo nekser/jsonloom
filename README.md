@@ -1,8 +1,9 @@
 # JSONLoom
 
-Visual, browser-based workspace for transforming structured data with operation pipelines.
+Visual, browser-based workspace for transforming structured data with composable operation pipelines.
 
-The app lets you:
+## What It Does
+
 - Load source data (`JSON`)
 - Build ordered transformation pipelines
 - Preview results live after each change
@@ -11,25 +12,22 @@ The app lets you:
 Primary app route: `/`  
 Documentation route: `/docs`
 
-## What It Is
+## Core Model
 
-This is a Next.js App Router application focused on interactive data transformation.
+Input data + ordered operations => transformed output
 
-Core model:
-- Input data + ordered operations => transformed output
-- Operations are typed and validated
-- Runtime executes client-side with error reporting and per-step metadata
+- Operations are typed and validated.
+- Runtime executes client-side with error reporting and per-step metadata.
 
 ## Current Feature Set
 
-- Rich operation catalog across object, array, string, math, control flow, validation, and date categories
+- Operation catalog across object, array, string, math, control flow, validation, and date categories
 - Nested pipelines for advanced operations (`MapArray`, `If`, `Switch`)
 - Undo/redo for pipeline edits
 - Import/export helpers for source and pipelines
 - URL-based sharing with encoded `pipeline` and `data`
-
 - In-app docs with operation examples and workflow references
-- Pipeline code generation targets (hidden by default behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
+- Pipeline code generation targets (behind `NEXT_PUBLIC_ENABLE_DOCS_AND_CODEGEN=true`):
   - JavaScript
   - TypeScript
   - Python
@@ -46,11 +44,13 @@ pnpm dev
 
 Open: [http://localhost:3000](http://localhost:3000)
 
-Set compile-time envs as needed (example):
+Set env values as needed (example):
 
 ```bash
-NEXT_PUBLIC_CONTACT_EMAIL=you@example.com
+NEXT_PUBLIC_CONTACT_EMAIL=maintainers@example.com
 ```
+
+For full env options, copy from [`.env.example`](./.env.example).
 
 ## Development Scripts
 
@@ -72,20 +72,23 @@ NEXT_PUBLIC_CONTACT_EMAIL=you@example.com
 
 ## Project Docs
 
-See `docs/` for contributor and architecture documentation:
-- `docs/getting-started.md`
-- `docs/architecture.md`
-- `docs/operations.md`
-- `docs/testing.md`
-- `docs/agent-workflow.md`
-- `docs/plan-todo.md`
-- `docs/promotion-google-ai-agents.md`
+See [`docs/`](./docs) for contributor and architecture documentation:
 
-## Technical Notes
+- [`docs/getting-started.md`](./docs/getting-started.md)
+- [`docs/architecture.md`](./docs/architecture.md)
+- [`docs/operations.md`](./docs/operations.md)
+- [`docs/testing.md`](./docs/testing.md)
+- [`docs/agent-workflow.md`](./docs/agent-workflow.md)
+- [`docs/plan-todo.md`](./docs/plan-todo.md)
 
-- Runtime is currently client-first.
-- Demo links use encoded pipelines/data and hydrate the workspace automatically.
+## Security and Privacy
 
-## Status
+- Security disclosures: follow [SECURITY.md](./SECURITY.md)
+- Privacy controls (in app): `/privacy` and `/cookies`
+- Telemetry is consent-gated and URL query payloads are sanitized before analytics events
 
-Active internal project. Product and API surface may evolve.
+## Roadmap Expectations
+
+- The project is pre-1.0 and may evolve quickly.
+- Backward compatibility is a goal, but breaking changes can happen in early versions.
+- Major behavior changes should be documented in [CHANGELOG.md](./CHANGELOG.md) and discussed in issues.

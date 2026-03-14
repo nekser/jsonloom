@@ -1,24 +1,18 @@
 ## Summary
 - What changed:
 - Why:
-- Linked plan item (from `docs/plan-todo.md`):
 
 ## Scope
 - In scope:
 - Out of scope:
 
-## Agent Outputs
-- Agent A (Implementation):
-- Agent B (Tests):
-- Agent C (Docs):
-- Agent D (Review findings):
-
 ## Validation
 - [ ] `pnpm lint`
 - [ ] `pnpm test:unit`
 - [ ] `pnpm test:integration`
+- [ ] `pnpm build`
 - [ ] `pnpm check`
-- [ ] `pnpm test:ui:ci` (when Playwright is enabled)
+- [ ] `pnpm check:dev` (for route/UI/docs changes)
 
 ## Behavior Changes
 - User-facing:
@@ -29,6 +23,6 @@
 - Mitigation:
 
 ## Docs and Follow-ups
-- [ ] Updated docs (`docs/*`, `README.md`, `AGENTS.md`) as needed
+- [ ] Updated docs (`README.md`, `docs/*`) as needed
 - [ ] Added/updated tests for changed behavior
-- [ ] Added follow-up tasks to `docs/plan-todo.md` if needed
+- [ ] Added changelog entry (if user-facing behavior changed)
