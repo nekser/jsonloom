@@ -46,3 +46,4 @@ x86
 public/docs/*-live.png
 public/docs/*-anchor-*.png
 public/docs/*visual-tour*.png
+.env*.local
