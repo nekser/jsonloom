@@ -56,7 +56,7 @@
     "ajv": "^8.18.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.544.0",
+    "lucide-react": "^0.577.0",
     "luxon": "^3.7.2",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.51.0",
