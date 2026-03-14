@@ -7,22 +7,8 @@
 - [Operations](./operations.md)
 - [Testing](./testing.md)
 - [Performance](./performance.md)
-- [React/Next Audit](./react-next-audit.md)
 - [Agent Workflow](./agent-workflow.md)
-- [Plan TODO](./plan-todo.md)
-- [Promotion (Google + AI Agents)](./promotion-google-ai-agents.md)
-
-## Community and Governance
-
-- [Contributing Guide](../CONTRIBUTING.md)
-- [Code of Conduct](../CODE_OF_CONDUCT.md)
-- [Security Policy](../SECURITY.md)
-- [Support](../SUPPORT.md)
-- [Changelog](../CHANGELOG.md)
-
-## Feature plans
-
-- [API Execution Mode and Integration Surface](./features/api-execution-mode-and-integration-surface.md)
+- [Plan TODO](./plan-todo.md)å
 
 ## Intended Audience
 
