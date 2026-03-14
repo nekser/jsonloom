@@ -39,14 +39,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Unit tests
-        run: pnpm test:unit
+      - name: Unit tests (coverage)
+        run: pnpm test:coverage
 
       - name: Integration tests
         run: pnpm test:integration
-
-      - name: Coverage report
-        run: npx jest --coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
