@@ -70,20 +70,8 @@ For full env options, copy from [`.env.example`](./.env.example).
 - `pnpm seo:indexnow`: notify IndexNow endpoint for key URLs (env-driven)
 - `pnpm seo:notify`: run sitemap submit + IndexNow notify
 
-## Project Docs
-
-See [`docs/`](./docs) for contributor and architecture documentation:
-
-- [`docs/getting-started.md`](./docs/getting-started.md)
-- [`docs/architecture.md`](./docs/architecture.md)
-- [`docs/operations.md`](./docs/operations.md)
-- [`docs/testing.md`](./docs/testing.md)
-- [`docs/agent-workflow.md`](./docs/agent-workflow.md)
-- [`docs/plan-todo.md`](./docs/plan-todo.md)
-
 ## Security and Privacy
 
-- Security disclosures: follow [SECURITY.md](./SECURITY.md)
 - Privacy controls (in app): `/privacy` and `/cookies`
 - Telemetry is consent-gated and URL query payloads are sanitized before analytics events
 
