@@ -13,6 +13,7 @@ concurrency:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   quality:
@@ -53,12 +54,8 @@ jobs:
           files: ./.coverage-e2e/lcov.info
           disable_search: true
           fail_ci_if_error: true
-          name: unit-coverage
-          flags: unit
-          override_commit: ${{ github.event.pull_request.head.sha || github.sha }}
-          override_branch: ${{ github.head_ref || github.ref_name }}
+          use_oidc: true
           verbose: true
-          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Build
         run: pnpm build
