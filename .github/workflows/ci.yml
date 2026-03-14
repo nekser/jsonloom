@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -39,11 +41,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Unit tests (coverage)
-        run: pnpm test:coverage
-
       - name: Integration tests
         run: pnpm test:integration
+
+      - name: Unit tests (coverage)
+        run: pnpm test:coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
@@ -51,6 +53,10 @@ jobs:
           files: ./.coverage-e2e/lcov.info
           disable_search: true
           fail_ci_if_error: true
+          name: unit-coverage
+          flags: unit
+          override_commit: ${{ github.event.pull_request.head.sha || github.sha }}
+          override_branch: ${{ github.head_ref || github.ref_name }}
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
