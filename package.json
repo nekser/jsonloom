@@ -1,6 +1,6 @@
 {
   "name": "jsonloom-app",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Browser-based JSON transformation workspace with composable operation pipelines.",
   "private": true,
   "license": "MIT",
