@@ -8,7 +8,6 @@
 - [Testing](./testing.md)
 - [Performance](./performance.md)
 - [Agent Workflow](./agent-workflow.md)
-- [Plan TODO](./plan-todo.md)å
 
 ## Intended Audience
 
