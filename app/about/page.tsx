@@ -54,6 +54,15 @@ export default function AboutPage() {
         </section>
 
         <section className="space-y-2">
+          <h2 className="text-2xl font-semibold">About the author</h2>
+          <ul className="list-disc pl-5 space-y-1 text-sm">
+            <li>This repository and project are my attempt to build something using harness engineering only.</li>
+            <li>Although I verified the code myself, most of the work was intentionally done by different AI agents.</li>
+            <li>The source code is free, and if you want, you can check it out on <a className="underline" href="https://github.com/nekser/jsonloom">GitHub</a></li>
+          </ul>
+        </section>
+
+        <section className="space-y-2">
           <h2 className="text-2xl font-semibold">Contact</h2>
           <p className="text-sm text-muted-foreground">
             Questions, feedback, or collaboration requests:

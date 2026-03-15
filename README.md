@@ -4,10 +4,13 @@
 [![License: MIT](https://img.shields.io/github/license/nekser/jsonloom)](https://github.com/nekser/jsonloom/blob/main/LICENSE)
 ![Node >=20](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)
 ![pnpm >=9](https://img.shields.io/badge/pnpm-%3E%3D9-F69220?logo=pnpm&logoColor=white)
-[![Coverage](https://codecov.io/gh/nekser/jsonloom/branch/main/graph/badge.svg)](https://codecov.io/gh/nekser/jsonloom)
-[![Deploy](https://img.shields.io/github/deployments/nekser/jsonloom/Production?label=deploy&logo=vercel)](https://github.com/nekser/jsonloom/deployments)
 
 Visual, browser-based workspace for transforming structured data with composable operation pipelines.
+
+## Disclaimer
+
+- This repository and project are my attempt to build something using harness engineering only.
+- Although I verified the code myself, most of the work was intentionally done by different AI agents.
 
 ## What It Does
 

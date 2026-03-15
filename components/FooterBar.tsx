@@ -15,6 +15,14 @@ export default function FooterBar() {
           <Link href={APP_ROUTES.home} className="hover:underline">Application</Link>
           <Link href={APP_ROUTES.docs} className="hover:underline">Docs</Link>
           <Link href={APP_ROUTES.about} className="hover:underline">About</Link>
+          <a
+            href="https://github.com/nekser/jsonloom"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+          >
+            GitHub
+          </a>
           <Link href={APP_ROUTES.privacy} className="hover:underline">Privacy</Link>
           <Link href={APP_ROUTES.cookies} className="hover:underline">Cookies</Link>
           <OpenPrivacySettingsButton />
