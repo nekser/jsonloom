@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { Operation } from "@/src/operations";
 import { executePipelineFromSource } from "@/src/operations/pipelineExecution";
 
-type SerializedPipeline = { schemaVersion: 1; ops: Array<{ id: string; type: string; config: unknown }> };
+type SerializedPipeline = { schemaVersion: 1; ops: Operation[] };
 
 function loadFixture(relPath: string): string {
   return fs.readFileSync(path.join(process.cwd(), relPath), "utf8");
